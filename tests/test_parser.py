@@ -46,3 +46,18 @@ def test_parse_page_classifies_boss_from_category():
     assert parsed.kind == "boss"
     assert parsed.attributes["damage"] == "75"
     assert parsed.categories == ["Bosses", "Mobs"]
+
+
+def test_parse_page_prefers_infobox_type_over_loose_categories():
+    text = """{{Mob Infobox
+|image=Abigail.png
+|health=150
+}}
+'''Abigail''' is a mob.
+[[Category:Characters]]
+[[Category:Mobs]]
+"""
+
+    parsed = parse_page("Abigail", text)
+
+    assert parsed.kind == "mob"

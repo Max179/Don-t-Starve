@@ -204,3 +204,67 @@ def test_write_parsed_page_records_attributes_images_and_relations(tmp_path):
     assert tuple(attribute) == ("health", 150)
     assert tuple(image) == ("Wilson Original Portrait.png", "image dst", "dst")
     assert tuple(relation) == ("wikilink", "character")
+
+
+def test_write_parsed_page_preserves_repeated_infobox_variants(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    source_id = upsert_source(
+        conn,
+        key="fandom",
+        name="Don't Starve Wiki on Fandom",
+        base_url="https://dontstarve.fandom.com/",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+    conn.execute(
+        """
+        insert into raw_pages (
+            source_id, pageid, ns, title, revid, canonical_url, wikitext, fetched_at
+        )
+        values (?, 42, 0, 'Abigail', 100, 'https://dontstarve.fandom.com/wiki/Abigail', 'body', 'now')
+        """,
+        (source_id,),
+    )
+    raw_page_id = conn.execute("select id from raw_pages").fetchone()["id"]
+    parsed = parse_page(
+        "Abigail",
+        """{{Mob Infobox
+|image=Abigail.png
+|health=150
+|damage=10
+}}
+{{Mob Infobox
+|image=Riled Abigail.png
+|health=600
+|damage=40
+}}
+'''Abigail''' is Wendy's sister.
+[[Category:Mobs]]
+""",
+    )
+
+    entity_id = write_parsed_page(
+        conn,
+        source_id=source_id,
+        raw_page_id=raw_page_id,
+        source_title="Abigail",
+        source_pageid=42,
+        source_revid=100,
+        source_timestamp="2026-07-01T00:00:00Z",
+        page_url="https://dontstarve.fandom.com/wiki/Abigail",
+        parsed=parsed,
+        primary=False,
+    )
+
+    rows = conn.execute(
+        """
+        select template_index, value_number
+        from entity_attributes
+        where entity_id=? and raw_name='health'
+        order by template_index
+        """,
+        (entity_id,),
+    ).fetchall()
+
+    assert [tuple(row) for row in rows] == [(0, 150), (1, 600)]

@@ -2,6 +2,8 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
+Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, and 1,874 registered infobox images. See [docs/progress.md](docs/progress.md).
+
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
 - `raw_pages`: source page evidence, revision ids, categories, templates, image references.

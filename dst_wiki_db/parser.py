@@ -106,9 +106,25 @@ def _extract_links(code: mwparserfromhell.wikicode.Wikicode) -> List[str]:
 
 
 def _classify_kind(infoboxes: List[ParsedInfobox], categories: List[str]) -> str:
-    haystack = " ".join(
-        [infobox.name for infobox in infoboxes] + categories
-    ).lower()
+    infobox_text = " ".join(infobox.name for infobox in infoboxes).lower()
+    category_text = " ".join(categories).lower()
+    haystack = f"{infobox_text} {category_text}"
+    if any(needle in haystack for needle in ("boss", "giant")):
+        return "boss"
+
+    infobox_checks = [
+        ("character", ("character infobox",)),
+        ("mob", ("mob infobox",)),
+        ("food", ("food infobox",)),
+        ("plant", ("plant infobox",)),
+        ("biome", ("biome infobox",)),
+        ("item", ("item infobox", "craft infobox", "turf infobox")),
+        ("structure", ("structure infobox",)),
+    ]
+    for kind, needles in infobox_checks:
+        if any(needle in infobox_text for needle in needles):
+            return kind
+
     checks = [
         ("boss", ("boss", "giant")),
         ("character", ("character", "survivor")),

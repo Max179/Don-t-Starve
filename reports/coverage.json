@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-07-15T19:05:53+00:00",
+  "sources": {
+    "fandom": {
+      "titles_seen": 2252,
+      "pages_written": 2252,
+      "entities_written": 2252,
+      "images_registered": 1874
+    }
+  },
+  "warnings": [],
+  "finished_at": "2026-07-15T19:21:50+00:00",
+  "database": "data/dont_starve_wiki.sqlite"
+}

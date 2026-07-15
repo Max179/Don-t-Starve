@@ -426,21 +426,22 @@ def _replace_attributes(
         "delete from entity_attributes where entity_id=? and source_id=? and raw_page_id=?",
         (entity_id, source_id, raw_page_id),
     )
-    for infobox in parsed.infoboxes:
+    for template_index, infobox in enumerate(parsed.infoboxes):
         for raw_name, value in infobox.params.items():
             variant = variant_key_from_raw_name(raw_name)
             conn.execute(
                 """
                 insert into entity_attributes (
-                    entity_id, source_id, raw_page_id, template_name, raw_name,
+                    entity_id, source_id, raw_page_id, template_index, template_name, raw_name,
                     canonical_name, value_text, value_number, unit, variant_key
                 )
-                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     entity_id,
                     source_id,
                     raw_page_id,
+                    template_index,
                     infobox.name,
                     raw_name,
                     canonical_field_name(raw_name),

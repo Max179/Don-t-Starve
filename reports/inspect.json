@@ -1,0 +1,134 @@
+{
+  "counts": {
+    "sources": 4,
+    "raw_pages": 2252,
+    "entities": 2252,
+    "entity_sources": 2252,
+    "entity_attributes": 22921,
+    "entity_images": 1874,
+    "entity_relations": 58997,
+    "verification_checks": 2252
+  },
+  "sample_entities": [
+    {
+      "canonical_title": "\"Ballphin Free\" Tuna",
+      "kind": "item",
+      "attribute_count": 5,
+      "image_count": 1
+    },
+    {
+      "canonical_title": "'The Sty' Oddities Emporium",
+      "kind": "structure",
+      "attribute_count": 13,
+      "image_count": 1
+    },
+    {
+      "canonical_title": "A Little Drama and QOL",
+      "kind": "page",
+      "attribute_count": 5,
+      "image_count": 1
+    },
+    {
+      "canonical_title": "A New Reign",
+      "kind": "page",
+      "attribute_count": 9,
+      "image_count": 1
+    },
+    {
+      "canonical_title": "A Smashing Pot",
+      "kind": "page",
+      "attribute_count": 4,
+      "image_count": 0
+    },
+    {
+      "canonical_title": "Abandoned Junk",
+      "kind": "page",
+      "attribute_count": 4,
+      "image_count": 0
+    },
+    {
+      "canonical_title": "Abigail",
+      "kind": "mob",
+      "attribute_count": 18,
+      "image_count": 2
+    },
+    {
+      "canonical_title": "Abigail's Flower",
+      "kind": "item",
+      "attribute_count": 20,
+      "image_count": 2
+    },
+    {
+      "canonical_title": "Abyss",
+      "kind": "page",
+      "attribute_count": 0,
+      "image_count": 0
+    },
+    {
+      "canonical_title": "Accomploshrine",
+      "kind": "structure",
+      "attribute_count": 13,
+      "image_count": 1
+    },
+    {
+      "canonical_title": "Accursed Trinket",
+      "kind": "item",
+      "attribute_count": 3,
+      "image_count": 0
+    },
+    {
+      "canonical_title": "Acid Rain",
+      "kind": "page",
+      "attribute_count": 0,
+      "image_count": 0
+    },
+    {
+      "canonical_title": "Adventure Mode",
+      "kind": "page",
+      "attribute_count": 0,
+      "image_count": 0
+    },
+    {
+      "canonical_title": "Ageless Watch",
+      "kind": "item",
+      "attribute_count": 13,
+      "image_count": 1
+    },
+    {
+      "canonical_title": "Alarming Clock",
+      "kind": "item",
+      "attribute_count": 19,
+      "image_count": 2
+    },
+    {
+      "canonical_title": "Alchemy Engine",
+      "kind": "structure",
+      "attribute_count": 16,
+      "image_count": 2
+    },
+    {
+      "canonical_title": "Alloy",
+      "kind": "item",
+      "attribute_count": 3,
+      "image_count": 0
+    },
+    {
+      "canonical_title": "Aloe",
+      "kind": "food",
+      "attribute_count": 16,
+      "image_count": 0
+    },
+    {
+      "canonical_title": "Amberosia",
+      "kind": "item",
+      "attribute_count": 11,
+      "image_count": 2
+    },
+    {
+      "canonical_title": "Amulet",
+      "kind": "item",
+      "attribute_count": 0,
+      "image_count": 0
+    }
+  ]
+}

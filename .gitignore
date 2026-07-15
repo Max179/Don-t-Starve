@@ -2,8 +2,6 @@ __pycache__/
 .pytest_cache/
 *.pyc
 
-# Generated wiki outputs should be created in GitHub Actions/artifacts, not kept locally.
-data/*.sqlite
+# Generated caches and downloaded image files can become very large.
 data/cache/
 data/images/
-reports/*.json
