@@ -30,6 +30,7 @@ Coverage:
 - Wiki-link relations: 58,997
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 108
+- Structured recipe ingredients: 1,954
 
 Entity kind distribution:
 
@@ -78,10 +79,26 @@ Klei page probe statuses:
 - `https://www.klei.com/games/dont-starve-together`: `ok`
 - `https://forums.kleientertainment.com/game-updates/dst/`: `failed` during this run because the endpoint returned a Cloudflare 502 page. The failure is stored in `official_records` instead of being hidden.
 
+## Derived Recipe Table
+
+The database now includes a `recipe_ingredients` table derived from parsed infobox attributes:
+
+```bash
+python3 scripts/rebuild_derived_tables.py \
+  --db data/dont_starve_wiki.sqlite \
+  --report reports/derived_tables.json
+```
+
+This pass generated 1,954 structured ingredient rows. Examples verified in the current database:
+
+- `Alchemy Engine`: Boards x4, Cut Stone x2, Gold Nugget x6
+- `Anchor`: Boards x2, Rope x3, Cut Stone x3
+- `Alarming Clock`: Time Pieces x3, Marble x4, Nightmare Fuel x8
+
 ## Remaining Work Toward The Full Goal
 
 - Confirm permission or an approved access path for wiki.gg full API/database ingestion, then build the canonical source database.
 - Expand Klei update verification when the Klei forums endpoint is reachable or an RSS/API endpoint is confirmed.
 - Improve cross-source mapping beyond title slug matching using spawn code, prefab code, image hash, infobox type, and category confidence.
-- Normalize relationships such as recipes, drops, spawn sources, upgrades, growth stages, skins, and cooked/raw forms into dedicated relation tables.
+- Normalize remaining relationships such as drops, spawn sources, upgrades, growth stages, skins, and cooked/raw forms into dedicated relation tables.
 - Store actual image files in a GitHub-friendly asset strategy. Git LFS is not installed in the current environment, so this pass stores image URLs and metadata in SQLite rather than committing thousands of binary files.

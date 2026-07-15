@@ -63,6 +63,9 @@ jobs:
 
       - name: Inspect database
         run: |
+          python scripts/rebuild_derived_tables.py \
+            --db data/dont_starve_wiki.sqlite \
+            --report reports/derived_tables.json
           python scripts/fetch_official_sources.py \
             --db data/dont_starve_wiki.sqlite \
             --steam-news-count 20 \
@@ -77,6 +80,7 @@ jobs:
             data/dont_starve_wiki.sqlite
             data/images/**
             reports/coverage.json
+            reports/derived_tables.json
             reports/inspect.json
             reports/official_sources.json
           if-no-files-found: error
