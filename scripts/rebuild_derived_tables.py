@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from dst_wiki_db.facts import rebuild_entity_facts
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.schema import connect, init_db
 
@@ -23,7 +24,8 @@ def main(argv=None):
     conn = connect(args.db)
     init_db(conn)
     recipe_count = rebuild_recipe_ingredients(conn)
-    payload = {"recipe_ingredients": recipe_count}
+    fact_count = rebuild_entity_facts(conn)
+    payload = {"recipe_ingredients": recipe_count, "entity_facts": fact_count}
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(payload, ensure_ascii=False, indent=2))
     print(json.dumps(payload, ensure_ascii=False, indent=2))

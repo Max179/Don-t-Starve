@@ -15,6 +15,7 @@ COUNT_TABLES = [
     "verification_checks",
     "official_records",
     "recipe_ingredients",
+    "entity_facts",
 ]
 
 

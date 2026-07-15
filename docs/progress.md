@@ -31,6 +31,7 @@ Coverage:
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 108
 - Structured recipe ingredients: 1,954
+- Structured drop/source/sold/spawn facts: 1,246
 
 Entity kind distribution:
 
@@ -95,10 +96,35 @@ This pass generated 1,954 structured ingredient rows. Examples verified in the c
 - `Anchor`: Boards x2, Rope x3, Cut Stone x3
 - `Alarming Clock`: Time Pieces x3, Marble x4, Nightmare Fuel x8
 
+## Derived Relation Facts
+
+The database now includes an `entity_facts` table derived from relation-like infobox fields:
+
+- `drops`
+- `dropped_by`
+- `sold_by`
+- `spawn_from`
+- `spawns`
+
+This pass generated 1,246 rows:
+
+- `dropped_by`: 483
+- `drops`: 437
+- `spawn_from`: 125
+- `sold_by`: 122
+- `spawns`: 79
+
+The table preserves the original value text and extracts targets, percentages, and quantities when possible. Examples verified in the current database:
+
+- `Cave Spider` drops Monster Meat at 50%, Silk at 25%, and Spider Gland at 25%.
+- `Clockwork Knight` drops Gears x2.
+- `Blue Whale` drops Raw Fish x4 and Blubber x4.
+- `Ancient Key` is recorded as obtained from Mumsy / Coin x3.
+
 ## Remaining Work Toward The Full Goal
 
 - Confirm permission or an approved access path for wiki.gg full API/database ingestion, then build the canonical source database.
 - Expand Klei update verification when the Klei forums endpoint is reachable or an RSS/API endpoint is confirmed.
 - Improve cross-source mapping beyond title slug matching using spawn code, prefab code, image hash, infobox type, and category confidence.
-- Normalize remaining relationships such as drops, spawn sources, upgrades, growth stages, skins, and cooked/raw forms into dedicated relation tables.
+- Normalize remaining relationships such as upgrades, growth stages, skins, cooked/raw forms, and cleaner target-entity resolution into dedicated relation tables.
 - Store actual image files in a GitHub-friendly asset strategy. Git LFS is not installed in the current environment, so this pass stores image URLs and metadata in SQLite rather than committing thousands of binary files.
