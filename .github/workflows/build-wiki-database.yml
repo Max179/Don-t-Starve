@@ -1,0 +1,76 @@
+name: Build wiki database
+
+on:
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: "Space-separated sources: fandom, or wiki.gg fandom if API permission is confirmed"
+        required: true
+        default: "fandom"
+      limit:
+        description: "Maximum pages per source; use 0 for all pages"
+        required: true
+        default: "25"
+      download_images:
+        description: "Image handling: none, primary, all"
+        required: true
+        default: "none"
+        type: choice
+        options:
+          - none
+          - primary
+          - all
+      allow_restricted_api:
+        description: "Only true if you have permission to use sources marked robots-restricted"
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Build database
+        shell: bash
+        run: |
+          args=(
+            --db data/dont_starve_wiki.sqlite
+            --sources ${{ inputs.sources }}
+            --limit "${{ inputs.limit }}"
+            --download-images "${{ inputs.download_images }}"
+            --image-dir data/images
+            --coverage reports/coverage.json
+          )
+          if [[ "${{ inputs.allow_restricted_api }}" == "true" ]]; then
+            args+=(--allow-restricted-api)
+          fi
+          python scripts/build_database.py "${args[@]}"
+
+      - name: Inspect database
+        run: python scripts/inspect_database.py data/dont_starve_wiki.sqlite > reports/inspect.json
+
+      - name: Upload database and image artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dont-starve-wiki-database
+          path: |
+            data/dont_starve_wiki.sqlite
+            data/images/**
+            reports/coverage.json
+            reports/inspect.json
+          if-no-files-found: error

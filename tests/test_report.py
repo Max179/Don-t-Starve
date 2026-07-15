@@ -1,0 +1,34 @@
+from dst_wiki_db.report import database_counts, sample_entities
+from dst_wiki_db.schema import connect, init_db, upsert_entity, upsert_source
+
+
+def test_database_counts_and_samples(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    source_id = upsert_source(
+        conn,
+        key="wiki.gg",
+        name="Don't Starve Wiki",
+        base_url="https://dontstarve.wiki.gg/",
+        api_url="https://dontstarve.wiki.gg/api.php",
+        role="canonical",
+    )
+    upsert_entity(
+        conn,
+        canonical_title="Wilson",
+        kind="character",
+        primary_source_id=source_id,
+        primary_page_id=18907,
+        canonical_url="https://dontstarve.wiki.gg/wiki/Wilson",
+        summary="Wilson is playable.",
+    )
+
+    assert database_counts(conn)["entities"] == 1
+    assert sample_entities(conn, limit=1) == [
+        {
+            "canonical_title": "Wilson",
+            "kind": "character",
+            "attribute_count": 0,
+            "image_count": 0,
+        }
+    ]
