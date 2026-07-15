@@ -139,6 +139,20 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, check_type, source_key, target_key)
         );
 
+        create table if not exists official_records (
+            id integer primary key,
+            provider text not null,
+            record_type text not null,
+            external_id text not null,
+            title text not null,
+            url text,
+            status text not null,
+            summary text,
+            payload_json text not null,
+            fetched_at text not null default current_timestamp,
+            unique (provider, record_type, external_id)
+        );
+
         create table if not exists run_metadata (
             key text primary key,
             value text not null,
@@ -221,6 +235,44 @@ def upsert_entity(
         ),
     )
     row = conn.execute("select id from entities where slug=?", (entity_slug,)).fetchone()
+    return int(row["id"])
+
+
+def upsert_official_record(conn: sqlite3.Connection, record) -> int:
+    import json
+
+    conn.execute(
+        """
+        insert into official_records (
+            provider, record_type, external_id, title, url, status, summary, payload_json, fetched_at
+        )
+        values (?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+        on conflict(provider, record_type, external_id) do update set
+            title=excluded.title,
+            url=excluded.url,
+            status=excluded.status,
+            summary=excluded.summary,
+            payload_json=excluded.payload_json,
+            fetched_at=current_timestamp
+        """,
+        (
+            record.provider,
+            record.record_type,
+            record.external_id,
+            record.title,
+            record.url,
+            record.status,
+            record.summary,
+            json.dumps(record.payload, ensure_ascii=False),
+        ),
+    )
+    row = conn.execute(
+        """
+        select id from official_records
+        where provider=? and record_type=? and external_id=?
+        """,
+        (record.provider, record.record_type, record.external_id),
+    ).fetchone()
     return int(row["id"])
 
 

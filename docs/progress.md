@@ -29,6 +29,7 @@ Coverage:
 - Registered images with fetched URL metadata: 1,785
 - Wiki-link relations: 58,997
 - Source-presence verification checks: 2,252
+- Official Steam/Klei verification records: 108
 
 Entity kind distribution:
 
@@ -52,10 +53,35 @@ The entity classifier now prefers infobox type over loose categories. This fixes
 - `Abigail's Flower`: `item`, not `character`
 - `Ageless Watch`: `item`, not `character`
 
+## Official Verification Layer
+
+The database now includes an `official_records` table populated by:
+
+```bash
+python3 scripts/fetch_official_sources.py \
+  --db data/dont_starve_wiki.sqlite \
+  --steam-news-count 25 \
+  --timeout 30 \
+  --report reports/official_sources.json
+```
+
+Official records currently include:
+
+- Steam appdetails: 2 records (`Don't Starve`, `Don't Starve Together`)
+- Steam DLC ids: 53 records
+- Steam news/update records: 50 records
+- Klei official page probes: 3 records
+
+Klei page probe statuses:
+
+- `https://www.klei.com/games/dont-starve`: `ok`
+- `https://www.klei.com/games/dont-starve-together`: `ok`
+- `https://forums.kleientertainment.com/game-updates/dst/`: `failed` during this run because the endpoint returned a Cloudflare 502 page. The failure is stored in `official_records` instead of being hidden.
+
 ## Remaining Work Toward The Full Goal
 
 - Confirm permission or an approved access path for wiki.gg full API/database ingestion, then build the canonical source database.
-- Add structured official verification tables for Klei update posts and Steam app/DLC metadata.
+- Expand Klei update verification when the Klei forums endpoint is reachable or an RSS/API endpoint is confirmed.
 - Improve cross-source mapping beyond title slug matching using spawn code, prefab code, image hash, infobox type, and category confidence.
 - Normalize relationships such as recipes, drops, spawn sources, upgrades, growth stages, skins, and cooked/raw forms into dedicated relation tables.
 - Store actual image files in a GitHub-friendly asset strategy. Git LFS is not installed in the current environment, so this pass stores image URLs and metadata in SQLite rather than committing thousands of binary files.

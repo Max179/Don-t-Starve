@@ -62,7 +62,12 @@ jobs:
           python scripts/build_database.py "${args[@]}"
 
       - name: Inspect database
-        run: python scripts/inspect_database.py data/dont_starve_wiki.sqlite > reports/inspect.json
+        run: |
+          python scripts/fetch_official_sources.py \
+            --db data/dont_starve_wiki.sqlite \
+            --steam-news-count 20 \
+            --report reports/official_sources.json
+          python scripts/inspect_database.py data/dont_starve_wiki.sqlite > reports/inspect.json
 
       - name: Upload database and image artifacts
         uses: actions/upload-artifact@v4
@@ -73,4 +78,5 @@ jobs:
             data/images/**
             reports/coverage.json
             reports/inspect.json
+            reports/official_sources.json
           if-no-files-found: error

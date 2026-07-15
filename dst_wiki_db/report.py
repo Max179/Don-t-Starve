@@ -13,6 +13,7 @@ COUNT_TABLES = [
     "entity_images",
     "entity_relations",
     "verification_checks",
+    "official_records",
 ]
 
 
