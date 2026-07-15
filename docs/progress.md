@@ -32,6 +32,7 @@ Coverage:
 - Official Steam/Klei verification records: 108
 - Structured recipe ingredients: 1,954
 - Structured drop/source/sold/spawn facts: 1,246
+- Variant records: 1,282
 
 Entity kind distribution:
 
@@ -121,10 +122,30 @@ The table preserves the original value text and extracts targets, percentages, a
 - `Blue Whale` drops Raw Fish x4 and Blubber x4.
 - `Ancient Key` is recorded as obtained from Mumsy / Coin x3.
 
+## Derived Variant Table
+
+The database now includes an `entity_variants` table derived from explicit variant keys, image roles, growth stage fields, DS/DST fields, and repeated infobox instances.
+
+This pass generated 1,282 rows:
+
+- `infobox_instance`: 617
+- `game_scope`: 323
+- `numbered_variant`: 307
+- `growth_stage`: 35
+
+Examples verified in the current database:
+
+- `Wilson`: `ds` game-scope variant from `image ds`
+- `Carrot`: growth-stage variants `seed`, `sprout`, `small`, `med`
+- `Aloe`: numbered variants `1` and `2` from health/form fields
+- `Abigail`: repeated `Mob Infobox` variants are preserved as `template:1` and `template:2`
+
+Recipe slots such as `ingredient1` and `ingredient2` are deliberately excluded from variants and live in `recipe_ingredients`.
+
 ## Remaining Work Toward The Full Goal
 
 - Confirm permission or an approved access path for wiki.gg full API/database ingestion, then build the canonical source database.
 - Expand Klei update verification when the Klei forums endpoint is reachable or an RSS/API endpoint is confirmed.
 - Improve cross-source mapping beyond title slug matching using spawn code, prefab code, image hash, infobox type, and category confidence.
-- Normalize remaining relationships such as upgrades, growth stages, skins, cooked/raw forms, and cleaner target-entity resolution into dedicated relation tables.
+- Normalize remaining relationships such as upgrades, skins, cooked/raw form labels, and cleaner target-entity resolution into dedicated relation tables.
 - Store actual image files in a GitHub-friendly asset strategy. Git LFS is not installed in the current environment, so this pass stores image URLs and metadata in SQLite rather than committing thousands of binary files.
