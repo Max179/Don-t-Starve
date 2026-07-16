@@ -200,6 +200,16 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, source_id, raw_page_id, template_index, variant_key, variant_type)
         );
 
+        create table if not exists entity_categories (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            raw_page_id integer not null references raw_pages(id) on delete cascade,
+            category_name text not null,
+            category_slug text not null,
+            unique (entity_id, source_id, raw_page_id, category_slug)
+        );
+
         create table if not exists run_metadata (
             key text primary key,
             value text not null,

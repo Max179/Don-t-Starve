@@ -17,6 +17,7 @@ COUNT_TABLES = [
     "recipe_ingredients",
     "entity_facts",
     "entity_variants",
+    "entity_categories",
 ]
 
 

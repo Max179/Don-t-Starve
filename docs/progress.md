@@ -33,6 +33,9 @@ Coverage:
 - Structured recipe ingredients: 1,954
 - Structured drop/source/sold/spawn facts: 1,246
 - Variant records: 1,282
+- Entity category links: 12,973
+- Entities with category links: 2,190
+- Distinct category slugs: 288
 
 Entity kind distribution:
 
@@ -141,6 +144,29 @@ Examples verified in the current database:
 - `Abigail`: repeated `Mob Infobox` variants are preserved as `template:1` and `template:2`
 
 Recipe slots such as `ingredient1` and `ingredient2` are deliberately excluded from variants and live in `recipe_ingredients`.
+
+## Derived Category Index
+
+The database now includes an `entity_categories` table derived from each raw MediaWiki page's `categories_json`. It preserves source and raw-page provenance while exposing normalized category slugs for filtering and cross-source alignment.
+
+This pass generated 12,973 category links across 2,190 entities and 288 distinct category slugs.
+
+Top categories in the current database include:
+
+- `Items`: 977
+- `Don't Starve Together`: 872
+- `Craftable Items`: 496
+- `Mobs`: 279
+- `Structures`: 278
+- `Food`: 184
+- `Craftable Structures`: 165
+
+Examples verified in the current database:
+
+- `Wilson`: Characters, Lore, Wilson
+- `Alchemy Engine`: Craftable Structures, Science, Structures, Prototypers, Science Tier 1
+- `Carrot`: Food, Items, Mob Dropped Items, Plants, Vegetables
+- `Cave Spider`: Cave Creatures, Hostile Creatures, Mobs, Monsters, Spiders
 
 ## Remaining Work Toward The Full Goal
 
