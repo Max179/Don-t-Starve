@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
 
 from dst_wiki_db.facts import rebuild_entity_facts
 from dst_wiki_db.categories import rebuild_entity_categories
+from dst_wiki_db.identity import rebuild_identity_keys
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.variants import rebuild_entity_variants
 from dst_wiki_db.schema import connect, init_db
@@ -29,11 +30,13 @@ def main(argv=None):
     fact_count = rebuild_entity_facts(conn)
     variant_count = rebuild_entity_variants(conn)
     category_count = rebuild_entity_categories(conn)
+    identity_count = rebuild_identity_keys(conn)
     payload = {
         "recipe_ingredients": recipe_count,
         "entity_facts": fact_count,
         "entity_variants": variant_count,
         "entity_categories": category_count,
+        "entity_identity_keys": identity_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(payload, ensure_ascii=False, indent=2))

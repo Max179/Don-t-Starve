@@ -36,6 +36,7 @@ Coverage:
 - Entity category links: 12,973
 - Entities with category links: 2,190
 - Distinct category slugs: 288
+- Identity keys for source alignment: 8,690
 
 Entity kind distribution:
 
@@ -167,6 +168,26 @@ Examples verified in the current database:
 - `Alchemy Engine`: Craftable Structures, Science, Structures, Prototypers, Science Tier 1
 - `Carrot`: Food, Items, Mob Dropped Items, Plants, Vegetables
 - `Cave Spider`: Cave Creatures, Hostile Creatures, Mobs, Monsters, Spiders
+
+## Cross-Source Identity Keys
+
+The database now includes an `entity_identity_keys` table and a `cross_source_matches` table. `entity_identity_keys` is populated from source-title slugs, spawn codes, image names, and image SHA1 hashes. It provides stable evidence for matching the same entity across wiki.gg, Fandom, and any future source imports.
+
+This pass generated 8,690 identity keys:
+
+- `spawn_code`: 2,779
+- `title_slug`: 2,252
+- `image_name`: 1,874
+- `image_sha1`: 1,785
+
+Examples verified in the current database:
+
+- `Anchor`: `title_slug=anchor`, `spawn_code=anchor_item`, `spawn_code=anchor`, and two image SHA1 keys
+- `Alchemy Engine`: `spawn_code=researchlab2`
+- `Abigail`: `spawn_code=abigail` and two image SHA1 keys
+- `Wilson`: `title_slug=wilson` and image SHA1 key
+
+`cross_source_matches` is currently empty because the committed snapshot contains one wiki source (`fandom`). Once wiki.gg is ingested, shared identity keys will be used to populate cross-source matches.
 
 ## Remaining Work Toward The Full Goal
 

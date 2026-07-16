@@ -210,6 +210,29 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, source_id, raw_page_id, category_slug)
         );
 
+        create table if not exists entity_identity_keys (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            raw_page_id integer references raw_pages(id) on delete set null,
+            key_type text not null,
+            key_value text not null,
+            source_field text not null,
+            confidence real not null default 1.0,
+            unique (entity_id, source_id, key_type, key_value, source_field)
+        );
+
+        create table if not exists cross_source_matches (
+            id integer primary key,
+            left_entity_id integer not null references entities(id) on delete cascade,
+            right_entity_id integer not null references entities(id) on delete cascade,
+            key_type text not null,
+            key_value text not null,
+            confidence real not null default 1.0,
+            match_method text not null,
+            unique (left_entity_id, right_entity_id, key_type, key_value)
+        );
+
         create table if not exists run_metadata (
             key text primary key,
             value text not null,

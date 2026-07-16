@@ -18,6 +18,8 @@ COUNT_TABLES = [
     "entity_facts",
     "entity_variants",
     "entity_categories",
+    "entity_identity_keys",
+    "cross_source_matches",
 ]
 
 
