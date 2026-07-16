@@ -29,6 +29,7 @@ Coverage:
 - Registered images with fetched URL metadata: 1,785
 - Page-level image references: 44,437
 - Entities with page-level image references: 275
+- Image-variant candidates: 419
 - Wiki-link relations: 58,997
 - Resolved wiki-link targets: 43,734
 - Source-presence verification checks: 2,252
@@ -204,6 +205,30 @@ Examples verified in the current database:
 - `Alchemy Engine`: `Alchemy Engine.png`, `Alchemy Engine Build.png`, `Alchemy Engine Burnt.png`, and related crafting/gallery references
 - `Ancient Guardian`: `Ancient Guardian.png`, `Ancient Guardian Phase 2.png`, and related figure/art references
 - File-page URLs are stored as source-specific `description_url` values, for example `https://dontstarve.fandom.com/wiki/File:Alchemy_Engine.png`
+
+## Derived Image Variant Candidates
+
+The database now includes an `image_variants` table derived from `page_images`. It detects page images whose filenames start with the owning entity slug, excludes exact matches that are already separate entity titles, and stores the candidate's variant key, variant type, match method, and confidence.
+
+This pass generated 419 image-variant candidates:
+
+- `visual_variant`: 339
+- `animation`: 26
+- `build_state`: 23
+- `growth_stage`: 12
+- `map_icon`: 5
+- `state`: 5
+- `oversized_form`: 4
+- `reference_asset`: 4
+- `phase`: 1
+
+Examples verified in the current database:
+
+- `Alchemy Engine`: `Alchemy Engine Build.png` as `build_state`, `Alchemy Engine Burnt.png` as `state`
+- `Ancient Guardian`: `Ancient Guardian Phase 2.png` as `phase`
+- `Carrot`: `Carrot Plant Seed/Small/Med/Full/Sprout.png` as `growth_stage`, oversized plant images as `oversized_form`
+- `Corn`: `Corn Stalk Seed/Small/Med/Full/Sprout.png` as `growth_stage`, oversized stalk images as `oversized_form`
+- `Bee Box.png` is not counted as a Bee image variant because `Bee Box` is its own entity
 
 ## Cross-Source Identity Keys
 

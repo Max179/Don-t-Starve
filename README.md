@@ -2,7 +2,7 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
-Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 1,874 registered infobox images, 44,437 page-level image references, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 108 official Steam/Klei verification records, and 9 source-access audit records. See [docs/progress.md](docs/progress.md).
+Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 1,874 registered infobox images, 44,437 page-level image references, 419 image-variant candidates, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 108 official Steam/Klei verification records, and 9 source-access audit records. See [docs/progress.md](docs/progress.md).
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
@@ -12,6 +12,7 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `entity_attributes`: infobox fields such as health, damage, attack range, speed, spawn code, recipe data, and DS/DST-specific variants.
 - `entity_images`: infobox image names, roles, variants, URLs, hashes, dimensions, and optional local files.
 - `page_images`: page-level image references from MediaWiki metadata, including gallery, page, and transcluded file references with source file-page URLs.
+- `image_variants`: filename-derived image variant candidates such as build, burnt, phase, animation, crop growth, and oversized crop forms.
 - `entity_relations`: wiki links with resolved `target_entity_id` values when the target exists in `entities`.
 - `recipe_ingredient_targets`: entity bridges from crafted entries to ingredient entries.
 - `entity_fact_targets`: entity bridges for parsed drops, dropped-by, sold-by, spawn-from, and spawns facts.
@@ -121,6 +122,6 @@ The importer supports `.xml`, `.xml.gz`, and `.xml.bz2`, reads main-namespace no
 ## Current Limitations
 
 - The parser is infobox-first and stores raw field names, canonical field names, numeric values, and variant keys. Recipe ingredients, selected drop/source/sold/spawn facts, categories, variants, and identity keys are normalized into derived tables, but some relationship families still need dedicated tables.
-- Infobox image rows remain the primary entity-image table. Page, gallery, and transcluded image references are stored separately in `page_images` so broad asset coverage does not blur the main image for each entity.
+- Infobox image rows remain the primary entity-image table. Page, gallery, and transcluded image references are stored separately in `page_images`; filename-derived alternates are stored in `image_variants` as candidates with match method and confidence.
 - Cross-source matching is ready to use title, spawn-code, image-name, and image-hash identity keys. The committed snapshot has only one wiki source, so `cross_source_matches` stays empty until wiki.gg or another wiki source is ingested.
 - Official Klei and Steam sources are registered as verification sources and source-audited, but are not yet normalized into dedicated update/product fact tables.
