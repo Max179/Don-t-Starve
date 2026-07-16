@@ -36,6 +36,7 @@ COUNT_TABLES = [
     "entity_categories",
     "entity_identity_keys",
     "cross_source_matches",
+    "entity_coverage",
 ]
 
 

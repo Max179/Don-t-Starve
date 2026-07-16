@@ -440,6 +440,47 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_source_catalog_evidence_source
             on source_catalog_evidence(source_catalog_id);
 
+        create table if not exists entity_coverage (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            source_count integer not null default 0,
+            raw_page_count integer not null default 0,
+            attribute_count integer not null default 0,
+            stat_count integer not null default 0,
+            stat_value_count integer not null default 0,
+            infobox_image_count integer not null default 0,
+            page_image_count integer not null default 0,
+            variant_count integer not null default 0,
+            category_count integer not null default 0,
+            relation_count integer not null default 0,
+            resolved_relation_count integer not null default 0,
+            fact_count integer not null default 0,
+            resolved_fact_count integer not null default 0,
+            recipe_ingredient_count integer not null default 0,
+            resolved_recipe_ingredient_count integer not null default 0,
+            official_mention_count integer not null default 0,
+            has_source integer not null default 0,
+            has_attributes integer not null default 0,
+            has_stats integer not null default 0,
+            has_images integer not null default 0,
+            has_variants integer not null default 0,
+            has_categories integer not null default 0,
+            has_relations integer not null default 0,
+            has_facts integer not null default 0,
+            has_recipes integer not null default 0,
+            has_official_mentions integer not null default 0,
+            coverage_score integer not null default 0,
+            missing_summary text not null
+        );
+
+        create index if not exists idx_entity_coverage_kind
+            on entity_coverage(kind);
+        create index if not exists idx_entity_coverage_score
+            on entity_coverage(coverage_score);
+
         create table if not exists recipe_ingredients (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

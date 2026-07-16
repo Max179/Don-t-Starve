@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
 
 from dst_wiki_db.facts import rebuild_entity_facts
 from dst_wiki_db.categories import rebuild_entity_categories
+from dst_wiki_db.entity_coverage import rebuild_entity_coverage
 from dst_wiki_db.image_variants import rebuild_image_variants
 from dst_wiki_db.identity import rebuild_identity_keys
 from dst_wiki_db.official_mentions import rebuild_official_record_mentions
@@ -50,6 +51,7 @@ def main(argv=None):
     source_catalog_counts = rebuild_source_catalog(conn)
     identity_count = rebuild_identity_keys(conn)
     target_counts = rebuild_entity_targets(conn)
+    coverage_count = rebuild_entity_coverage(conn)
     payload = {
         "recipe_ingredients": recipe_count,
         "recipe_ingredient_targets": target_counts["recipe_ingredient_targets"],
@@ -78,6 +80,7 @@ def main(argv=None):
             "source_catalog_evidence"
         ],
         "entity_identity_keys": identity_count,
+        "entity_coverage": coverage_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(payload, ensure_ascii=False, indent=2))

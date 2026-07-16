@@ -23,6 +23,7 @@ Coverage:
 
 - Raw pages: 2,252
 - Entities: 2,252
+- Entity coverage rows: 2,252
 - Source mappings: 2,252
 - Parsed attributes: 22,921
 - Normalized stat rows: 6,866
@@ -70,6 +71,44 @@ Entity kind distribution:
 - `plant`: 46
 
 ## Verified Parser Improvements
+
+## Entity Coverage Audit
+
+The database now includes an `entity_coverage` table with one row per entity. It summarizes source mappings, raw page evidence, attributes, stats, image coverage, variants, categories, relation targets, fact targets, recipe targets, official mentions, a 0-100 coverage score, and a pipe-delimited missing-data summary.
+
+Coverage score distribution:
+
+- 90: 13 entities
+- 80: 197 entities
+- 70: 457 entities
+- 60: 691 entities
+- 50: 360 entities
+- 40: 152 entities
+- 30: 330 entities
+- 20: 39 entities
+- 10: 13 entities
+
+Average coverage score by entity kind:
+
+- `structure`: 66.63 across 205 entities
+- `mob`: 62.13 across 286 entities
+- `item`: 61.93 across 787 entities
+- `food`: 61.80 across 61 entities
+- `plant`: 61.09 across 46 entities
+- `boss`: 59.81 across 159 entities
+- `character`: 51.48 across 135 entities
+- `biome`: 48.49 across 53 entities
+- `page`: 37.48 across 520 entities
+
+Current high-priority missing dimensions:
+
+- Entities missing image coverage: 1,028
+- Entities missing stat rows: 685
+- Entities missing variant rows: 1,782
+- Entities missing official mentions: 2,106
+- Entities missing source mappings: 0
+
+Examples with 90/100 coverage include `Abigail's Flower`, `Battle Call Canister`, `Bundling Wrap`, `Deconstruction Staff`, `Ghost`, `Grave`, `Hound`, `Meat`, `Midsummer Cawnival`, and `Royal Tapestry`.
 
 Some wiki pages contain repeated infoboxes for variants or alternate forms. For example, Abigail has multiple `Mob Infobox` blocks. The schema now records `template_index` on `entity_attributes`, so repeated fields such as `health` and `damage` are preserved instead of overwritten or rejected.
 

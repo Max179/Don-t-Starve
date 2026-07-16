@@ -30,7 +30,8 @@
     "entity_variants": 1282,
     "entity_categories": 12973,
     "entity_identity_keys": 8690,
-    "cross_source_matches": 0
+    "cross_source_matches": 0,
+    "entity_coverage": 2252
   },
   "sample_entities": [
     {
