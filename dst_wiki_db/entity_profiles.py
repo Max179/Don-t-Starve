@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import base64
+import gzip
 import json
 import sqlite3
 from typing import Any
+
+
+PROFILE_ENCODING = "gzip+base64+json"
 
 
 def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
@@ -32,9 +37,9 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 entity_id, slug, canonical_title, kind, coverage_score,
                 media_count, stat_count, variant_count, category_count,
                 fact_count, recipe_ingredient_count, official_mention_count,
-                relationship_count, profile_json, updated_at
+                relationship_count, profile_encoding, profile_json, updated_at
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
             """,
             (
                 entity_id,
@@ -50,12 +55,33 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 counts["recipes"],
                 counts["official_mentions"],
                 counts["relationships"],
-                json.dumps(profile, ensure_ascii=False, sort_keys=True),
+                PROFILE_ENCODING,
+                dump_profile_json(profile),
             ),
         )
         count += 1
     conn.commit()
     return count
+
+
+def dump_profile_json(profile: dict[str, Any]) -> str:
+    payload = json.dumps(profile, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    return base64.b64encode(gzip.compress(payload, compresslevel=9)).decode("ascii")
+
+
+def load_profile_json(row_or_text: sqlite3.Row | str, encoding: str | None = None) -> dict[str, Any]:
+    if isinstance(row_or_text, str):
+        text = row_or_text
+        profile_encoding = encoding or "json"
+    else:
+        text = str(row_or_text["profile_json"])
+        profile_encoding = str(row_or_text["profile_encoding"])
+    if profile_encoding == PROFILE_ENCODING:
+        payload = gzip.decompress(base64.b64decode(text.encode("ascii"))).decode("utf-8")
+        return json.loads(payload)
+    if profile_encoding == "json":
+        return json.loads(text)
+    raise ValueError(f"Unsupported profile encoding: {profile_encoding}")
 
 
 def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str, Any]:

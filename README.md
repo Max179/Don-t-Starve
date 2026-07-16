@@ -22,7 +22,7 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `entity_gameplay_edges`: typed forward and inverse gameplay relationships for ingredients, drops, sellers, and spawn relationships.
 - `entity_coverage`: per-entry coverage score, evidence counts, and missing-data summary for triage.
 - `entity_variant_summary`: merged per-entry variant evidence across attributes, stats, recipes, facts, explicit variants, and media assets.
-- `entity_profile_json`: one JSON profile per entity for direct wiki/API consumption, aggregating identity, coverage, media, stats, variants, categories, facts, recipes, typed relationships, and official mentions.
+- `entity_profile_json`: one compressed JSON profile per entity for direct wiki/API consumption, aggregating identity, coverage, media, stats, variants, categories, facts, recipes, typed relationships, and official mentions. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode `profile_json`.
 - `verification_checks`: source-presence and cross-source verification records.
 - `official_records`: official Steam/Klei products, DLC listings, DLC appdetails, update posts, and page probes with source payloads.
 - `official_products`: queryable Steam product facts derived from official appdetails records.

@@ -1,6 +1,7 @@
 import json
+import pytest
 
-from dst_wiki_db.entity_profiles import rebuild_entity_profile_json
+from dst_wiki_db.entity_profiles import load_profile_json, rebuild_entity_profile_json
 from dst_wiki_db.schema import connect, init_db, upsert_entity, upsert_source
 
 
@@ -203,13 +204,15 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         select entity_id, slug, canonical_title, kind, media_count,
                stat_count, variant_count, category_count, fact_count,
                recipe_ingredient_count, official_mention_count,
-               relationship_count, profile_json
+               relationship_count, profile_encoding, profile_json
         from entity_profile_json
         where entity_id = ?
         """,
         (entity_id,),
     ).fetchone()
-    profile = json.loads(row["profile_json"])
+    with pytest.raises(json.JSONDecodeError):
+        json.loads(row["profile_json"])
+    profile = load_profile_json(row)
     assert dict(row) | {"profile_json": profile} == {
         "entity_id": entity_id,
         "slug": "berry-bush",
@@ -223,6 +226,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "recipe_ingredient_count": 1,
         "official_mention_count": 1,
         "relationship_count": 1,
+        "profile_encoding": "gzip+base64+json",
         "profile_json": profile,
     }
     assert profile["identity"] == {

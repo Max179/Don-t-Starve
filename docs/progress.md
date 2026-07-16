@@ -582,6 +582,8 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,252 rows, matching the `entities` table.
 
+Profile payloads are stored as `gzip+base64+json` in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows. After compression and `vacuum`, `data/dont_starve_wiki.sqlite` is about 71 MiB instead of about 96 MiB.
+
 Each profile aggregates:
 
 - identity: id, slug, title, kind, canonical URL, and summary

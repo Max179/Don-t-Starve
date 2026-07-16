@@ -663,6 +663,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             recipe_ingredient_count integer not null default 0,
             official_mention_count integer not null default 0,
             relationship_count integer not null default 0,
+            profile_encoding text not null default 'json',
             profile_json text not null,
             updated_at text not null default current_timestamp
         );
@@ -721,6 +722,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         table="entity_profile_json",
         column="relationship_count",
         definition="integer not null default 0",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_profile_json",
+        column="profile_encoding",
+        definition="text not null default 'json'",
     )
 
 
