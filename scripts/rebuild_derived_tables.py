@@ -13,6 +13,7 @@ from dst_wiki_db.categories import rebuild_entity_categories
 from dst_wiki_db.image_variants import rebuild_image_variants
 from dst_wiki_db.identity import rebuild_identity_keys
 from dst_wiki_db.official_mentions import rebuild_official_record_mentions
+from dst_wiki_db.official_products import rebuild_official_products
 from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.stats import rebuild_entity_stat_values, rebuild_entity_stats
@@ -40,6 +41,7 @@ def main(argv=None):
     page_image_count = rebuild_page_images(conn)
     image_variant_count = rebuild_image_variants(conn)
     official_mention_count = rebuild_official_record_mentions(conn)
+    official_product_counts = rebuild_official_products(conn)
     identity_count = rebuild_identity_keys(conn)
     target_counts = rebuild_entity_targets(conn)
     payload = {
@@ -55,6 +57,8 @@ def main(argv=None):
         "page_images": page_image_count,
         "image_variants": image_variant_count,
         "official_record_mentions": official_mention_count,
+        "official_products": official_product_counts["official_products"],
+        "official_product_media": official_product_counts["official_product_media"],
         "entity_identity_keys": identity_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

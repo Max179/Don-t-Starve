@@ -250,6 +250,52 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_official_record_mentions_record
             on official_record_mentions(official_record_id);
 
+        create table if not exists official_products (
+            id integer primary key,
+            official_record_id integer not null references official_records(id) on delete cascade,
+            provider text not null,
+            record_type text not null,
+            external_id text not null,
+            product_type text not null,
+            title text not null,
+            url text,
+            parent_external_id text,
+            parent_title text,
+            short_description text,
+            release_date_text text,
+            is_free integer,
+            required_age integer,
+            controller_support text,
+            website text,
+            supported_languages text,
+            unique (official_record_id)
+        );
+
+        create index if not exists idx_official_products_external
+            on official_products(provider, external_id);
+        create index if not exists idx_official_products_parent
+            on official_products(provider, parent_external_id);
+
+        create table if not exists official_product_media (
+            id integer primary key,
+            official_product_id integer not null references official_products(id) on delete cascade,
+            official_record_id integer not null references official_records(id) on delete cascade,
+            provider text not null,
+            external_id text not null,
+            media_role text not null,
+            media_index integer not null default 0,
+            media_url text not null,
+            width integer,
+            height integer,
+            source_field text not null,
+            unique (official_record_id, media_role, media_index, media_url)
+        );
+
+        create index if not exists idx_official_product_media_product
+            on official_product_media(official_product_id);
+        create index if not exists idx_official_product_media_external
+            on official_product_media(provider, external_id);
+
         create table if not exists source_audits (
             id integer primary key,
             source_id integer references sources(id) on delete set null,

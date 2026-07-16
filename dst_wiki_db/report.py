@@ -19,6 +19,8 @@ COUNT_TABLES = [
     "verification_checks",
     "official_records",
     "official_record_mentions",
+    "official_products",
+    "official_product_media",
     "source_audits",
     "recipe_ingredients",
     "recipe_ingredient_targets",

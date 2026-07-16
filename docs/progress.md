@@ -37,6 +37,8 @@ Coverage:
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 161
 - Steam DLC appdetails records: 53
+- Normalized official product records: 55
+- Official product media URLs: 223
 - Official-record entity mentions: 678
 - Structured recipe ingredients: 1,954
 - Resolved recipe ingredient targets: 1,816
@@ -97,6 +99,25 @@ All 53 Steam DLC appdetails requests succeeded. Each record preserves its parent
 - `Don't Starve Together: Starter Pack 2026` (`4211520`)
 - `Don't Starve Together: Blooming Verdant Chest` (`2377640`)
 - `Don't Starve Together: Complete Roseate Chest` (`3155070`)
+
+The database now also includes `official_products` and `official_product_media` derived from Steam appdetails records. The product table generated 55 normalized rows:
+
+- `dlc`: 52
+- `game`: 2
+- `music`: 1
+
+The official media table generated 223 image URL rows:
+
+- `description_image`: 58
+- `capsule_image`: 55
+- `capsule_imagev5`: 55
+- `header_image`: 55
+
+Examples verified in the current database:
+
+- `Don't Starve Together` (`322330`): official game product row with Steam short description and direct media URLs.
+- `Don't Starve Together: Starter Pack 2026` (`4211520`): parent app `322330`, parent title `Don't Starve Together`, and 8 description images plus header/capsule media.
+- `Don't Starve Soundtrack` (`219750`): product type `music`, parent app `219740`, and soundtrack-specific description images.
 
 The database also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase matching. With DLC titles and descriptions included, this pass generated 678 official-record entity mentions:
 
