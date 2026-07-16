@@ -2,7 +2,7 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
-Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 1,874 registered infobox images, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,246 structured drop/source/sold/spawn facts, and 108 official Steam/Klei verification records. See [docs/progress.md](docs/progress.md).
+Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 1,874 registered infobox images, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,246 structured drop/source/sold/spawn facts, 108 official Steam/Klei verification records, and 9 source-access audit records. See [docs/progress.md](docs/progress.md).
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
@@ -13,6 +13,7 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `entity_images`: image names, roles, variants, URLs, hashes, dimensions, and optional local files.
 - `entity_relations`: wiki links and future relationship facts.
 - `verification_checks`: source-presence and cross-source verification records.
+- `source_audits`: robots, API, and official-source availability checks.
 
 ## Source Strategy
 
@@ -67,13 +68,16 @@ python3 scripts/build_database.py \
 The generated local files are ignored by git. Remove them after a smoke test if you want the machine clean:
 
 ```bash
-rm -f data/dont_starve_wiki.sqlite reports/coverage.json reports/inspect.json
+rm -f data/dont_starve_wiki.sqlite reports/coverage.json reports/inspect.json reports/source_audits.json
 rm -rf data/images
 ```
 
-Inspect the output:
+Audit sources and inspect the output:
 
 ```bash
+python3 scripts/audit_sources.py \
+  --db data/dont_starve_wiki.sqlite \
+  --report reports/source_audits.json
 python3 scripts/inspect_database.py data/dont_starve_wiki.sqlite
 ```
 
@@ -96,7 +100,7 @@ After wiki.gg API permission is confirmed, run the GitHub workflow with:
 
 ## Current Limitations
 
-- The parser is infobox-first and stores raw field names, canonical field names, numeric values, and variant keys. It does not yet fully normalize all recipe/drops/spawn relationships.
+- The parser is infobox-first and stores raw field names, canonical field names, numeric values, and variant keys. Recipe ingredients, selected drop/source/sold/spawn facts, categories, variants, and identity keys are normalized into derived tables, but some relationship families still need dedicated tables.
 - Image rows are registered from infobox image fields first. Page gallery and navbox images are intentionally not treated as primary entity images.
-- Cross-source mapping currently uses normalized title slugs. Future passes should add spawn code, prefab code, image hash, and template/category confidence scoring.
-- Official Klei and Steam sources are registered as verification sources but are not yet ingested into structured update/product tables.
+- Cross-source matching is ready to use title, spawn-code, image-name, and image-hash identity keys. The committed snapshot has only one wiki source, so `cross_source_matches` stays empty until wiki.gg or another wiki source is ingested.
+- Official Klei and Steam sources are registered as verification sources and source-audited, but are not yet normalized into dedicated update/product fact tables.

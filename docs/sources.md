@@ -14,6 +14,7 @@ Checked on 2026-07-16 Asia/Shanghai during this build session.
   - `action=query&prop=revisions|categories|templates|images`
   - `action=query&prop=imageinfo&iiprop=url|mime|size|sha1`
 - Constraint: robots research indicated `/api.php`, `/rest.php`, and `/wiki/File:` are disallowed for automated crawling. Use only with permission or an approved access method.
+- Current source audit: `robots.txt` returned HTTP 200 and declared `search=yes`, `ai-train=no`, and `use=reference`. The project records wiki.gg `mediawiki_siteinfo` as `restricted_by_robots` and skips API access by default.
 
 ## 2. Klei Official Site And Forums
 
@@ -22,6 +23,7 @@ Checked on 2026-07-16 Asia/Shanghai during this build session.
 - Role: official verification.
 - Best use: verify releases, update notes, official descriptions, and mechanic changes.
 - Constraint: official text and media are not a bulk reusable wiki license. Store facts, citations, URLs, and timestamps rather than copying long announcement bodies.
+- Current source audit: the two Klei game pages returned HTTP 200. The DST update forum returned HTTP 403 during the latest audit and is stored as a failed source-access record.
 
 ## 3. Steam Store / Steam Web API
 
@@ -31,16 +33,18 @@ Checked on 2026-07-16 Asia/Shanghai during this build session.
 - DS API: https://store.steampowered.com/api/appdetails?appids=219740&filters=basic
 - Role: official product and DLC verification.
 - Best use: app ids, DLC ids, release metadata, supported platforms, store descriptions, and news pointers.
+- Current source audit: both appdetails probes returned HTTP 200.
 
 ## 4. Don't Starve Wiki on Fandom
 
 - URL: https://dontstarve.fandom.com/
 - API: https://dontstarve.fandom.com/api.php
 - Role: historical comparison source.
-- Observed API statistics: about 219,384 pages, 2,252 articles, 25,319 images, 533,978 edits, and 8 active users.
+- Observed API statistics: about 219,384 pages, 2,252 articles, 25,319 images, 533,981 edits, and 8 active users.
 - License: CC-BY-SA / Fandom licensing.
 - Best use: cross-source title matches, older page history, and difference checks against wiki.gg.
 - Constraint: Fandom pages include platform wrappers and may be sensitive to high-frequency requests. Use low request rates and cache raw pages.
+- Current source audit: `robots.txt` returned HTTP 403 through Cloudflare in the latest audit, while `api.php` siteinfo returned HTTP 200.
 
 ## Common Wiki Structures
 

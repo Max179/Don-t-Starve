@@ -37,6 +37,7 @@ Coverage:
 - Entities with category links: 2,190
 - Distinct category slugs: 288
 - Identity keys for source alignment: 8,690
+- Source-access audit records: 9
 
 Entity kind distribution:
 
@@ -188,6 +189,37 @@ Examples verified in the current database:
 - `Wilson`: `title_slug=wilson` and image SHA1 key
 
 `cross_source_matches` is currently empty because the committed snapshot contains one wiki source (`fandom`). Once wiki.gg is ingested, shared identity keys will be used to populate cross-source matches.
+
+## Source Access Audit
+
+The database now includes a `source_audits` table populated by:
+
+```bash
+python3 scripts/audit_sources.py \
+  --db data/dont_starve_wiki.sqlite \
+  --timeout 30 \
+  --report reports/source_audits.json
+```
+
+This pass generated 9 source-access records:
+
+- `wiki.gg`: 2 records
+- `fandom`: 2 records
+- `klei`: 3 records
+- `steam`: 2 records
+
+Status distribution:
+
+- `ok`: 6
+- `restricted_by_robots`: 1
+- `failed`: 2
+
+Latest audit observations:
+
+- wiki.gg `robots.txt` returned HTTP 200 and explicitly disallows `/api.php`; the audit records wiki.gg API siteinfo as `restricted_by_robots` and does not fetch it by default.
+- Fandom `api.php` siteinfo returned HTTP 200 with 2,252 articles and 25,319 images; Fandom `robots.txt` returned HTTP 403 through Cloudflare during this audit.
+- Klei product pages for Don't Starve and Don't Starve Together returned HTTP 200; the Klei DST update forum returned HTTP 403 during this audit.
+- Steam appdetails probes for app ids `322330` and `219740` returned HTTP 200.
 
 ## Remaining Work Toward The Full Goal
 

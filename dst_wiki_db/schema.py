@@ -153,6 +153,22 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (provider, record_type, external_id)
         );
 
+        create table if not exists source_audits (
+            id integer primary key,
+            source_id integer references sources(id) on delete set null,
+            source_key text not null,
+            check_type text not null,
+            url text not null,
+            status text not null,
+            status_code integer,
+            allowed integer,
+            title text not null,
+            summary text,
+            payload_json text not null,
+            checked_at text not null default current_timestamp,
+            unique (source_key, check_type, url)
+        );
+
         create table if not exists recipe_ingredients (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,
@@ -264,8 +280,8 @@ def upsert_source(
             api_url=excluded.api_url,
             role=excluded.role,
             license=excluded.license,
-            fetched_at=excluded.fetched_at,
-            siteinfo_json=excluded.siteinfo_json
+            fetched_at=coalesce(excluded.fetched_at, sources.fetched_at),
+            siteinfo_json=coalesce(excluded.siteinfo_json, sources.siteinfo_json)
         """,
         (key, name, base_url, api_url, role, license, fetched_at, siteinfo_json),
     )

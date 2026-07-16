@@ -32,6 +32,38 @@ def test_schema_can_upsert_sources_and_entities(tmp_path):
     assert tuple(row) == ("Wilson", "character")
 
 
+def test_upsert_source_preserves_fetch_metadata_when_not_reprovided(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    upsert_source(
+        conn,
+        key="fandom",
+        name="Don't Starve Wiki on Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+        fetched_at="2026-07-16T00:00:00+00:00",
+        siteinfo_json='{"statistics":{"articles":2252}}',
+    )
+
+    upsert_source(
+        conn,
+        key="fandom",
+        name="Don't Starve Wiki on Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+
+    row = conn.execute(
+        "select fetched_at, siteinfo_json from sources where key='fandom'"
+    ).fetchone()
+    assert tuple(row) == (
+        "2026-07-16T00:00:00+00:00",
+        '{"statistics":{"articles":2252}}',
+    )
+
+
 def test_schema_has_auditable_raw_tables(tmp_path):
     conn = sqlite3.connect(tmp_path / "wiki.sqlite")
     init_db(conn)
