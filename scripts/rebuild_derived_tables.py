@@ -18,6 +18,7 @@ from dst_wiki_db.official_mentions import rebuild_official_record_mentions
 from dst_wiki_db.official_products import rebuild_official_products
 from dst_wiki_db.official_updates import rebuild_official_update_events
 from dst_wiki_db.official_update_sections import rebuild_official_update_sections
+from dst_wiki_db.entity_profiles import rebuild_entity_profile_json
 from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.source_catalog import rebuild_source_catalog
@@ -56,6 +57,7 @@ def main(argv=None):
     target_counts = rebuild_entity_targets(conn)
     variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
+    profile_count = rebuild_entity_profile_json(conn)
     payload = {
         "recipe_ingredients": recipe_count,
         "recipe_ingredient_targets": target_counts["recipe_ingredient_targets"],
@@ -87,6 +89,7 @@ def main(argv=None):
         "entity_identity_keys": identity_count,
         "entity_variant_summary": variant_summary_count,
         "entity_coverage": coverage_count,
+        "entity_profile_json": profile_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(payload, ensure_ascii=False, indent=2))

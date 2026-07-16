@@ -577,3 +577,18 @@ Latest wiki.gg discovery probe:
 - Improve cross-source mapping beyond title slug matching using spawn code, prefab code, image hash, infobox type, and category confidence.
 - Normalize remaining relationships such as upgrades, skins, cooked/raw form labels, and more advanced fuzzy/alias target matching into dedicated relation tables.
 - Store actual image files in a GitHub-friendly asset strategy. Git LFS is not installed in the current environment, so this pass stores image URLs and metadata in SQLite rather than committing thousands of binary files.
+
+## Entity JSON Profiles
+
+The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,252 rows, matching the `entities` table.
+
+Each profile aggregates:
+
+- identity: id, slug, title, kind, canonical URL, and summary
+- coverage: coverage score, detailed evidence counts, boolean coverage flags, and missing-data labels
+- media: unified infobox/page media assets with primary flags, URLs, dimensions, local paths, and variant metadata
+- stats: normalized stat rows with raw field names, numeric values when available, units, and variant keys
+- variants: merged variant evidence from data, recipes, facts, explicit variants, and media
+- categories, facts, recipe ingredients, and official Steam/Klei mentions
+
+The table also stores queryable top-level counts such as `media_count`, `stat_count`, `variant_count`, `category_count`, `fact_count`, `recipe_ingredient_count`, and `official_mention_count` so applications can build lists without parsing JSON.

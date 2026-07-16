@@ -22,5 +22,6 @@
   "source_catalog_evidence": 26,
   "entity_identity_keys": 8690,
   "entity_variant_summary": 2982,
-  "entity_coverage": 2252
+  "entity_coverage": 2252,
+  "entity_profile_json": 2252
 }

@@ -617,6 +617,29 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_variant_summary_type
             on entity_variant_summary(variant_type);
 
+        create table if not exists entity_profile_json (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            coverage_score integer not null default 0,
+            media_count integer not null default 0,
+            stat_count integer not null default 0,
+            variant_count integer not null default 0,
+            category_count integer not null default 0,
+            fact_count integer not null default 0,
+            recipe_ingredient_count integer not null default 0,
+            official_mention_count integer not null default 0,
+            profile_json text not null,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_profile_json_kind
+            on entity_profile_json(kind);
+        create index if not exists idx_entity_profile_json_title
+            on entity_profile_json(canonical_title);
+
         create table if not exists entity_categories (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

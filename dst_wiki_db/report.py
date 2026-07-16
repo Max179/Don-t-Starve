@@ -39,6 +39,7 @@ COUNT_TABLES = [
     "entity_identity_keys",
     "cross_source_matches",
     "entity_coverage",
+    "entity_profile_json",
 ]
 
 
