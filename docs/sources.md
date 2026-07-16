@@ -1,6 +1,6 @@
 # Don't Starve Data Sources
 
-Checked on 2026-07-16 Asia/Shanghai during this build session.
+Checked on 2026-07-17 Asia/Shanghai during this build session. The ranked source plan is stored in `source_catalog`; supporting search, official, manual-review, and audit evidence is stored in `source_catalog_evidence`.
 
 ## 1. Don't Starve Wiki on wiki.gg
 
@@ -47,6 +47,20 @@ Checked on 2026-07-16 Asia/Shanghai during this build session.
 - Best use: cross-source title matches, older page history, and difference checks against wiki.gg.
 - Constraint: Fandom pages include platform wrappers and may be sensitive to high-frequency requests. Use low request rates and cache raw pages.
 - Current source audit: `robots.txt` returned HTTP 403 through Cloudflare in the latest audit, while `api.php` siteinfo returned HTTP 200.
+
+## 5. Don't Starve Wiki on Fextralife
+
+- URL: https://dontstarve.wiki.fextralife.com/Don't+Starve+Wiki
+- Role: competitor/reference-only source.
+- Best use: spot-check coverage gaps, alternate naming, and broad guide-page coverage.
+- Constraint: not currently used for bulk ingestion; verify terms before reuse.
+
+## 6. Context And Discovery Signals
+
+- Wikipedia: https://en.wikipedia.org/wiki/Don%27t_Starve for general product context only.
+- Reddit/r/dontstarve: https://www.reddit.com/r/dontstarve/ for source-discovery and community migration signals only.
+- PatchBot: https://patchbot.io/games/dont-starve-together for update-discovery signals only.
+- Constraint: these sources do not replace wiki.gg, Klei, Steam, or Fandom evidence for mechanics, stats, images, or entity records.
 
 ## Common Wiki Structures
 

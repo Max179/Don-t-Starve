@@ -1,6 +1,6 @@
 # Current Database Progress
 
-Last updated: 2026-07-16 Asia/Shanghai.
+Last updated: 2026-07-17 Asia/Shanghai.
 
 ## Committed Database
 
@@ -44,6 +44,8 @@ Coverage:
 - Official update section items: 397
 - Official update media URLs: 5
 - Official-record entity mentions: 678
+- Ranked source catalog rows: 8
+- Source catalog evidence rows: 26
 - Structured recipe ingredients: 1,954
 - Resolved recipe ingredient targets: 1,816
 - Structured drop/source/sold/spawn facts: 1,246
@@ -394,6 +396,28 @@ Examples verified in the current database:
 `cross_source_matches` is currently empty because the committed snapshot contains one wiki source (`fandom`). Once wiki.gg is ingested, shared identity keys will be used to populate cross-source matches.
 
 ## Source Access Audit
+
+The database now includes a `source_catalog` table and `source_catalog_evidence` table for ranked source discovery and verification planning. This pass generated 8 source catalog rows and 26 evidence rows:
+
+- `wiki.gg`: rank 1, `primary`, canonical community wiki, `permission_required`
+- `klei`: rank 2, `official`, official verification, `active`
+- `steam`: rank 3, `official`, official product/update metadata, `active`
+- `fandom`: rank 4, `comparison`, historical community wiki, `active_with_caution`
+- `fextralife`: rank 5, `competitor`, reference-only coverage checks
+- `wikipedia`: rank 6, `context`, general product context only
+- `reddit`: rank 7, `community_signal`, source-discovery signal only
+- `patchbot`: rank 8, `community_signal`, update-discovery signal only
+
+Evidence row counts by source:
+
+- `klei`: 6
+- `steam`: 5
+- `wiki.gg`: 5
+- `fandom`: 5
+- `fextralife`: 2
+- `patchbot`: 1
+- `reddit`: 1
+- `wikipedia`: 1
 
 The database now includes a `source_audits` table populated by:
 

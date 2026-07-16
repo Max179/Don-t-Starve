@@ -92,5 +92,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "official_update_media",
         "official_update_sections",
         "official_update_section_items",
+        "source_catalog",
+        "source_catalog_evidence",
         "run_metadata",
     }.issubset(tables)

@@ -18,6 +18,7 @@ from dst_wiki_db.official_updates import rebuild_official_update_events
 from dst_wiki_db.official_update_sections import rebuild_official_update_sections
 from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
+from dst_wiki_db.source_catalog import rebuild_source_catalog
 from dst_wiki_db.stats import rebuild_entity_stat_values, rebuild_entity_stats
 from dst_wiki_db.targets import rebuild_entity_targets
 from dst_wiki_db.variants import rebuild_entity_variants
@@ -46,6 +47,7 @@ def main(argv=None):
     official_product_counts = rebuild_official_products(conn)
     official_update_counts = rebuild_official_update_events(conn)
     official_update_section_counts = rebuild_official_update_sections(conn)
+    source_catalog_counts = rebuild_source_catalog(conn)
     identity_count = rebuild_identity_keys(conn)
     target_counts = rebuild_entity_targets(conn)
     payload = {
@@ -70,6 +72,10 @@ def main(argv=None):
         ],
         "official_update_section_items": official_update_section_counts[
             "official_update_section_items"
+        ],
+        "source_catalog": source_catalog_counts["source_catalog"],
+        "source_catalog_evidence": source_catalog_counts[
+            "source_catalog_evidence"
         ],
         "entity_identity_keys": identity_count,
     }

@@ -398,6 +398,48 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (source_key, check_type, url)
         );
 
+        create table if not exists source_catalog (
+            id integer primary key,
+            source_id integer references sources(id) on delete set null,
+            source_key text not null unique,
+            rank integer not null unique,
+            tier text not null,
+            source_type text not null,
+            role text not null,
+            name text not null,
+            base_url text not null,
+            api_url text,
+            access_method text not null,
+            ingestion_status text not null,
+            license_summary text not null,
+            coverage_summary text not null,
+            verification_use text not null,
+            notes text not null,
+            last_verified text not null
+        );
+
+        create index if not exists idx_source_catalog_tier
+            on source_catalog(tier);
+        create index if not exists idx_source_catalog_status
+            on source_catalog(ingestion_status);
+
+        create table if not exists source_catalog_evidence (
+            id integer primary key,
+            source_catalog_id integer not null references source_catalog(id) on delete cascade,
+            source_id integer references sources(id) on delete set null,
+            source_key text not null,
+            evidence_type text not null,
+            provider text not null,
+            url text not null,
+            title text not null,
+            summary text not null,
+            checked_date text not null,
+            unique (source_key, evidence_type, url, title)
+        );
+
+        create index if not exists idx_source_catalog_evidence_source
+            on source_catalog_evidence(source_catalog_id);
+
         create table if not exists recipe_ingredients (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

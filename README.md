@@ -2,7 +2,7 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
-Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 6,866 normalized stat rows, 6,844 parsed stat value rows, 1,874 registered infobox images, 44,437 page-level image references, 419 image-variant candidates, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 161 official Steam/Klei verification records, 55 normalized official product records, 223 official product media URLs, 50 normalized official update events, 80 normalized official update sections, 397 official update section items, 5 official update media URLs, 678 official-record entity mentions, and 9 source-access audit records. The official layer includes appdetails for all 53 Steam-listed DLC ids, with official header, capsule, and description image URLs. See [docs/progress.md](docs/progress.md).
+Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 6,866 normalized stat rows, 6,844 parsed stat value rows, 1,874 registered infobox images, 44,437 page-level image references, 419 image-variant candidates, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 161 official Steam/Klei verification records, 55 normalized official product records, 223 official product media URLs, 50 normalized official update events, 80 normalized official update sections, 397 official update section items, 5 official update media URLs, 678 official-record entity mentions, 8 ranked source catalog rows, 26 source catalog evidence rows, and 9 source-access audit records. The official layer includes appdetails for all 53 Steam-listed DLC ids, with official header, capsule, and description image URLs. See [docs/progress.md](docs/progress.md).
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
@@ -28,15 +28,21 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `official_update_media`: official update image URLs extracted from Steam news content.
 - `official_record_mentions`: high-confidence links from official Steam/Klei records back to matching wiki entities.
 - `source_audits`: robots, API, and official-source availability checks.
+- `source_catalog`: ranked wiki, official, competitor, and community-signal source candidates.
+- `source_catalog_evidence`: search, official, audit, and manual-review evidence for each ranked source.
 
 ## Source Strategy
 
-The current source ranking is:
+The current source ranking is also stored in `source_catalog`:
 
 1. `wiki.gg` Don't Starve Wiki: canonical community wiki, largest current coverage.
 2. Klei official site/forums: official verification for updates, releases, and mechanics changes.
 3. Steam Store / Steam Web API: official product metadata and DLC verification.
 4. Fandom Don't Starve Wiki: historical comparison and cross-source checks.
+5. Fextralife Don't Starve Wiki: competitor/reference-only coverage check.
+6. Wikipedia: general product context only.
+7. Reddit/r/dontstarve: source-discovery signal only.
+8. PatchBot: update-discovery signal only, verified back to official sources before use.
 
 Important: public research found that wiki.gg robots rules restrict `/api.php`. This project supports wiki.gg API ingestion, but the CLI skips that source unless `--allow-restricted-api` is passed. Only use that flag if you have permission or an acceptable data-access arrangement. Fandom is useful for testing the pipeline and historical comparison, but it should not be treated as the primary source of truth.
 
