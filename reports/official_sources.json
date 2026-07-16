@@ -1,13 +1,14 @@
 {
-  "records_written": 108,
+  "records_written": 161,
   "by_provider": {
-    "steam": 105,
+    "steam": 158,
     "klei": 3
   },
   "by_type": {
     "steam:appdetails": 2,
     "steam:steam_dlc_id": 53,
     "steam:news": 50,
+    "steam:dlc_appdetails": 53,
     "klei:http_probe": 3
   }
 }

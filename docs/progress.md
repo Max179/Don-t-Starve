@@ -35,8 +35,9 @@ Coverage:
 - Wiki-link relations: 58,997
 - Resolved wiki-link targets: 43,734
 - Source-presence verification checks: 2,252
-- Official Steam/Klei verification records: 108
-- Official-record entity mentions: 292
+- Official Steam/Klei verification records: 161
+- Steam DLC appdetails records: 53
+- Official-record entity mentions: 678
 - Structured recipe ingredients: 1,954
 - Resolved recipe ingredient targets: 1,816
 - Structured drop/source/sold/spawn facts: 1,246
@@ -86,27 +87,38 @@ Official records currently include:
 
 - Steam appdetails: 2 records (`Don't Starve`, `Don't Starve Together`)
 - Steam DLC ids: 53 records
+- Steam DLC appdetails: 53 records
 - Steam news/update records: 50 records
 - Klei official page probes: 3 records
 
-The database now also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase matching. This pass generated 292 official-record entity mentions:
+All 53 Steam DLC appdetails requests succeeded. Each record preserves its parent appid and the official Steam data payload. All 53 records contain both `header_image` and `capsule_image` URLs. Examples include:
 
+- `Don't Starve Soundtrack` (`219750`)
+- `Don't Starve Together: Starter Pack 2026` (`4211520`)
+- `Don't Starve Together: Blooming Verdant Chest` (`2377640`)
+- `Don't Starve Together: Complete Roseate Chest` (`3155070`)
+
+The database also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase matching. With DLC titles and descriptions included, this pass generated 678 official-record entity mentions:
+
+- `steam:dlc_appdetails`: 386
 - `steam:news`: 176
 - `steam:steam_dlc_id`: 102
 - `steam:appdetails`: 9
 - `klei:http_probe`: 5
 
-Top matched entities include:
+Top entities mentioned by DLC appdetails include:
 
-- `Don't Starve`: 74
-- `Don't Starve Together`: 55
-- `Klei Entertainment`: 13
-- `WX-78`: 9
-- `The Constant`: 8
-- `Wilson`: 5
-- `Beefalo`: 4
-- `Wheeler`: 4
-- `Wormwood`: 4
+- `Don't Starve`: 53
+- `Don't Starve Together`: 49
+- `Wilson`: 18
+- `The Constant`: 17
+- `Wendy`: 13
+- `Willow`: 13
+- `Webber`: 12
+- `WX-78`: 11
+- `Winona`: 11
+- `Wolfgang`: 11
+- `Wortox`: 11
 
 The matcher skips generic single-word non-creature entries such as `Time`, `Things`, and `Farm`; those three currently have 0 official mentions after filtering.
 

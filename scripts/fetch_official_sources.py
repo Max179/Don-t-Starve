@@ -20,6 +20,11 @@ def main(argv=None):
     parser.add_argument("--steam-news-count", type=int, default=20)
     parser.add_argument("--timeout", type=int, default=30)
     parser.add_argument("--report", type=Path, default=Path("reports/official_sources.json"))
+    parser.add_argument(
+        "--skip-steam-dlc-details",
+        action="store_true",
+        help="Only store parent-listed DLC ids; skip individual Steam DLC appdetails requests.",
+    )
     args = parser.parse_args(argv)
 
     conn = connect(args.db)
@@ -30,6 +35,7 @@ def main(argv=None):
             appids=[322330, 219740],
             news_count=args.steam_news_count,
             timeout=args.timeout,
+            include_dlc_details=not args.skip_steam_dlc_details,
         )
     )
     records.extend(fetch_klei_records(timeout=args.timeout))

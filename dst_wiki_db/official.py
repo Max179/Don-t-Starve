@@ -86,6 +86,61 @@ def records_from_steam_appdetails(appid: int, payload: Mapping[str, object]) -> 
     return records
 
 
+def records_from_steam_dlc_appdetails(
+    dlc_appid: int,
+    parent_appid: int,
+    payload: Mapping[str, object],
+) -> OfficialRecord:
+    app_payload = payload.get(str(dlc_appid), {})
+    if not isinstance(app_payload, Mapping):
+        return OfficialRecord(
+            provider="steam",
+            record_type="dlc_appdetails",
+            external_id=str(dlc_appid),
+            title=f"Steam DLC {dlc_appid}",
+            url=f"https://store.steampowered.com/app/{dlc_appid}/",
+            status="invalid_payload",
+            summary=None,
+            payload={"parent_appid": parent_appid, "payload": payload},
+        )
+    if not app_payload.get("success"):
+        return OfficialRecord(
+            provider="steam",
+            record_type="dlc_appdetails",
+            external_id=str(dlc_appid),
+            title=f"Steam DLC {dlc_appid}",
+            url=f"https://store.steampowered.com/app/{dlc_appid}/",
+            status="failed",
+            summary=None,
+            payload={"parent_appid": parent_appid, "payload": app_payload},
+        )
+
+    data = app_payload.get("data", {})
+    if not isinstance(data, Mapping):
+        return OfficialRecord(
+            provider="steam",
+            record_type="dlc_appdetails",
+            external_id=str(dlc_appid),
+            title=f"Steam DLC {dlc_appid}",
+            url=f"https://store.steampowered.com/app/{dlc_appid}/",
+            status="invalid_payload",
+            summary=None,
+            payload={"parent_appid": parent_appid, "payload": app_payload},
+        )
+
+    title = str(data.get("name") or f"Steam DLC {dlc_appid}")
+    return OfficialRecord(
+        provider="steam",
+        record_type="dlc_appdetails",
+        external_id=str(dlc_appid),
+        title=title,
+        url=f"https://store.steampowered.com/app/{dlc_appid}/",
+        status="ok",
+        summary=_optional_text(data.get("short_description")),
+        payload={"parent_appid": parent_appid, "data": data},
+    )
+
+
 def records_from_steam_news(appid: int, payload: Mapping[str, object]) -> List[OfficialRecord]:
     appnews = payload.get("appnews", {})
     if not isinstance(appnews, Mapping):
@@ -146,9 +201,12 @@ def fetch_steam_records(
     news_count: int,
     timeout: int,
     session=None,
+    include_dlc_details: bool = True,
 ) -> List[OfficialRecord]:
     session = session or _session()
     records: List[OfficialRecord] = []
+    dlc_pairs: List[tuple[int, int]] = []
+    seen_dlc_pairs: set[tuple[int, int]] = set()
     for appid in appids:
         try:
             app_payload = _get_json(
@@ -157,7 +215,19 @@ def fetch_steam_records(
                 {"appids": str(appid), "filters": "basic"},
                 timeout,
             )
-            records.extend(records_from_steam_appdetails(appid, app_payload))
+            app_records = records_from_steam_appdetails(appid, app_payload)
+            records.extend(app_records)
+            for record in app_records:
+                if record.record_type != "steam_dlc_id" or record.status != "listed":
+                    continue
+                dlc_appid = _optional_int(record.payload.get("dlc_appid"))
+                parent_appid = _optional_int(record.payload.get("parent_appid"))
+                if dlc_appid is None or parent_appid is None:
+                    continue
+                pair = (dlc_appid, parent_appid)
+                if pair not in seen_dlc_pairs:
+                    seen_dlc_pairs.add(pair)
+                    dlc_pairs.append(pair)
         except requests.RequestException as exc:
             records.append(_failed_steam_record(appid, "appdetails", exc))
 
@@ -176,6 +246,20 @@ def fetch_steam_records(
             records.extend(records_from_steam_news(appid, news_payload))
         except requests.RequestException as exc:
             records.append(_failed_steam_record(appid, "news", exc))
+    if include_dlc_details:
+        for dlc_appid, parent_appid in dlc_pairs:
+            try:
+                dlc_payload = _get_json(
+                    session,
+                    "https://store.steampowered.com/api/appdetails",
+                    {"appids": str(dlc_appid), "filters": "basic"},
+                    timeout,
+                )
+                records.append(
+                    records_from_steam_dlc_appdetails(dlc_appid, parent_appid, dlc_payload)
+                )
+            except requests.RequestException as exc:
+                records.append(_failed_steam_dlc_record(dlc_appid, parent_appid, exc))
     return records
 
 
@@ -253,6 +337,24 @@ def _failed_steam_record(appid: int, record_type: str, exc: Exception) -> Offici
     )
 
 
+def _failed_steam_dlc_record(dlc_appid: int, parent_appid: int, exc: Exception) -> OfficialRecord:
+    return OfficialRecord(
+        provider="steam",
+        record_type="dlc_appdetails",
+        external_id=str(dlc_appid),
+        title=f"Steam DLC {dlc_appid}",
+        url=f"https://store.steampowered.com/app/{dlc_appid}/",
+        status="failed",
+        summary=str(exc),
+        payload={
+            "error": str(exc),
+            "parent_appid": parent_appid,
+            "dlc_appid": dlc_appid,
+            "record_type": "dlc_appdetails",
+        },
+    )
+
+
 def _session():
     session = requests.Session()
     session.headers.update({"User-Agent": USER_AGENT})
@@ -263,6 +365,13 @@ def _optional_text(value: object) -> str | None:
     if value is None:
         return None
     return str(value)
+
+
+def _optional_int(value: object) -> int | None:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _text_excerpt(value: str, limit: int) -> str:
