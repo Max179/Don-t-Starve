@@ -15,6 +15,8 @@ Checked on 2026-07-16 Asia/Shanghai during this build session.
   - `action=query&prop=imageinfo&iiprop=url|mime|size|sha1`
 - Constraint: robots research indicated `/api.php`, `/rest.php`, and `/wiki/File:` are disallowed for automated crawling. Use only with permission or an approved access method.
 - Current source audit: `robots.txt` returned HTTP 200 and declared `search=yes`, `ai-train=no`, and `use=reference`. The project records wiki.gg `mediawiki_siteinfo` as `restricted_by_robots` and skips API access by default.
+- Dump discovery: common unauthenticated paths such as `/sitemap.xml`, `/sitemap_index.xml`, and `/dump.xml` did not expose a usable XML dump during the latest probe. `Special:Statistics`, `Special:AllPages`, and normal article pages returned HTTP 200 on lightweight HEAD probes, but Special pages are not used as a bulk ingestion path.
+- Approved dump path: if wiki.gg or another approved source provides a MediaWiki XML dump, use `scripts/import_xml_dump.py` to import it into the canonical database without calling `/api.php`.
 
 ## 2. Klei Official Site And Forums
 

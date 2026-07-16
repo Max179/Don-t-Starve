@@ -98,6 +98,23 @@ After wiki.gg API permission is confirmed, run the GitHub workflow with:
 
 `--limit 0` means all pages. Until permission is confirmed, use small positive limits for verification.
 
+## Import An Approved XML Dump
+
+If wiki.gg or another approved source provides a MediaWiki XML dump, import it without using the restricted wiki.gg API:
+
+```bash
+python3 scripts/import_xml_dump.py path/to/dump.xml.bz2 \
+  --db data/dont_starve_wiki.sqlite \
+  --source wiki.gg \
+  --limit 0 \
+  --report reports/xml_dump_import.json
+python3 scripts/rebuild_derived_tables.py \
+  --db data/dont_starve_wiki.sqlite \
+  --report reports/derived_tables.json
+```
+
+The importer supports `.xml`, `.xml.gz`, and `.xml.bz2`, reads main-namespace non-redirect pages by default, and writes into the same raw/entity/attribute/image/category structures as the API importer.
+
 ## Current Limitations
 
 - The parser is infobox-first and stores raw field names, canonical field names, numeric values, and variant keys. Recipe ingredients, selected drop/source/sold/spawn facts, categories, variants, and identity keys are normalized into derived tables, but some relationship families still need dedicated tables.

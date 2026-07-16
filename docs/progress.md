@@ -221,9 +221,30 @@ Latest audit observations:
 - Klei product pages for Don't Starve and Don't Starve Together returned HTTP 200; the Klei DST update forum returned HTTP 403 during this audit.
 - Steam appdetails probes for app ids `322330` and `219740` returned HTTP 200.
 
+## Approved XML Dump Import Path
+
+The project now includes a MediaWiki XML dump importer for an approved canonical source dump:
+
+```bash
+python3 scripts/import_xml_dump.py path/to/dump.xml.bz2 \
+  --db data/dont_starve_wiki.sqlite \
+  --source wiki.gg \
+  --limit 0 \
+  --report reports/xml_dump_import.json
+```
+
+The importer supports `.xml`, `.xml.gz`, and `.xml.bz2`, streams main-namespace non-redirect pages, stores XML `siteinfo` on the selected source, and writes each page through the same parser and schema used by the API importer. It registers raw pages, canonical entities, infobox attributes, infobox images, wiki links, categories, templates, and source provenance. After importing a real dump, run `scripts/rebuild_derived_tables.py` to rebuild recipes, facts, variants, categories, identity keys, and cross-source matches.
+
+Latest wiki.gg discovery probe:
+
+- `/sitemap.xml`: no usable sitemap XML exposed.
+- `/sitemap_index.xml`: no usable sitemap XML exposed.
+- `/dump.xml`: no usable XML dump exposed; a GET probe hit a wiki.gg rate-limit/interstitial page.
+- `Special:Statistics`, `Special:AllPages`, and normal article pages responded to lightweight HEAD probes, but Special pages remain unsuitable as a bulk ingestion path.
+
 ## Remaining Work Toward The Full Goal
 
-- Confirm permission or an approved access path for wiki.gg full API/database ingestion, then build the canonical source database.
+- Confirm permission or obtain an approved wiki.gg XML dump/API access path, then build the canonical source database.
 - Expand Klei update verification when the Klei forums endpoint is reachable or an RSS/API endpoint is confirmed.
 - Improve cross-source mapping beyond title slug matching using spawn code, prefab code, image hash, infobox type, and category confidence.
 - Normalize remaining relationships such as upgrades, skins, cooked/raw form labels, and cleaner target-entity resolution into dedicated relation tables.
