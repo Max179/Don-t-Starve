@@ -114,6 +114,22 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, source_id, image_name, role, variant_key)
         );
 
+        create table if not exists page_images (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            raw_page_id integer not null references raw_pages(id) on delete cascade,
+            image_title text not null,
+            image_name text not null,
+            image_slug text not null,
+            role text not null default 'page_reference',
+            description_url text,
+            local_path text,
+            unique (entity_id, source_id, raw_page_id, image_slug, role)
+        );
+
+        create index if not exists idx_page_images_entity on page_images(entity_id);
+
         create table if not exists entity_relations (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
 from dst_wiki_db.facts import rebuild_entity_facts
 from dst_wiki_db.categories import rebuild_entity_categories
 from dst_wiki_db.identity import rebuild_identity_keys
+from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.targets import rebuild_entity_targets
 from dst_wiki_db.variants import rebuild_entity_variants
@@ -31,6 +32,7 @@ def main(argv=None):
     fact_count = rebuild_entity_facts(conn)
     variant_count = rebuild_entity_variants(conn)
     category_count = rebuild_entity_categories(conn)
+    page_image_count = rebuild_page_images(conn)
     identity_count = rebuild_identity_keys(conn)
     target_counts = rebuild_entity_targets(conn)
     payload = {
@@ -41,6 +43,7 @@ def main(argv=None):
         "entity_relation_targets": target_counts["entity_relation_targets"],
         "entity_variants": variant_count,
         "entity_categories": category_count,
+        "page_images": page_image_count,
         "entity_identity_keys": identity_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

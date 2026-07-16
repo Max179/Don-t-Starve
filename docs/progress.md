@@ -27,6 +27,8 @@ Coverage:
 - Parsed attributes: 22,921
 - Registered infobox images: 1,874
 - Registered images with fetched URL metadata: 1,785
+- Page-level image references: 44,437
+- Entities with page-level image references: 275
 - Wiki-link relations: 58,997
 - Resolved wiki-link targets: 43,734
 - Source-presence verification checks: 2,252
@@ -190,6 +192,18 @@ Examples verified in the current database:
 - `Alchemy Engine`: Craftable Structures, Science, Structures, Prototypers, Science Tier 1
 - `Carrot`: Food, Items, Mob Dropped Items, Plants, Vegetables
 - `Cave Spider`: Cave Creatures, Hostile Creatures, Mobs, Monsters, Spiders
+
+## Derived Page Image Index
+
+The database now includes a `page_images` table derived from each raw MediaWiki page's `images_json`. This table is separate from `entity_images`: `entity_images` keeps infobox image roles and fetched image metadata, while `page_images` records broader page-level file references from article content, galleries, navboxes, and transcluded templates.
+
+This pass generated 44,437 page-level image references across 275 entities.
+
+Examples verified in the current database:
+
+- `Alchemy Engine`: `Alchemy Engine.png`, `Alchemy Engine Build.png`, `Alchemy Engine Burnt.png`, and related crafting/gallery references
+- `Ancient Guardian`: `Ancient Guardian.png`, `Ancient Guardian Phase 2.png`, and related figure/art references
+- File-page URLs are stored as source-specific `description_url` values, for example `https://dontstarve.fandom.com/wiki/File:Alchemy_Engine.png`
 
 ## Cross-Source Identity Keys
 

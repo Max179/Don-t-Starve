@@ -79,6 +79,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "entity_sources",
         "entity_attributes",
         "entity_images",
+        "page_images",
         "entity_relations",
         "verification_checks",
         "run_metadata",
