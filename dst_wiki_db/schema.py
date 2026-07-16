@@ -96,6 +96,26 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, raw_page_id, template_index, template_name, raw_name, variant_key)
         );
 
+        create table if not exists entity_stats (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            raw_page_id integer not null references raw_pages(id) on delete cascade,
+            attribute_id integer not null references entity_attributes(id) on delete cascade,
+            template_index integer not null default 0,
+            stat_name text not null,
+            stat_type text not null,
+            raw_name text not null,
+            value_text text not null,
+            value_number real,
+            unit text not null,
+            variant_key text not null default '',
+            unique (attribute_id, stat_name)
+        );
+
+        create index if not exists idx_entity_stats_entity on entity_stats(entity_id);
+        create index if not exists idx_entity_stats_name on entity_stats(stat_name);
+
         create table if not exists entity_images (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

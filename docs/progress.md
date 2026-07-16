@@ -25,6 +25,7 @@ Coverage:
 - Entities: 2,252
 - Source mappings: 2,252
 - Parsed attributes: 22,921
+- Normalized stat rows: 6,866
 - Registered infobox images: 1,874
 - Registered images with fetched URL metadata: 1,785
 - Page-level image references: 44,437
@@ -107,6 +108,39 @@ This pass generated 1,954 structured ingredient rows and 1,816 exact ingredient-
 - `Alchemy Engine`: Boards x4, Cut Stone x2, Gold Nugget x6
 - `Anchor`: Boards x2, Rope x3, Cut Stone x3
 - `Alarming Clock`: Time Pieces x3, Marble x4, Nightmare Fuel x8
+
+## Derived Stats Table
+
+The database now includes an `entity_stats` table derived from parsed infobox attributes. It keeps raw text and source provenance, normalizes stat names, groups rows by stat type, assigns units, and preserves variant keys such as DS/DST or numbered food forms.
+
+This pass generated 6,866 normalized stat rows:
+
+- `item`: 3,203
+- `combat`: 1,245
+- `survival`: 1,216
+- `food`: 651
+- `movement`: 453
+- `stat`: 98
+
+Top normalized stat names include:
+
+- `stack`: 1,145
+- `tier`: 716
+- `health`: 615
+- `damage`: 384
+- `spoil`: 377
+- `durability`: 371
+- `walk_speed`: 252
+- `attack_period`: 214
+- `run_speed`: 201
+- `attack_range`: 176
+
+Examples verified in the current database:
+
+- `Ancient Guardian`: health 2,500, DST health 10,000, damage 100, attack range 25, attack period 2 seconds, run speed 17, walk speed 5
+- `Bee`: health 100, damage 10, attack range 0.6, attack periods 2 and 3 seconds, walk speed 4, run speed 6
+- `Carrot`: food health/hunger/sanity/spoil stats keep raw/cooked variant keys; food value now parses `32px|link=Vegetables × 1` as 1.0 instead of the icon size
+- `Berries`: food value now parses `32px|link=Fruit × 0.5` as 0.5
 
 ## Derived Relation Facts
 

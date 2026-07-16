@@ -14,6 +14,7 @@ from dst_wiki_db.image_variants import rebuild_image_variants
 from dst_wiki_db.identity import rebuild_identity_keys
 from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
+from dst_wiki_db.stats import rebuild_entity_stats
 from dst_wiki_db.targets import rebuild_entity_targets
 from dst_wiki_db.variants import rebuild_entity_variants
 from dst_wiki_db.schema import connect, init_db
@@ -30,6 +31,7 @@ def main(argv=None):
     conn = connect(args.db)
     init_db(conn)
     recipe_count = rebuild_recipe_ingredients(conn)
+    stat_count = rebuild_entity_stats(conn)
     fact_count = rebuild_entity_facts(conn)
     variant_count = rebuild_entity_variants(conn)
     category_count = rebuild_entity_categories(conn)
@@ -40,6 +42,7 @@ def main(argv=None):
     payload = {
         "recipe_ingredients": recipe_count,
         "recipe_ingredient_targets": target_counts["recipe_ingredient_targets"],
+        "entity_stats": stat_count,
         "entity_facts": fact_count,
         "entity_fact_targets": target_counts["entity_fact_targets"],
         "entity_relation_targets": target_counts["entity_relation_targets"],
