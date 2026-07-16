@@ -23,6 +23,8 @@ COUNT_TABLES = [
     "official_product_media",
     "official_update_events",
     "official_update_media",
+    "official_update_sections",
+    "official_update_section_items",
     "source_audits",
     "recipe_ingredients",
     "recipe_ingredient_targets",

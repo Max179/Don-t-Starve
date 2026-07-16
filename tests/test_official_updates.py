@@ -206,6 +206,10 @@ def test_rebuild_official_update_events_stops_steam_clan_images_at_extension(tmp
         media_url
         == "https://clan.cloudflare.steamstatic.com/images/6835324/ab86c0465b1ab14494e7f5f5baa18059fc74d611.png"
     )
+    content_text = conn.execute(
+        "select content_text from official_update_events"
+    ).fetchone()[0]
+    assert content_text == "The"
 
 
 def test_rebuild_official_update_events_ignores_failed_and_non_news_records(tmp_path):

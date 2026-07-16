@@ -13,6 +13,10 @@ STEAM_CLAN_IMAGE_RE = re.compile(
     r"(?P<filename>[A-Za-z0-9._-]+?\.(?:png|jpe?g|gif|webp|avif))",
     re.IGNORECASE,
 )
+STEAM_CLAN_PLACEHOLDER_RE = re.compile(
+    r"\{STEAM_CLAN_IMAGE\}/\d+/[^\s<]+",
+    re.IGNORECASE,
+)
 
 
 def rebuild_official_update_events(conn: sqlite3.Connection) -> dict[str, int]:
@@ -213,7 +217,8 @@ def _iso_timestamp(value: int | None) -> str | None:
 
 def _plain_text(contents: str) -> str:
     parser = _TextParser()
-    parser.feed(STEAM_CLAN_IMAGE_RE.sub(" ", contents))
+    without_valid_images = STEAM_CLAN_IMAGE_RE.sub(" ", contents)
+    parser.feed(STEAM_CLAN_PLACEHOLDER_RE.sub(" ", without_valid_images))
     return " ".join(" ".join(parser.parts).split())
 
 

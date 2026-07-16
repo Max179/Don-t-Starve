@@ -343,6 +343,45 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_official_update_media_external
             on official_update_media(provider, external_id);
 
+        create table if not exists official_update_sections (
+            id integer primary key,
+            official_update_event_id integer not null references official_update_events(id) on delete cascade,
+            official_record_id integer not null references official_records(id) on delete cascade,
+            provider text not null,
+            external_id text not null,
+            section_index integer not null,
+            heading_text text not null,
+            section_type text not null,
+            body_text text not null,
+            item_count integer not null default 0,
+            unique (official_update_event_id, section_index)
+        );
+
+        create index if not exists idx_official_update_sections_event
+            on official_update_sections(official_update_event_id);
+        create index if not exists idx_official_update_sections_type
+            on official_update_sections(section_type);
+
+        create table if not exists official_update_section_items (
+            id integer primary key,
+            official_update_section_id integer not null references official_update_sections(id) on delete cascade,
+            official_update_event_id integer not null references official_update_events(id) on delete cascade,
+            official_record_id integer not null references official_records(id) on delete cascade,
+            provider text not null,
+            external_id text not null,
+            section_index integer not null,
+            section_type text not null,
+            item_index integer not null,
+            item_text text not null,
+            character_length integer not null,
+            unique (official_update_section_id, item_index)
+        );
+
+        create index if not exists idx_official_update_section_items_section
+            on official_update_section_items(official_update_section_id);
+        create index if not exists idx_official_update_section_items_event
+            on official_update_section_items(official_update_event_id);
+
         create table if not exists source_audits (
             id integer primary key,
             source_id integer references sources(id) on delete set null,

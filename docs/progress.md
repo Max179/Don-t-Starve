@@ -40,6 +40,8 @@ Coverage:
 - Normalized official product records: 55
 - Official product media URLs: 223
 - Normalized official update events: 50
+- Normalized official update sections: 80
+- Official update section items: 397
 - Official update media URLs: 5
 - Official-record entity mentions: 678
 - Structured recipe ingredients: 1,954
@@ -135,6 +137,23 @@ Steam news records are also normalized into `official_update_events` and `offici
 - `Midsummer Cawnival is Back!`: `event`, published `2026-06-25T18:37:41Z`, 3 mentioned entities.
 - `Don't Starve Together: From Beyond - Cursed Confrontation Pt. 1 & Klei Fest 2026`: `event`, 8 mentioned entities.
 - `Don't Starve Together peaks at 122k players`: `milestone`, source author `SteamDB`.
+
+Official update text is also split into 80 ordered section rows and 397 searchable item rows. Section distribution:
+
+- `body`: 23 sections, 122 items
+- `bug_fixes`: 18 sections, 129 items
+- `changes`: 13 sections, 37 items
+- `introduction`: 13 sections, 60 items
+- `highlights`: 8 sections, 27 items
+- `adjustments`: 2 sections, 6 items
+- `login_rewards`: 1 section, 8 items
+- `other_additions`: 2 sections, 8 items
+
+Examples verified in the current database:
+
+- `Hotfix 712852`: glued source headings are separated into `Changes` and `Bug Fixes`, yielding 1 change item and 8 bug-fix items.
+- `Hotfix 740256`: 5 `Changes` items and 10 `Bug Fixes` items.
+- `Don't Starve Together: From Beyond - Cursed Confrontation Pt. 1 & Klei Fest 2026`: ordered `Introduction`, `Highlights`, `Other Additions`, and `Changes` sections.
 
 The Steam clan image extractor only stores URLs ending in known image extensions, avoiding truncated or text-contaminated URLs such as placeholders ending in `...` or `pngThe`.
 

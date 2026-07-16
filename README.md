@@ -2,7 +2,7 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
-Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 6,866 normalized stat rows, 6,844 parsed stat value rows, 1,874 registered infobox images, 44,437 page-level image references, 419 image-variant candidates, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 161 official Steam/Klei verification records, 55 normalized official product records, 223 official product media URLs, 50 normalized official update events, 5 official update media URLs, 678 official-record entity mentions, and 9 source-access audit records. The official layer includes appdetails for all 53 Steam-listed DLC ids, with official header, capsule, and description image URLs. See [docs/progress.md](docs/progress.md).
+Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 6,866 normalized stat rows, 6,844 parsed stat value rows, 1,874 registered infobox images, 44,437 page-level image references, 419 image-variant candidates, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 161 official Steam/Klei verification records, 55 normalized official product records, 223 official product media URLs, 50 normalized official update events, 80 normalized official update sections, 397 official update section items, 5 official update media URLs, 678 official-record entity mentions, and 9 source-access audit records. The official layer includes appdetails for all 53 Steam-listed DLC ids, with official header, capsule, and description image URLs. See [docs/progress.md](docs/progress.md).
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
@@ -23,6 +23,8 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `official_products`: queryable Steam product facts derived from official appdetails records.
 - `official_product_media`: official product image URLs from Steam media fields and product descriptions.
 - `official_update_events`: queryable Steam news/update events with dates, authors, event type, text, and mention counts.
+- `official_update_sections`: ordered headings and bodies parsed from official update event text.
+- `official_update_section_items`: sentence-like patch-note items linked to their event and section.
 - `official_update_media`: official update image URLs extracted from Steam news content.
 - `official_record_mentions`: high-confidence links from official Steam/Klei records back to matching wiki entities.
 - `source_audits`: robots, API, and official-source availability checks.
