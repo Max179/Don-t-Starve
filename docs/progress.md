@@ -589,6 +589,21 @@ Each profile aggregates:
 - media: unified infobox/page media assets with primary flags, URLs, dimensions, local paths, and variant metadata
 - stats: normalized stat rows with raw field names, numeric values when available, units, and variant keys
 - variants: merged variant evidence from data, recipes, facts, explicit variants, and media
-- categories, facts, recipe ingredients, and official Steam/Klei mentions
+- categories, facts, recipe ingredients, typed gameplay relationships, and official Steam/Klei mentions
 
-The table also stores queryable top-level counts such as `media_count`, `stat_count`, `variant_count`, `category_count`, `fact_count`, `recipe_ingredient_count`, and `official_mention_count` so applications can build lists without parsing JSON.
+The table also stores queryable top-level counts such as `media_count`, `stat_count`, `variant_count`, `category_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, and `official_mention_count` so applications can build lists without parsing JSON.
+
+## Typed Gameplay Relationship Edges
+
+The database now includes an `entity_gameplay_edges` table that turns resolved recipe and fact targets into typed forward and inverse relationships. This pass generated 4,502 gameplay edges:
+
+- `uses_ingredient`: 1,816
+- `ingredient_for`: 1,816
+- `drops`: 359
+- `dropped_by`: 359
+- `spawns`: 74
+- `spawned_from`: 74
+- `sold_by`: 2
+- `sells`: 2
+
+These edges are derived only from resolved target tables, so each row points from one known entity id to another known entity id and keeps source evidence such as source table, source row id, quantity, probability, variant key, and confidence. The `entity_profile_json` profiles now include a `relationships` array and `relationship_count`; 943 entity profiles currently have at least one typed gameplay relationship.

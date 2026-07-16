@@ -33,6 +33,7 @@ COUNT_TABLES = [
     "recipe_ingredient_targets",
     "entity_facts",
     "entity_fact_targets",
+    "entity_gameplay_edges",
     "entity_variants",
     "entity_variant_summary",
     "entity_categories",

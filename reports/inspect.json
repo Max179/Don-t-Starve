@@ -28,6 +28,7 @@
     "recipe_ingredient_targets": 1816,
     "entity_facts": 1246,
     "entity_fact_targets": 435,
+    "entity_gameplay_edges": 4502,
     "entity_variants": 1282,
     "entity_variant_summary": 2982,
     "entity_categories": 12973,

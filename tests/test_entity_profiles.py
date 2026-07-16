@@ -24,6 +24,15 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         canonical_url="https://example.test/Berry_Bush",
         summary="A harvestable bush.",
     )
+    berries_id = upsert_entity(
+        conn,
+        canonical_title="Berries",
+        kind="item",
+        primary_source_id=source_id,
+        primary_page_id=2,
+        canonical_url="https://example.test/Berries",
+        summary="",
+    )
     conn.execute(
         """
         insert into raw_pages (
@@ -170,17 +179,35 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (official_record_id, entity_id),
     )
+    conn.execute(
+        """
+        insert into entity_gameplay_edges (
+            entity_id, related_entity_id, source_id, source_table,
+            source_row_id, edge_type, edge_group, direction, entity_title,
+            entity_slug, entity_kind, related_title, related_slug,
+            related_kind, quantity_text, quantity_number, probability_text,
+            variant_key, confidence
+        )
+        values (?, ?, ?, 'entity_facts', 1, 'drops', 'fact', 'forward',
+                'Berry Bush', 'berry-bush', 'plant', 'Berries', 'berries',
+                'item', '1', 1, null, '', 0.9)
+        """,
+        (entity_id, berries_id, source_id),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
-    assert result == 1
+    assert result == 2
     row = conn.execute(
         """
         select entity_id, slug, canonical_title, kind, media_count,
                stat_count, variant_count, category_count, fact_count,
-               recipe_ingredient_count, official_mention_count, profile_json
+               recipe_ingredient_count, official_mention_count,
+               relationship_count, profile_json
         from entity_profile_json
-        """
+        where entity_id = ?
+        """,
+        (entity_id,),
     ).fetchone()
     profile = json.loads(row["profile_json"])
     assert dict(row) | {"profile_json": profile} == {
@@ -195,6 +222,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "fact_count": 1,
         "recipe_ingredient_count": 1,
         "official_mention_count": 1,
+        "relationship_count": 1,
         "profile_json": profile,
     }
     assert profile["identity"] == {
@@ -214,6 +242,8 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["facts"][0]["fact_type"] == "drops"
     assert profile["recipes"][0]["ingredient_name"] == "Berries"
     assert profile["official_mentions"][0]["title"] == "Berry Bush update"
+    assert profile["relationships"][0]["edge_type"] == "drops"
+    assert profile["relationships"][0]["related_title"] == "Berries"
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):

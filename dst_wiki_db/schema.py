@@ -573,6 +573,37 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_fact_id, target_entity_id, match_method)
         );
 
+        create table if not exists entity_gameplay_edges (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            related_entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            source_table text not null,
+            source_row_id integer not null,
+            edge_type text not null,
+            edge_group text not null,
+            direction text not null,
+            entity_title text not null,
+            entity_slug text not null,
+            entity_kind text not null,
+            related_title text not null,
+            related_slug text not null,
+            related_kind text not null,
+            quantity_text text,
+            quantity_number real,
+            probability_text text,
+            variant_key text not null default '',
+            confidence real not null default 0.9,
+            unique (entity_id, related_entity_id, edge_type, source_table, source_row_id, direction)
+        );
+
+        create index if not exists idx_entity_gameplay_edges_entity
+            on entity_gameplay_edges(entity_id);
+        create index if not exists idx_entity_gameplay_edges_related
+            on entity_gameplay_edges(related_entity_id);
+        create index if not exists idx_entity_gameplay_edges_type
+            on entity_gameplay_edges(edge_type);
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,
@@ -631,6 +662,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             fact_count integer not null default 0,
             recipe_ingredient_count integer not null default 0,
             official_mention_count integer not null default 0,
+            relationship_count integer not null default 0,
             profile_json text not null,
             updated_at text not null default current_timestamp
         );
@@ -680,6 +712,26 @@ def init_db(conn: sqlite3.Connection) -> None:
         );
         """
     )
+    _migrate_schema(conn)
+
+
+def _migrate_schema(conn: sqlite3.Connection) -> None:
+    _add_column_if_missing(
+        conn,
+        table="entity_profile_json",
+        column="relationship_count",
+        definition="integer not null default 0",
+    )
+
+
+def _add_column_if_missing(
+    conn: sqlite3.Connection, *, table: str, column: str, definition: str
+) -> None:
+    columns = set()
+    for row in conn.execute(f"pragma table_info({table})").fetchall():
+        columns.add(str(row["name"] if hasattr(row, "keys") else row[1]))
+    if column not in columns:
+        conn.execute(f"alter table {table} add column {column} {definition}")
 
 
 def upsert_source(

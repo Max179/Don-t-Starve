@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
 from dst_wiki_db.facts import rebuild_entity_facts
 from dst_wiki_db.categories import rebuild_entity_categories
 from dst_wiki_db.entity_coverage import rebuild_entity_coverage
+from dst_wiki_db.gameplay_edges import rebuild_entity_gameplay_edges
 from dst_wiki_db.image_variants import rebuild_image_variants
 from dst_wiki_db.identity import rebuild_identity_keys
 from dst_wiki_db.media_assets import rebuild_entity_media_assets
@@ -55,6 +56,7 @@ def main(argv=None):
     source_catalog_counts = rebuild_source_catalog(conn)
     identity_count = rebuild_identity_keys(conn)
     target_counts = rebuild_entity_targets(conn)
+    gameplay_edge_count = rebuild_entity_gameplay_edges(conn)
     variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
     profile_count = rebuild_entity_profile_json(conn)
@@ -66,6 +68,7 @@ def main(argv=None):
         "entity_facts": fact_count,
         "entity_fact_targets": target_counts["entity_fact_targets"],
         "entity_relation_targets": target_counts["entity_relation_targets"],
+        "entity_gameplay_edges": gameplay_edge_count,
         "entity_variants": variant_count,
         "entity_categories": category_count,
         "page_images": page_image_count,

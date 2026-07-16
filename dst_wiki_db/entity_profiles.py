@@ -32,9 +32,9 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 entity_id, slug, canonical_title, kind, coverage_score,
                 media_count, stat_count, variant_count, category_count,
                 fact_count, recipe_ingredient_count, official_mention_count,
-                profile_json, updated_at
+                relationship_count, profile_json, updated_at
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
             """,
             (
                 entity_id,
@@ -49,6 +49,7 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 counts["facts"],
                 counts["recipes"],
                 counts["official_mentions"],
+                counts["relationships"],
                 json.dumps(profile, ensure_ascii=False, sort_keys=True),
             ),
         )
@@ -66,6 +67,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     facts = _facts(conn, entity_id)
     recipes = _recipes(conn, entity_id)
     official_mentions = _official_mentions(conn, entity_id)
+    relationships = _relationships(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -84,6 +86,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
             "facts": len(facts),
             "recipes": len(recipes),
             "official_mentions": len(official_mentions),
+            "relationships": len(relationships),
         },
         "media": media,
         "stats": stats,
@@ -92,6 +95,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "facts": facts,
         "recipes": recipes,
         "official_mentions": official_mentions,
+        "relationships": relationships,
     }
 
 
@@ -428,6 +432,51 @@ def _official_mentions(
             "match_method": str(row["match_method"]),
             "confidence": _optional_float(row["confidence"]),
             "context_text": str(row["context_text"]),
+        }
+        for row in rows
+    ]
+
+
+def _relationships(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """
+        select
+            related_entity_id,
+            related_title,
+            related_slug,
+            related_kind,
+            edge_type,
+            edge_group,
+            direction,
+            source_table,
+            source_row_id,
+            quantity_text,
+            quantity_number,
+            probability_text,
+            variant_key,
+            confidence
+        from entity_gameplay_edges
+        where entity_id = ?
+        order by edge_group, edge_type, related_title, id
+        """,
+        (entity_id,),
+    ).fetchall()
+    return [
+        {
+            "related_entity_id": int(row["related_entity_id"]),
+            "related_title": str(row["related_title"]),
+            "related_slug": str(row["related_slug"]),
+            "related_kind": str(row["related_kind"]),
+            "edge_type": str(row["edge_type"]),
+            "edge_group": str(row["edge_group"]),
+            "direction": str(row["direction"]),
+            "source_table": str(row["source_table"]),
+            "source_row_id": int(row["source_row_id"]),
+            "quantity_text": row["quantity_text"],
+            "quantity_number": _optional_float(row["quantity_number"]),
+            "probability_text": row["probability_text"],
+            "variant_key": str(row["variant_key"] or ""),
+            "confidence": _optional_float(row["confidence"]),
         }
         for row in rows
     ]
