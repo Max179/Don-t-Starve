@@ -13,6 +13,7 @@ from dst_wiki_db.categories import rebuild_entity_categories
 from dst_wiki_db.entity_coverage import rebuild_entity_coverage
 from dst_wiki_db.image_variants import rebuild_image_variants
 from dst_wiki_db.identity import rebuild_identity_keys
+from dst_wiki_db.media_assets import rebuild_entity_media_assets
 from dst_wiki_db.official_mentions import rebuild_official_record_mentions
 from dst_wiki_db.official_products import rebuild_official_products
 from dst_wiki_db.official_updates import rebuild_official_update_events
@@ -44,6 +45,7 @@ def main(argv=None):
     category_count = rebuild_entity_categories(conn)
     page_image_count = rebuild_page_images(conn)
     image_variant_count = rebuild_image_variants(conn)
+    media_asset_count = rebuild_entity_media_assets(conn)
     official_mention_count = rebuild_official_record_mentions(conn)
     official_product_counts = rebuild_official_products(conn)
     official_update_counts = rebuild_official_update_events(conn)
@@ -64,6 +66,7 @@ def main(argv=None):
         "entity_categories": category_count,
         "page_images": page_image_count,
         "image_variants": image_variant_count,
+        "entity_media_assets": media_asset_count,
         "official_record_mentions": official_mention_count,
         "official_products": official_product_counts["official_products"],
         "official_product_media": official_product_counts["official_product_media"],

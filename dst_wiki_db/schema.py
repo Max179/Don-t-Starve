@@ -190,6 +190,38 @@ def init_db(conn: sqlite3.Connection) -> None:
 
         create index if not exists idx_image_variants_entity on image_variants(entity_id);
 
+        create table if not exists entity_media_assets (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            raw_page_id integer references raw_pages(id) on delete set null,
+            asset_source text not null,
+            entity_image_id integer references entity_images(id) on delete cascade,
+            page_image_id integer references page_images(id) on delete cascade,
+            image_name text not null,
+            image_slug text not null,
+            role text not null,
+            original_url text,
+            description_url text,
+            local_path text,
+            width integer,
+            height integer,
+            mime text,
+            sha1 text,
+            variant_key text not null default '',
+            variant_type text not null default '',
+            variant_label text not null default '',
+            is_variant integer not null default 0,
+            is_primary integer not null default 0,
+            confidence real not null default 1.0,
+            unique (entity_id, asset_source, image_slug, role, entity_image_id, page_image_id)
+        );
+
+        create index if not exists idx_entity_media_assets_entity
+            on entity_media_assets(entity_id);
+        create index if not exists idx_entity_media_assets_variant
+            on entity_media_assets(is_variant, variant_type);
+
         create table if not exists entity_relations (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

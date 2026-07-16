@@ -31,6 +31,7 @@ Coverage:
 - Registered infobox images: 1,874
 - Registered images with fetched URL metadata: 1,785
 - Page-level image references: 44,437
+- Unified entity media assets: 46,311
 - Entities with page-level image references: 275
 - Image-variant candidates: 419
 - Wiki-link relations: 58,997
@@ -413,6 +414,37 @@ Examples verified in the current database:
 - `Carrot`: `Carrot Plant Seed/Small/Med/Full/Sprout.png` as `growth_stage`, oversized plant images as `oversized_form`
 - `Corn`: `Corn Stalk Seed/Small/Med/Full/Sprout.png` as `growth_stage`, oversized stalk images as `oversized_form`
 - `Bee Box.png` is not counted as a Bee image variant because `Bee Box` is its own entity
+
+## Unified Entity Media Assets
+
+The database now includes an `entity_media_assets` table derived from `entity_images`, `page_images`, and `image_variants`. It provides one query surface for infobox images, page-reference images, primary image flags, file-page URLs, source URLs, local paths, and image variant metadata.
+
+This pass generated 46,311 media asset rows:
+
+- `infobox`: 1,874
+- `page_reference`: 44,437
+- Primary asset rows: 1,663
+- Variant asset rows: 629
+
+Variant media asset distribution:
+
+- `visual_variant`: 339
+- `infobox_variant`: 133
+- `game_scope`: 77
+- `animation`: 26
+- `build_state`: 23
+- `growth_stage`: 12
+- `map_icon`: 5
+- `state`: 5
+- `oversized_form`: 4
+- `reference_asset`: 4
+- `phase`: 1
+
+Examples verified in the current database:
+
+- `Alchemy Engine`: page-reference media assets for `Build`, `Burnt`, and animation images.
+- `Ancient Guardian`: `Phase 2` page-reference media asset.
+- `Axe`: `Dropped` state and `Wall Decoration` visual-variant media assets.
 
 ## Cross-Source Identity Keys
 
