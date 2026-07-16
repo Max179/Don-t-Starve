@@ -131,3 +131,75 @@ def test_rebuild_entity_targets_creates_fact_target_bridge(tmp_path):
         "target_slug",
         0.9,
     )
+
+
+def test_rebuild_entity_targets_creates_recipe_ingredient_bridge(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    source_id = upsert_source(
+        conn,
+        key="fandom",
+        name="Don't Starve Wiki on Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+    alchemy_engine_id = upsert_entity(
+        conn,
+        canonical_title="Alchemy Engine",
+        kind="structure",
+        primary_source_id=source_id,
+        primary_page_id=1,
+        canonical_url="https://dontstarve.fandom.com/wiki/Alchemy_Engine",
+        summary="A station.",
+    )
+    boards_id = upsert_entity(
+        conn,
+        canonical_title="Boards",
+        kind="item",
+        primary_source_id=source_id,
+        primary_page_id=2,
+        canonical_url="https://dontstarve.fandom.com/wiki/Boards",
+        summary="Crafting material.",
+    )
+    conn.execute(
+        """
+        insert into raw_pages (
+            source_id, pageid, ns, title, revid, canonical_url, wikitext, fetched_at
+        )
+        values (?, 1, 0, 'Alchemy Engine', 10, 'https://dontstarve.fandom.com/wiki/Alchemy_Engine', 'body', 'now')
+        """,
+        (source_id,),
+    )
+    raw_page_id = conn.execute("select id from raw_pages where pageid=1").fetchone()["id"]
+    conn.execute(
+        """
+        insert into recipe_ingredients (
+            entity_id, source_id, raw_page_id, ingredient_slot,
+            ingredient_name, ingredient_slug, quantity_text, quantity_number
+        )
+        values (?, ?, ?, 1, 'Boards', 'boards', '4', 4)
+        """,
+        (alchemy_engine_id, source_id, raw_page_id),
+    )
+    recipe_ingredient_id = conn.execute("select id from recipe_ingredients").fetchone()["id"]
+
+    result = rebuild_entity_targets(conn)
+
+    assert result["recipe_ingredient_targets"] == 1
+    row = conn.execute(
+        """
+        select
+            recipe_ingredient_id, entity_id, ingredient_entity_id,
+            ingredient_name, match_method, confidence
+        from recipe_ingredient_targets
+        """
+    ).fetchone()
+    assert tuple(row) == (
+        recipe_ingredient_id,
+        alchemy_engine_id,
+        boards_id,
+        "Boards",
+        "ingredient_slug",
+        0.9,
+    )

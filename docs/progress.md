@@ -32,6 +32,7 @@ Coverage:
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 108
 - Structured recipe ingredients: 1,954
+- Resolved recipe ingredient targets: 1,816
 - Structured drop/source/sold/spawn facts: 1,246
 - Resolved drop/source/sold/spawn fact targets: 435
 - Variant records: 1,282
@@ -98,7 +99,7 @@ python3 scripts/rebuild_derived_tables.py \
   --report reports/derived_tables.json
 ```
 
-This pass generated 1,954 structured ingredient rows. Examples verified in the current database:
+This pass generated 1,954 structured ingredient rows and 1,816 exact ingredient-to-entity target bridges. Examples verified in the current database:
 
 - `Alchemy Engine`: Boards x4, Cut Stone x2, Gold Nugget x6
 - `Anchor`: Boards x2, Rope x3, Cut Stone x3
@@ -134,10 +135,13 @@ The table preserves the original value text and extracts targets, percentages, a
 The database now resolves parsed targets back to entity IDs where the normalized target title matches an existing entry:
 
 - `entity_relations.target_entity_id`: 43,734 wiki-link relation rows now point at target entities.
+- `recipe_ingredient_targets`: 1,816 recipe ingredient rows now point at ingredient entities.
 - `entity_fact_targets`: 435 parsed drops, dropped-by, sold-by, spawn-from, and spawns rows now have target entity bridges.
 
 Examples verified in the current database:
 
+- `'The Sty' Oddities Emporium` recipe ingredient -> `Boards`, `Ball Pein Hammer`, and `Pig Skin`
+- `Abigail's Flower` recipe ingredient -> `Mourning Glory` and `Nightmare Fuel`
 - `Abigail's Flower` `dropped_by` -> `Abigail`
 - `Ancient Key` `dropped_by` -> `Mumsy` and `Coin`
 - `Beard Hair` `dropped_by` -> `Wilson`

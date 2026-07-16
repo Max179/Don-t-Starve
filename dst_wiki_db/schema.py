@@ -184,6 +184,19 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, raw_page_id, template_index, ingredient_slot, variant_key)
         );
 
+        create table if not exists recipe_ingredient_targets (
+            id integer primary key,
+            recipe_ingredient_id integer not null references recipe_ingredients(id) on delete cascade,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            ingredient_entity_id integer not null references entities(id) on delete cascade,
+            ingredient_name text not null,
+            ingredient_slug text not null,
+            match_method text not null,
+            confidence real not null default 1.0,
+            unique (recipe_ingredient_id, ingredient_entity_id, match_method)
+        );
+
         create table if not exists entity_facts (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

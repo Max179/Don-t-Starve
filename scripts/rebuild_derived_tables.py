@@ -35,6 +35,7 @@ def main(argv=None):
     target_counts = rebuild_entity_targets(conn)
     payload = {
         "recipe_ingredients": recipe_count,
+        "recipe_ingredient_targets": target_counts["recipe_ingredient_targets"],
         "entity_facts": fact_count,
         "entity_fact_targets": target_counts["entity_fact_targets"],
         "entity_relation_targets": target_counts["entity_relation_targets"],

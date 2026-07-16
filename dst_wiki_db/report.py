@@ -16,6 +16,7 @@ COUNT_TABLES = [
     "official_records",
     "source_audits",
     "recipe_ingredients",
+    "recipe_ingredient_targets",
     "entity_facts",
     "entity_fact_targets",
     "entity_variants",
