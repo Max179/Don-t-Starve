@@ -229,6 +229,27 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (provider, record_type, external_id)
         );
 
+        create table if not exists official_record_mentions (
+            id integer primary key,
+            official_record_id integer not null references official_records(id) on delete cascade,
+            entity_id integer not null references entities(id) on delete cascade,
+            provider text not null,
+            record_type text not null,
+            external_id text not null,
+            entity_title text not null,
+            mention_text text not null,
+            match_field text not null,
+            match_method text not null,
+            confidence real not null default 0.5,
+            context_text text not null,
+            unique (official_record_id, entity_id, match_field, mention_text)
+        );
+
+        create index if not exists idx_official_record_mentions_entity
+            on official_record_mentions(entity_id);
+        create index if not exists idx_official_record_mentions_record
+            on official_record_mentions(official_record_id);
+
         create table if not exists source_audits (
             id integer primary key,
             source_id integer references sources(id) on delete set null,

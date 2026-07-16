@@ -36,6 +36,7 @@ Coverage:
 - Resolved wiki-link targets: 43,734
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 108
+- Official-record entity mentions: 292
 - Structured recipe ingredients: 1,954
 - Resolved recipe ingredient targets: 1,816
 - Structured drop/source/sold/spawn facts: 1,246
@@ -87,6 +88,27 @@ Official records currently include:
 - Steam DLC ids: 53 records
 - Steam news/update records: 50 records
 - Klei official page probes: 3 records
+
+The database now also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase matching. This pass generated 292 official-record entity mentions:
+
+- `steam:news`: 176
+- `steam:steam_dlc_id`: 102
+- `steam:appdetails`: 9
+- `klei:http_probe`: 5
+
+Top matched entities include:
+
+- `Don't Starve`: 74
+- `Don't Starve Together`: 55
+- `Klei Entertainment`: 13
+- `WX-78`: 9
+- `The Constant`: 8
+- `Wilson`: 5
+- `Beefalo`: 4
+- `Wheeler`: 4
+- `Wormwood`: 4
+
+The matcher skips generic single-word non-creature entries such as `Time`, `Things`, and `Farm`; those three currently have 0 official mentions after filtering.
 
 Klei page probe statuses:
 
