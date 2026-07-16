@@ -26,6 +26,7 @@ Coverage:
 - Source mappings: 2,252
 - Parsed attributes: 22,921
 - Normalized stat rows: 6,866
+- Parsed stat value rows: 6,844
 - Registered infobox images: 1,874
 - Registered images with fetched URL metadata: 1,785
 - Page-level image references: 44,437
@@ -111,7 +112,7 @@ This pass generated 1,954 structured ingredient rows and 1,816 exact ingredient-
 
 ## Derived Stats Table
 
-The database now includes an `entity_stats` table derived from parsed infobox attributes. It keeps raw text and source provenance, normalizes stat names, groups rows by stat type, assigns units, and preserves variant keys such as DS/DST or numbered food forms.
+The database now includes an `entity_stats` table derived from parsed infobox attributes. It keeps raw text and source provenance, normalizes stat names, groups rows by stat type, assigns units, and preserves variant keys such as DS/DST or numbered food forms. It also includes `entity_stat_values`, a child table that splits multi-value stat text into ordered numeric rows with local context.
 
 This pass generated 6,866 normalized stat rows:
 
@@ -121,6 +122,19 @@ This pass generated 6,866 normalized stat rows:
 - `food`: 651
 - `movement`: 453
 - `stat`: 98
+
+It also generated 6,844 parsed stat value rows. Top value-bearing stat names include:
+
+- `tier`: 702
+- `health`: 646
+- `damage`: 531
+- `stack`: 495
+- `durability`: 426
+- `resources`: 418
+- `sanity_restored`: 376
+- `burn_time`: 357
+- `spoil`: 350
+- `walk_speed`: 280
 
 Top normalized stat names include:
 
@@ -137,7 +151,9 @@ Top normalized stat names include:
 
 Examples verified in the current database:
 
-- `Ancient Guardian`: health 2,500, DST health 10,000, damage 100, attack range 25, attack period 2 seconds, run speed 17, walk speed 5
+- `Ancient Guardian`: health 2,500, DST health 10,000, damage 100, attack ranges 25 and 4.6, attack period 2 seconds, run speed 17, walk speed 5
+- `Antlion`: damage values 50, 75, and 100 to player plus 100, 150, and 200 to mobs are split into ordered child rows
+- `Bearger`: walk speed values 3 (casual) and 6 (aggressive) are split into separate child rows with context
 - `Bee`: health 100, damage 10, attack range 0.6, attack periods 2 and 3 seconds, walk speed 4, run speed 6
 - `Carrot`: food health/hunger/sanity/spoil stats keep raw/cooked variant keys; food value now parses `32px|link=Vegetables × 1` as 1.0 instead of the icon size
 - `Berries`: food value now parses `32px|link=Fruit × 0.5` as 0.5

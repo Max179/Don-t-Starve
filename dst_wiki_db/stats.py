@@ -59,6 +59,7 @@ ITEM_STATS = {
 }
 SURVIVAL_STATS = {"sanityaura", "sanitydrain"}
 FOOD_VALUE_RE = re.compile(r"[×x]\s*([-+]?\d+(?:\.\d+)?)")
+NUMBER_RE = re.compile(r"[-+]?\d+(?:\.\d+)?")
 
 
 def rebuild_entity_stats(conn: sqlite3.Connection) -> int:
@@ -126,6 +127,63 @@ def rebuild_entity_stats(conn: sqlite3.Connection) -> int:
     return count
 
 
+def rebuild_entity_stat_values(conn: sqlite3.Connection) -> int:
+    conn.execute("delete from entity_stat_values")
+    rows = conn.execute(
+        """
+        select
+            id as entity_stat_id,
+            entity_id,
+            source_id,
+            raw_page_id,
+            attribute_id,
+            stat_name,
+            value_text,
+            value_number,
+            unit,
+            variant_key
+        from entity_stats
+        order by entity_id, raw_page_id, entity_stat_id
+        """
+    ).fetchall()
+
+    count = 0
+    for row in rows:
+        values = _stat_value_parts(
+            stat_name=str(row["stat_name"]),
+            value_text=str(row["value_text"]),
+            stored_value=row["value_number"],
+        )
+        for index, (raw_value, value_number, context_text) in enumerate(values):
+            conn.execute(
+                """
+                insert into entity_stat_values (
+                    entity_stat_id, entity_id, source_id, raw_page_id, attribute_id,
+                    stat_name, value_index, raw_value, value_number, context_text,
+                    unit, variant_key
+                )
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    int(row["entity_stat_id"]),
+                    int(row["entity_id"]),
+                    int(row["source_id"]),
+                    int(row["raw_page_id"]),
+                    int(row["attribute_id"]),
+                    str(row["stat_name"]),
+                    index,
+                    raw_value,
+                    value_number,
+                    context_text,
+                    str(row["unit"]),
+                    str(row["variant_key"] or ""),
+                ),
+            )
+            count += 1
+    conn.commit()
+    return count
+
+
 def _base_stat_name(canonical_name: str) -> str:
     if canonical_name in STAT_UNITS:
         return canonical_name
@@ -161,3 +219,42 @@ def _value_number(*, stat_name: str, value_text: str, stored_value) -> float | i
                 return int(number)
             return number
     return stored_value
+
+
+def _stat_value_parts(
+    *, stat_name: str, value_text: str, stored_value
+) -> list[tuple[str, float | int, str]]:
+    if stat_name == "food_value":
+        values = []
+        for match in FOOD_VALUE_RE.finditer(value_text):
+            raw_value = match.group(1)
+            values.append((raw_value, _number(raw_value), _clean_context(match.group(0))))
+        if values:
+            return values
+    matches = [match for match in NUMBER_RE.finditer(value_text) if not _is_wiki_icon_size(value_text, match)]
+    values = []
+    for index, match in enumerate(matches):
+        raw_value = match.group(0)
+        next_start = matches[index + 1].start() if index + 1 < len(matches) else len(value_text)
+        context = _clean_context(value_text[match.start() : next_start])
+        values.append((raw_value, _number(raw_value), context or raw_value))
+    if not values and stored_value is not None:
+        raw_value = str(stored_value)
+        values.append((raw_value, _number(raw_value), raw_value))
+    return values
+
+
+def _number(raw_value: str) -> float | int:
+    number = float(raw_value)
+    if number.is_integer():
+        return int(number)
+    return number
+
+
+def _is_wiki_icon_size(value_text: str, match: re.Match[str]) -> bool:
+    suffix = value_text[match.end() : match.end() + 2].lower()
+    return suffix == "px"
+
+
+def _clean_context(context: str) -> str:
+    return " ".join(context.strip(" ,;\n\t").split())

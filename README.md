@@ -2,7 +2,7 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
-Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 6,866 normalized stat rows, 1,874 registered infobox images, 44,437 page-level image references, 419 image-variant candidates, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 108 official Steam/Klei verification records, and 9 source-access audit records. See [docs/progress.md](docs/progress.md).
+Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 6,866 normalized stat rows, 6,844 parsed stat value rows, 1,874 registered infobox images, 44,437 page-level image references, 419 image-variant candidates, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 108 official Steam/Klei verification records, and 9 source-access audit records. See [docs/progress.md](docs/progress.md).
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
@@ -11,6 +11,7 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `entity_sources`: cross-source page mappings.
 - `entity_attributes`: infobox fields such as health, damage, attack range, speed, spawn code, recipe data, and DS/DST-specific variants.
 - `entity_stats`: normalized query rows for health, damage, attack range, speed, hunger, sanity, durability, stack size, spoil time, and similar numeric or raw stat fields.
+- `entity_stat_values`: per-number stat rows for multi-value fields, keeping order and local context such as player/mob damage or casual/aggressive speed.
 - `entity_images`: infobox image names, roles, variants, URLs, hashes, dimensions, and optional local files.
 - `page_images`: page-level image references from MediaWiki metadata, including gallery, page, and transcluded file references with source file-page URLs.
 - `image_variants`: filename-derived image variant candidates such as build, burnt, phase, animation, crop growth, and oversized crop forms.

@@ -11,6 +11,7 @@ COUNT_TABLES = [
     "entity_sources",
     "entity_attributes",
     "entity_stats",
+    "entity_stat_values",
     "entity_images",
     "page_images",
     "image_variants",
