@@ -39,6 +39,8 @@ Coverage:
 - Steam DLC appdetails records: 53
 - Normalized official product records: 55
 - Official product media URLs: 223
+- Normalized official update events: 50
+- Official update media URLs: 5
 - Official-record entity mentions: 678
 - Structured recipe ingredients: 1,954
 - Resolved recipe ingredient targets: 1,816
@@ -118,6 +120,23 @@ Examples verified in the current database:
 - `Don't Starve Together` (`322330`): official game product row with Steam short description and direct media URLs.
 - `Don't Starve Together: Starter Pack 2026` (`4211520`): parent app `322330`, parent title `Don't Starve Together`, and 8 description images plus header/capsule media.
 - `Don't Starve Soundtrack` (`219750`): product type `music`, parent app `219740`, and soundtrack-specific description images.
+
+Steam news records are also normalized into `official_update_events` and `official_update_media`. This pass generated 50 update/event rows and 5 valid Steam clan image URLs. Event type distribution:
+
+- `announcement`: 18
+- `hotfix`: 14
+- `update`: 11
+- `event`: 6
+- `milestone`: 1
+
+44 of the 50 update rows have at least one linked wiki entity mention through `official_record_mentions`. Examples verified in the current database:
+
+- `Hotfix 740477`: `hotfix`, published `2026-07-06T22:58:25Z`, author `JesseB_Klei`.
+- `Midsummer Cawnival is Back!`: `event`, published `2026-06-25T18:37:41Z`, 3 mentioned entities.
+- `Don't Starve Together: From Beyond - Cursed Confrontation Pt. 1 & Klei Fest 2026`: `event`, 8 mentioned entities.
+- `Don't Starve Together peaks at 122k players`: `milestone`, source author `SteamDB`.
+
+The Steam clan image extractor only stores URLs ending in known image extensions, avoiding truncated or text-contaminated URLs such as placeholders ending in `...` or `pngThe`.
 
 The database also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase matching. With DLC titles and descriptions included, this pass generated 678 official-record entity mentions:
 

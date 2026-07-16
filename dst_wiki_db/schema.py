@@ -296,6 +296,53 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_official_product_media_external
             on official_product_media(provider, external_id);
 
+        create table if not exists official_update_events (
+            id integer primary key,
+            official_record_id integer not null references official_records(id) on delete cascade,
+            provider text not null,
+            record_type text not null,
+            external_id text not null,
+            appid integer,
+            title text not null,
+            url text,
+            author text,
+            published_at_unix integer,
+            published_at_iso text,
+            event_type text not null,
+            summary text,
+            content_text text not null,
+            content_length integer not null default 0,
+            mentioned_entity_count integer not null default 0,
+            unique (official_record_id)
+        );
+
+        create index if not exists idx_official_update_events_appid
+            on official_update_events(provider, appid);
+        create index if not exists idx_official_update_events_published
+            on official_update_events(published_at_unix);
+        create index if not exists idx_official_update_events_type
+            on official_update_events(event_type);
+
+        create table if not exists official_update_media (
+            id integer primary key,
+            official_update_event_id integer not null references official_update_events(id) on delete cascade,
+            official_record_id integer not null references official_records(id) on delete cascade,
+            provider text not null,
+            external_id text not null,
+            media_role text not null,
+            media_index integer not null default 0,
+            media_url text not null,
+            width integer,
+            height integer,
+            source_field text not null,
+            unique (official_record_id, media_role, media_index, media_url)
+        );
+
+        create index if not exists idx_official_update_media_event
+            on official_update_media(official_update_event_id);
+        create index if not exists idx_official_update_media_external
+            on official_update_media(provider, external_id);
+
         create table if not exists source_audits (
             id integer primary key,
             source_id integer references sources(id) on delete set null,

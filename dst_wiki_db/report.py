@@ -21,6 +21,8 @@ COUNT_TABLES = [
     "official_record_mentions",
     "official_products",
     "official_product_media",
+    "official_update_events",
+    "official_update_media",
     "source_audits",
     "recipe_ingredients",
     "recipe_ingredient_targets",

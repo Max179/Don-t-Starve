@@ -88,5 +88,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "official_record_mentions",
         "official_products",
         "official_product_media",
+        "official_update_events",
+        "official_update_media",
         "run_metadata",
     }.issubset(tables)
