@@ -2,7 +2,7 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
-Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 1,874 registered infobox images, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,246 structured drop/source/sold/spawn facts, 108 official Steam/Klei verification records, and 9 source-access audit records. See [docs/progress.md](docs/progress.md).
+Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 22,921 parsed attributes, 1,874 registered infobox images, 43,734 resolved wiki-link targets, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 1,954 structured recipe ingredients, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 108 official Steam/Klei verification records, and 9 source-access audit records. See [docs/progress.md](docs/progress.md).
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
@@ -11,7 +11,8 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `entity_sources`: cross-source page mappings.
 - `entity_attributes`: infobox fields such as health, damage, attack range, speed, spawn code, recipe data, and DS/DST-specific variants.
 - `entity_images`: image names, roles, variants, URLs, hashes, dimensions, and optional local files.
-- `entity_relations`: wiki links and future relationship facts.
+- `entity_relations`: wiki links with resolved `target_entity_id` values when the target exists in `entities`.
+- `entity_fact_targets`: entity bridges for parsed drops, dropped-by, sold-by, spawn-from, and spawns facts.
 - `verification_checks`: source-presence and cross-source verification records.
 - `source_audits`: robots, API, and official-source availability checks.
 

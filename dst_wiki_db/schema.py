@@ -203,6 +203,19 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, raw_page_id, template_index, fact_type, raw_name, fact_index, variant_key)
         );
 
+        create table if not exists entity_fact_targets (
+            id integer primary key,
+            entity_fact_id integer not null references entity_facts(id) on delete cascade,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            target_entity_id integer not null references entities(id) on delete cascade,
+            target_title text not null,
+            target_slug text not null,
+            match_method text not null,
+            confidence real not null default 1.0,
+            unique (entity_fact_id, target_entity_id, match_method)
+        );
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

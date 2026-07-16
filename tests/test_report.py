@@ -1,5 +1,6 @@
 from dst_wiki_db.report import database_counts, sample_entities
 from dst_wiki_db.schema import connect, init_db, upsert_entity, upsert_source
+from scripts.inspect_database import main as inspect_main
 
 
 def test_database_counts_and_samples(tmp_path):
@@ -32,3 +33,17 @@ def test_database_counts_and_samples(tmp_path):
             "image_count": 0,
         }
     ]
+
+
+def test_inspect_database_initializes_missing_new_tables(tmp_path, capsys):
+    db_path = tmp_path / "old.sqlite"
+    conn = connect(db_path)
+    init_db(conn)
+    conn.execute("drop table entity_fact_targets")
+    conn.commit()
+    conn.close()
+
+    assert inspect_main([str(db_path)]) == 0
+
+    output = capsys.readouterr().out
+    assert '"entity_fact_targets": 0' in output

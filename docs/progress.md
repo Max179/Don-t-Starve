@@ -28,10 +28,12 @@ Coverage:
 - Registered infobox images: 1,874
 - Registered images with fetched URL metadata: 1,785
 - Wiki-link relations: 58,997
+- Resolved wiki-link targets: 43,734
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 108
 - Structured recipe ingredients: 1,954
 - Structured drop/source/sold/spawn facts: 1,246
+- Resolved drop/source/sold/spawn fact targets: 435
 - Variant records: 1,282
 - Entity category links: 12,973
 - Entities with category links: 2,190
@@ -126,6 +128,21 @@ The table preserves the original value text and extracts targets, percentages, a
 - `Clockwork Knight` drops Gears x2.
 - `Blue Whale` drops Raw Fish x4 and Blubber x4.
 - `Ancient Key` is recorded as obtained from Mumsy / Coin x3.
+
+## Entity Target Resolution
+
+The database now resolves parsed targets back to entity IDs where the normalized target title matches an existing entry:
+
+- `entity_relations.target_entity_id`: 43,734 wiki-link relation rows now point at target entities.
+- `entity_fact_targets`: 435 parsed drops, dropped-by, sold-by, spawn-from, and spawns rows now have target entity bridges.
+
+Examples verified in the current database:
+
+- `Abigail's Flower` `dropped_by` -> `Abigail`
+- `Ancient Key` `dropped_by` -> `Mumsy` and `Coin`
+- `Beard Hair` `dropped_by` -> `Wilson`
+- `Berries` `dropped_by` -> `Berry Bush`
+- `Blue Gem` `dropped_by` -> `Ancient Statue` and `Pick/Axe`
 
 ## Derived Variant Table
 
@@ -247,5 +264,5 @@ Latest wiki.gg discovery probe:
 - Confirm permission or obtain an approved wiki.gg XML dump/API access path, then build the canonical source database.
 - Expand Klei update verification when the Klei forums endpoint is reachable or an RSS/API endpoint is confirmed.
 - Improve cross-source mapping beyond title slug matching using spawn code, prefab code, image hash, infobox type, and category confidence.
-- Normalize remaining relationships such as upgrades, skins, cooked/raw form labels, and cleaner target-entity resolution into dedicated relation tables.
+- Normalize remaining relationships such as upgrades, skins, cooked/raw form labels, and more advanced fuzzy/alias target matching into dedicated relation tables.
 - Store actual image files in a GitHub-friendly asset strategy. Git LFS is not installed in the current environment, so this pass stores image URLs and metadata in SQLite rather than committing thousands of binary files.

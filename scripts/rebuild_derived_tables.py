@@ -12,6 +12,7 @@ from dst_wiki_db.facts import rebuild_entity_facts
 from dst_wiki_db.categories import rebuild_entity_categories
 from dst_wiki_db.identity import rebuild_identity_keys
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
+from dst_wiki_db.targets import rebuild_entity_targets
 from dst_wiki_db.variants import rebuild_entity_variants
 from dst_wiki_db.schema import connect, init_db
 
@@ -31,9 +32,12 @@ def main(argv=None):
     variant_count = rebuild_entity_variants(conn)
     category_count = rebuild_entity_categories(conn)
     identity_count = rebuild_identity_keys(conn)
+    target_counts = rebuild_entity_targets(conn)
     payload = {
         "recipe_ingredients": recipe_count,
         "entity_facts": fact_count,
+        "entity_fact_targets": target_counts["entity_fact_targets"],
+        "entity_relation_targets": target_counts["entity_relation_targets"],
         "entity_variants": variant_count,
         "entity_categories": category_count,
         "entity_identity_keys": identity_count,

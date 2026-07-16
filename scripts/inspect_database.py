@@ -9,7 +9,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from dst_wiki_db.report import database_counts, sample_entities
-from dst_wiki_db.schema import connect
+from dst_wiki_db.schema import connect, init_db
 
 
 def main(argv=None):
@@ -18,6 +18,7 @@ def main(argv=None):
         print("Usage: scripts/inspect_database.py path/to/wiki.sqlite", file=sys.stderr)
         return 2
     conn = connect(args[0])
+    init_db(conn)
     payload = {
         "counts": database_counts(conn),
         "sample_entities": sample_entities(conn, limit=20),
