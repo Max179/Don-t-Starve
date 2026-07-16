@@ -96,5 +96,6 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "source_catalog",
         "source_catalog_evidence",
         "entity_coverage",
+        "entity_variant_summary",
         "run_metadata",
     }.issubset(tables)

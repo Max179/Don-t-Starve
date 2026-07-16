@@ -34,6 +34,7 @@ COUNT_TABLES = [
     "entity_facts",
     "entity_fact_targets",
     "entity_variants",
+    "entity_variant_summary",
     "entity_categories",
     "entity_identity_keys",
     "cross_source_matches",

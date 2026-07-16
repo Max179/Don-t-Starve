@@ -23,6 +23,7 @@ from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.source_catalog import rebuild_source_catalog
 from dst_wiki_db.stats import rebuild_entity_stat_values, rebuild_entity_stats
 from dst_wiki_db.targets import rebuild_entity_targets
+from dst_wiki_db.variant_summary import rebuild_entity_variant_summary
 from dst_wiki_db.variants import rebuild_entity_variants
 from dst_wiki_db.schema import connect, init_db
 
@@ -53,6 +54,7 @@ def main(argv=None):
     source_catalog_counts = rebuild_source_catalog(conn)
     identity_count = rebuild_identity_keys(conn)
     target_counts = rebuild_entity_targets(conn)
+    variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
     payload = {
         "recipe_ingredients": recipe_count,
@@ -83,6 +85,7 @@ def main(argv=None):
             "source_catalog_evidence"
         ],
         "entity_identity_keys": identity_count,
+        "entity_variant_summary": variant_summary_count,
         "entity_coverage": coverage_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

@@ -53,6 +53,7 @@ Coverage:
 - Structured drop/source/sold/spawn facts: 1,246
 - Resolved drop/source/sold/spawn fact targets: 435
 - Variant records: 1,282
+- Merged entity variant summary rows: 2,982
 - Entity category links: 12,973
 - Entities with category links: 2,190
 - Distinct category slugs: 288
@@ -355,6 +356,35 @@ Examples verified in the current database:
 - `Abigail`: repeated `Mob Infobox` variants are preserved as `template:1` and `template:2`
 
 Recipe slots such as `ingredient1` and `ingredient2` are deliberately excluded from variants and live in `recipe_ingredients`.
+
+The database now also includes `entity_variant_summary`, which merges variant keys from `entity_attributes`, `entity_stats`, `entity_facts`, `recipe_ingredients`, `entity_variants`, and `entity_media_assets`. This pass generated 2,982 merged variant summary rows:
+
+- `numbered_variant`: 1,680
+- `infobox_instance`: 617
+- `visual_variant`: 336
+- `game_scope`: 234
+- `growth_stage`: 47
+- `animation`: 26
+- `build_state`: 23
+- `map_icon`: 5
+- `state`: 5
+- `oversized_form`: 4
+- `reference_asset`: 4
+- `phase`: 1
+
+Evidence coverage across variant summary rows:
+
+- Rows with data evidence: 2,566
+- Rows with media evidence: 590
+- Rows with stat evidence: 227
+- Rows with fact evidence: 6
+- Rows with recipe evidence: 1,464
+
+Examples verified in the current database:
+
+- `Battle Songs`: numbered variants merge attribute, recipe, explicit variant, and media evidence.
+- `Berry Bush`: numbered variants merge data, recipe, explicit variant, and media evidence.
+- `Chess Pieces`: numbered variants preserve several media-backed forms.
 
 ## Derived Category Index
 

@@ -586,6 +586,37 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, source_id, raw_page_id, template_index, variant_key, variant_type)
         );
 
+        create table if not exists entity_variant_summary (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            variant_key text not null,
+            variant_type text not null,
+            label text not null,
+            attribute_count integer not null default 0,
+            stat_count integer not null default 0,
+            fact_count integer not null default 0,
+            recipe_ingredient_count integer not null default 0,
+            entity_variant_count integer not null default 0,
+            media_asset_count integer not null default 0,
+            primary_media_asset_count integer not null default 0,
+            has_data integer not null default 0,
+            has_media integer not null default 0,
+            has_stats integer not null default 0,
+            has_facts integer not null default 0,
+            has_recipes integer not null default 0,
+            confidence real not null default 0.5,
+            source_summary text not null,
+            unique (entity_id, variant_key)
+        );
+
+        create index if not exists idx_entity_variant_summary_entity
+            on entity_variant_summary(entity_id);
+        create index if not exists idx_entity_variant_summary_type
+            on entity_variant_summary(variant_type);
+
         create table if not exists entity_categories (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,
