@@ -634,6 +634,29 @@ Common taxonomy tags include:
 
 Each compressed entity profile now includes a `taxonomy` array and `taxonomy_count`, so consumers can render labels such as `Mob`, `Hostile`, `Don't Starve Together`, `Craftable`, or `Has Spawn Code` directly from the profile payload.
 
+## Entity Combat Profiles
+
+The database now includes an `entity_combat_profiles` table that pivots normalized combat and movement stats into one queryable row per entity. It uses only `entity_stats.stat_type in ('combat', 'movement')`, so food healing values and other survival stats do not pollute combat health/damage summaries.
+
+This pass generated 409 combat profile rows:
+
+- `mob`: 210
+- `item`: 85
+- `character`: 58
+- `boss`: 41
+- `structure`: 7
+- `page`: 5
+- `plant`: 3
+
+Each row stores min/max values, raw text, and evidence counts for health, damage, attack range, attack period, walk speed, and run speed, plus source and variant counts. Example boss rows now expose:
+
+- `Ancient Guardian`: health 2,500-10,000, damage 100, attack range 4.6-25
+- `Bee Queen`: health 22,500, damage 120, attack range 4
+- `Deerclops`: health 2,000-4,000, damage 150, attack range 68
+- `Dragonfly`: health 2,750-27,500, damage 3-225, attack range 4-6
+
+Each compressed entity profile now includes a nullable `combat_profile` object so API consumers can read these battle/movement summaries directly from `entity_profile_json` without joining the raw stat tables.
+
 ## Media Download Manifest
 
 The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.

@@ -643,6 +643,50 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_gameplay_edges_type
             on entity_gameplay_edges(edge_type);
 
+        create table if not exists entity_combat_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            health_min real,
+            health_max real,
+            health_text text not null default '',
+            health_evidence_count integer not null default 0,
+            damage_min real,
+            damage_max real,
+            damage_text text not null default '',
+            damage_evidence_count integer not null default 0,
+            attack_range_min real,
+            attack_range_max real,
+            attack_range_text text not null default '',
+            attack_range_evidence_count integer not null default 0,
+            attack_period_min real,
+            attack_period_max real,
+            attack_period_text text not null default '',
+            attack_period_evidence_count integer not null default 0,
+            walk_speed_min real,
+            walk_speed_max real,
+            walk_speed_text text not null default '',
+            walk_speed_evidence_count integer not null default 0,
+            run_speed_min real,
+            run_speed_max real,
+            run_speed_text text not null default '',
+            run_speed_evidence_count integer not null default 0,
+            combat_stat_count integer not null default 0,
+            movement_stat_count integer not null default 0,
+            source_count integer not null default 0,
+            variant_count integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_combat_profiles_kind
+            on entity_combat_profiles(kind);
+        create index if not exists idx_entity_combat_profiles_health
+            on entity_combat_profiles(health_max);
+        create index if not exists idx_entity_combat_profiles_damage
+            on entity_combat_profiles(damage_max);
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

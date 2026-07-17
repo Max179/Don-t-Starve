@@ -97,6 +97,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     official_mentions = _official_mentions(conn, entity_id)
     relationships = _relationships(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
+    combat_profile = _combat_profile(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -127,6 +128,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "official_mentions": official_mentions,
         "relationships": relationships,
         "taxonomy": taxonomy,
+        "combat_profile": combat_profile,
     }
 
 
@@ -540,6 +542,70 @@ def _taxonomy(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
         }
         for row in rows
     ]
+
+
+def _combat_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            health_min,
+            health_max,
+            health_text,
+            health_evidence_count,
+            damage_min,
+            damage_max,
+            damage_text,
+            damage_evidence_count,
+            attack_range_min,
+            attack_range_max,
+            attack_range_text,
+            attack_range_evidence_count,
+            attack_period_min,
+            attack_period_max,
+            attack_period_text,
+            attack_period_evidence_count,
+            walk_speed_min,
+            walk_speed_max,
+            walk_speed_text,
+            walk_speed_evidence_count,
+            run_speed_min,
+            run_speed_max,
+            run_speed_text,
+            run_speed_evidence_count,
+            combat_stat_count,
+            movement_stat_count,
+            source_count,
+            variant_count
+        from entity_combat_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "health": _profile_stat(row, "health"),
+        "damage": _profile_stat(row, "damage"),
+        "attack_range": _profile_stat(row, "attack_range"),
+        "attack_period": _profile_stat(row, "attack_period"),
+        "walk_speed": _profile_stat(row, "walk_speed"),
+        "run_speed": _profile_stat(row, "run_speed"),
+        "counts": {
+            "combat_stats": int(row["combat_stat_count"]),
+            "movement_stats": int(row["movement_stat_count"]),
+            "sources": int(row["source_count"]),
+            "variants": int(row["variant_count"]),
+        },
+    }
+
+
+def _profile_stat(row: sqlite3.Row, prefix: str) -> dict[str, Any]:
+    return {
+        "min": _optional_float(row[f"{prefix}_min"]),
+        "max": _optional_float(row[f"{prefix}_max"]),
+        "text": str(row[f"{prefix}_text"] or ""),
+        "evidence_count": int(row[f"{prefix}_evidence_count"]),
+    }
 
 
 def _optional_int(value: Any) -> int | None:

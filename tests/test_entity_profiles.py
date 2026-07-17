@@ -206,6 +206,21 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id,),
     )
+    conn.execute(
+        """
+        insert into entity_combat_profiles (
+            entity_id, slug, canonical_title, kind,
+            health_min, health_max, health_text, health_evidence_count,
+            damage_min, damage_max, damage_text, damage_evidence_count,
+            combat_stat_count, movement_stat_count, source_count,
+            variant_count
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                100, 100, '100', 1, 10, 20, '10 / 20', 1,
+                2, 0, 1, 0)
+        """,
+        (entity_id,),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
@@ -262,6 +277,8 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["relationships"][0]["edge_type"] == "drops"
     assert profile["relationships"][0]["related_title"] == "Berries"
     assert profile["taxonomy"][0]["taxonomy_key"] == "plant"
+    assert profile["combat_profile"]["health"]["max"] == 100.0
+    assert profile["combat_profile"]["damage"]["text"] == "10 / 20"
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):

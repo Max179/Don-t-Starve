@@ -35,6 +35,7 @@ COUNT_TABLES = [
     "entity_facts",
     "entity_fact_targets",
     "entity_gameplay_edges",
+    "entity_combat_profiles",
     "entity_variants",
     "entity_variant_summary",
     "entity_categories",
