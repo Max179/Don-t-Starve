@@ -633,3 +633,25 @@ Common taxonomy tags include:
 - `gameplay:drop_source`: 205 entities
 
 Each compressed entity profile now includes a `taxonomy` array and `taxonomy_count`, so consumers can render labels such as `Mob`, `Hostile`, `Don't Starve Together`, `Craftable`, or `Has Spawn Code` directly from the profile payload.
+
+## Media Download Manifest
+
+The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.
+
+URL readiness:
+
+- `direct_url`: 1,785 rows
+- `file_page_only`: 44,437 rows
+- `missing_url`: 89 rows
+
+Queue reasons:
+
+- `page_reference|file_page_only`: 44,018
+- `primary|direct_url`: 1,579
+- `variant|file_page_only`: 419
+- `variant|direct_url`: 205
+- `primary|missing_url`: 84
+- `variant|missing_url`: 5
+- `page_reference|direct_url`: 1
+
+Each row stores source key, entity slug/title/kind, image name/slug, direct download URL when available, file-page URL, deterministic `data/images/{source_key}/{entity_slug}/{image_slug}` target path, pending download status, priority, queue reason, and variant metadata. Binary image files still remain out of git by default; the manifest gives GitHub Actions or a future downloader a precise queue for primary images, variants, and page references.

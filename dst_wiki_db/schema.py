@@ -222,6 +222,41 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_media_assets_variant
             on entity_media_assets(is_variant, variant_type);
 
+        create table if not exists entity_media_downloads (
+            id integer primary key,
+            entity_media_asset_id integer not null unique references entity_media_assets(id) on delete cascade,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_id integer not null references sources(id) on delete cascade,
+            source_key text not null,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            image_name text not null,
+            image_slug text not null,
+            role text not null,
+            asset_source text not null,
+            download_url text,
+            file_page_url text,
+            url_status text not null,
+            target_path text not null,
+            download_status text not null default 'pending',
+            priority integer not null,
+            queue_reason text not null,
+            variant_key text not null default '',
+            variant_type text not null default '',
+            variant_label text not null default '',
+            is_primary integer not null default 0,
+            is_variant integer not null default 0,
+            confidence real not null default 1.0
+        );
+
+        create index if not exists idx_entity_media_downloads_entity
+            on entity_media_downloads(entity_id);
+        create index if not exists idx_entity_media_downloads_status
+            on entity_media_downloads(download_status, priority);
+        create index if not exists idx_entity_media_downloads_url_status
+            on entity_media_downloads(url_status);
+
         create table if not exists entity_relations (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

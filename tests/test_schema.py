@@ -84,6 +84,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "page_images",
         "image_variants",
         "entity_media_assets",
+        "entity_media_downloads",
         "entity_relations",
         "verification_checks",
         "official_record_mentions",
