@@ -638,25 +638,38 @@ Each compressed entity profile now includes a `taxonomy` array and `taxonomy_cou
 
 The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.
 
-URL readiness:
+URL readiness after resolving a first 250-row file-page batch:
 
-- `direct_url`: 1,785 rows
-- `file_page_only`: 44,437 rows
+- `direct_url`: 2,034 rows
+- `file_page_only`: 44,188 rows
 - `missing_url`: 89 rows
 
 Queue reasons:
 
 - `page_reference|file_page_only`: 44,018
 - `primary|direct_url`: 1,579
-- `variant|file_page_only`: 419
-- `variant|direct_url`: 205
+- `variant|direct_url`: 454
+- `variant|file_page_only`: 170
 - `primary|missing_url`: 84
 - `variant|missing_url`: 5
 - `page_reference|direct_url`: 1
 
 Each row stores source key, entity slug/title/kind, image name/slug, direct download URL when available, file-page URL, deterministic `data/images/{source_key}/{entity_slug}/{image_slug}` target path, download status, priority, queue reason, and variant metadata. Downloader state columns now record local path, content length, downloaded timestamp, and error text.
 
-The manifest is executable with `scripts/download_media_assets.py`. A safe smoke run is:
+File-page rows are resolvable through MediaWiki imageinfo without downloading binaries:
+
+```bash
+python3 scripts/resolve_media_file_pages.py \
+  --db data/dont_starve_wiki.sqlite \
+  --source-key fandom \
+  --limit 250 \
+  --batch-size 50 \
+  --report reports/media_file_page_resolution.json
+```
+
+The latest resolver batch attempted 250 rows, resolved 249 direct URLs, and left 1 missing. Both `entity_media_downloads` and `entity_media_assets` now have 2,034 direct media URLs.
+
+The manifest is executable with `scripts/download_media_assets.py`. A safe downloader smoke run is:
 
 ```bash
 python3 scripts/download_media_assets.py \

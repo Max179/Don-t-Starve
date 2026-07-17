@@ -108,6 +108,17 @@ python3 scripts/audit_sources.py \
 python3 scripts/inspect_database.py data/dont_starve_wiki.sqlite
 ```
 
+Resolve a small batch of file-page-only media rows into direct URLs:
+
+```bash
+python3 scripts/resolve_media_file_pages.py \
+  --db data/dont_starve_wiki.sqlite \
+  --source-key fandom \
+  --limit 250 \
+  --batch-size 50 \
+  --report reports/media_file_page_resolution.json
+```
+
 Download a small batch of direct media URLs from the manifest:
 
 ```bash

@@ -1,6 +1,7 @@
 from dst_wiki_db.media_downloads import (
     download_pending_media,
     rebuild_entity_media_downloads,
+    resolve_file_page_download_urls,
 )
 from dst_wiki_db.schema import connect, init_db, upsert_entity, upsert_source
 
@@ -202,6 +203,95 @@ def test_download_pending_media_dry_run_does_not_write_or_update(tmp_path):
     assert tuple(row) == ("pending", None)
 
 
+def test_resolve_file_page_download_urls_updates_manifest_and_media_asset(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    _seed_file_page_only_download(conn)
+    client = FakeImageInfoClient(
+        {
+            "File:Bee Build.png": {
+                "url": "https://img.test/Bee_Build.png",
+                "width": 128,
+                "height": 96,
+                "mime": "image/png",
+                "sha1": "def",
+            }
+        }
+    )
+
+    result = resolve_file_page_download_urls(
+        conn,
+        source_key="fandom",
+        limit=1,
+        client=client,
+        batch_size=10,
+    )
+
+    assert result == {
+        "attempted": 1,
+        "resolved": 1,
+        "missing": 0,
+        "skipped": 0,
+        "dry_run": False,
+    }
+    assert client.requests == [["Bee Build.png"]]
+    manifest = conn.execute(
+        """
+        select download_url, url_status, priority, queue_reason
+        from entity_media_downloads
+        """
+    ).fetchone()
+    assert dict(manifest) == {
+        "download_url": "https://img.test/Bee_Build.png",
+        "url_status": "direct_url",
+        "priority": 20,
+        "queue_reason": "variant|direct_url",
+    }
+    asset = conn.execute(
+        """
+        select original_url, width, height, mime, sha1
+        from entity_media_assets
+        """
+    ).fetchone()
+    assert dict(asset) == {
+        "original_url": "https://img.test/Bee_Build.png",
+        "width": 128,
+        "height": 96,
+        "mime": "image/png",
+        "sha1": "def",
+    }
+
+
+def test_resolve_file_page_download_urls_dry_run_does_not_update(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    _seed_file_page_only_download(conn)
+    client = FakeImageInfoClient(
+        {"File:Bee Build.png": {"url": "https://img.test/Bee_Build.png"}}
+    )
+
+    result = resolve_file_page_download_urls(
+        conn,
+        source_key="fandom",
+        limit=1,
+        client=client,
+        dry_run=True,
+    )
+
+    assert result == {
+        "attempted": 1,
+        "resolved": 0,
+        "missing": 0,
+        "skipped": 1,
+        "dry_run": True,
+    }
+    assert client.requests == []
+    row = conn.execute(
+        "select download_url, url_status from entity_media_downloads"
+    ).fetchone()
+    assert tuple(row) == (None, "file_page_only")
+
+
 def _seed_pending_direct_download(conn):
     source_id = upsert_source(
         conn,
@@ -270,6 +360,76 @@ def _seed_pending_direct_download(conn):
     return media_asset_id
 
 
+def _seed_file_page_only_download(conn):
+    source_id = upsert_source(
+        conn,
+        key="fandom",
+        name="Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+    entity_id = upsert_entity(
+        conn,
+        canonical_title="Bee",
+        kind="mob",
+        primary_source_id=source_id,
+        primary_page_id=1,
+        canonical_url="https://example.test/Bee",
+        summary="",
+    )
+    conn.execute(
+        """
+        insert into raw_pages (
+            source_id, pageid, ns, title, canonical_url, wikitext,
+            categories_json, templates_json, images_json, externallinks_json,
+            fetched_at
+        )
+        values (?, 1, 0, 'Bee', 'https://example.test/Bee', '',
+                '[]', '[]', '[]', '[]', 'now')
+        """,
+        (source_id,),
+    )
+    raw_page_id = conn.execute("select id from raw_pages").fetchone()["id"]
+    cursor = conn.execute(
+        """
+        insert into entity_media_assets (
+            entity_id, source_id, raw_page_id, asset_source, image_name,
+            image_slug, role, original_url, description_url, local_path,
+            width, height, mime, sha1, variant_key, variant_type,
+            variant_label, is_variant, is_primary, confidence
+        )
+        values (?, ?, ?, 'page_reference', 'Bee Build.png', 'bee-build-png',
+                'page_reference', null,
+                'https://example.test/File:Bee_Build.png',
+                null, null, null, null, null, 'build', 'build_state',
+                'Build', 1, 0, 0.7)
+        """,
+        (entity_id, source_id, raw_page_id),
+    )
+    media_asset_id = cursor.lastrowid
+    conn.execute(
+        """
+        insert into entity_media_downloads (
+            entity_media_asset_id, entity_id, source_id, source_key, slug,
+            canonical_title, kind, image_name, image_slug, role,
+            asset_source, download_url, file_page_url, url_status,
+            target_path, download_status, priority, queue_reason,
+            variant_key, variant_type, variant_label, is_primary,
+            is_variant, confidence
+        )
+        values (?, ?, ?, 'fandom', 'bee', 'Bee', 'mob', 'Bee Build.png',
+                'bee-build-png', 'page_reference', 'page_reference', null,
+                'https://example.test/File:Bee_Build.png', 'file_page_only',
+                'data/images/fandom/bee/bee-build-png', 'pending', 35,
+                'variant|file_page_only', 'build', 'build_state',
+                'Build', 0, 1, 0.7)
+        """,
+        (media_asset_id, entity_id, source_id),
+    )
+    return media_asset_id
+
+
 class FakeSession:
     def __init__(self, payloads):
         self.payloads = list(payloads)
@@ -286,3 +446,13 @@ class FakeResponse:
 
     def raise_for_status(self):
         return None
+
+
+class FakeImageInfoClient:
+    def __init__(self, info_by_title):
+        self.info_by_title = info_by_title
+        self.requests = []
+
+    def fetch_imageinfo(self, image_names):
+        self.requests.append(list(image_names))
+        return self.info_by_title

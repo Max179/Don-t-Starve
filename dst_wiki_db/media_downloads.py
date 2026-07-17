@@ -6,6 +6,8 @@ from typing import Any
 
 import requests
 
+from dst_wiki_db.mediawiki import MediaWikiClient
+
 
 def rebuild_entity_media_downloads(conn: sqlite3.Connection) -> int:
     conn.execute("delete from entity_media_downloads")
@@ -152,6 +154,109 @@ def download_pending_media(
     return result
 
 
+def resolve_file_page_download_urls(
+    conn: sqlite3.Connection,
+    *,
+    source_key: str | None = None,
+    limit: int | None = None,
+    client: Any | None = None,
+    batch_size: int = 50,
+    dry_run: bool = False,
+) -> dict[str, int | bool]:
+    rows = _file_page_only_rows(conn, source_key=source_key, limit=limit)
+    result = {
+        "attempted": len(rows),
+        "resolved": 0,
+        "missing": 0,
+        "skipped": 0,
+        "dry_run": dry_run,
+    }
+    if not rows:
+        return result
+    if dry_run:
+        result["skipped"] = len(rows)
+        return result
+
+    clients: dict[str, Any] = {}
+    if client is not None:
+        for row in rows:
+            clients[str(row["source_key"])] = client
+
+    for group in _chunks(rows, max(1, batch_size)):
+        by_source: dict[str, list[sqlite3.Row]] = {}
+        for row in group:
+            by_source.setdefault(str(row["source_key"]), []).append(row)
+        for key, source_rows in by_source.items():
+            source_client = clients.get(key)
+            if source_client is None:
+                first = source_rows[0]
+                source_client = MediaWikiClient(
+                    key=key,
+                    api_url=str(first["api_url"]),
+                )
+                clients[key] = source_client
+            info_by_title = source_client.fetch_imageinfo(
+                [str(row["image_name"]) for row in source_rows]
+            )
+            for row in source_rows:
+                info = _imageinfo_for_row(info_by_title, str(row["image_name"]))
+                download_url = (info.get("url") or info.get("thumburl")) if info else None
+                if not download_url:
+                    result["missing"] += 1
+                    continue
+                url_status = "direct_url"
+                priority = _priority(
+                    is_primary=bool(row["is_primary"]),
+                    is_variant=bool(row["is_variant"]),
+                    url_status=url_status,
+                )
+                queue_reason = _queue_reason(
+                    is_primary=bool(row["is_primary"]),
+                    is_variant=bool(row["is_variant"]),
+                    url_status=url_status,
+                )
+                conn.execute(
+                    """
+                    update entity_media_downloads
+                    set download_url = ?,
+                        url_status = ?,
+                        priority = ?,
+                        queue_reason = ?,
+                        error_text = ''
+                    where id = ?
+                    """,
+                    (
+                        str(download_url),
+                        url_status,
+                        priority,
+                        queue_reason,
+                        int(row["id"]),
+                    ),
+                )
+                conn.execute(
+                    """
+                    update entity_media_assets
+                    set original_url = coalesce(original_url, ?),
+                        width = coalesce(width, ?),
+                        height = coalesce(height, ?),
+                        mime = coalesce(mime, ?),
+                        sha1 = coalesce(sha1, ?)
+                    where id = ?
+                    """,
+                    (
+                        str(download_url),
+                        _optional_int(info.get("width")),
+                        _optional_int(info.get("height")),
+                        info.get("mime"),
+                        info.get("sha1"),
+                        int(row["entity_media_asset_id"]),
+                    ),
+                )
+                result["resolved"] += 1
+    conn.commit()
+    return result
+
+
 def _pending_direct_downloads(
     conn: sqlite3.Connection, *, limit: int | None
 ) -> list[sqlite3.Row]:
@@ -170,6 +275,75 @@ def _pending_direct_downloads(
         """,
         params,
     ).fetchall()
+
+
+def _file_page_only_rows(
+    conn: sqlite3.Connection, *, source_key: str | None, limit: int | None
+) -> list[sqlite3.Row]:
+    filters = [
+        "emd.url_status = 'file_page_only'",
+        "(emd.download_url is null or emd.download_url = '')",
+        "emd.file_page_url is not null",
+        "emd.file_page_url != ''",
+    ]
+    params: list[object] = []
+    if source_key:
+        filters.append("emd.source_key = ?")
+        params.append(source_key)
+    limit_clause = ""
+    if limit is not None:
+        limit_clause = "limit ?"
+        params.append(limit)
+    return conn.execute(
+        f"""
+        select
+            emd.id,
+            emd.entity_media_asset_id,
+            emd.source_key,
+            emd.image_name,
+            emd.is_primary,
+            emd.is_variant,
+            s.api_url
+        from entity_media_downloads emd
+        join sources s on s.id = emd.source_id
+        where {" and ".join(filters)}
+        order by emd.priority, emd.id
+        {limit_clause}
+        """,
+        tuple(params),
+    ).fetchall()
+
+
+def _imageinfo_for_row(info_by_title: dict[str, dict], image_name: str) -> dict:
+    candidates = [
+        image_name,
+        _file_title(image_name),
+        _file_title(image_name).replace(" ", "_"),
+    ]
+    for candidate in candidates:
+        info = info_by_title.get(candidate)
+        if info:
+            return info
+    return {}
+
+
+def _file_title(name: str) -> str:
+    if name.lower().startswith(("file:", "image:")):
+        return "File:" + name.split(":", 1)[1].strip()
+    return "File:" + name.strip()
+
+
+def _optional_int(value: object) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _chunks(rows: list[sqlite3.Row], size: int) -> list[list[sqlite3.Row]]:
+    return [rows[index : index + size] for index in range(0, len(rows), size)]
 
 
 def _url_status(download_url: str | None, file_page_url: str | None) -> str:
