@@ -12,6 +12,7 @@ from urllib.parse import quote
 
 from dst_wiki_db.mediawiki import MediaWikiClient, page_revision, page_wikitext
 from dst_wiki_db.parser import ParsedImage, ParsedPage, parse_page
+from dst_wiki_db.raw_pages import encode_wikitext
 from dst_wiki_db.schema import connect, init_db, slugify, upsert_entity, upsert_source
 
 
@@ -332,14 +333,15 @@ def write_raw_page(
     revision = page_revision(page)
     title = str(page.get("title", ""))
     pageid = int(page.get("pageid", 0))
+    encoded_wikitext, wikitext_encoding = encode_wikitext(page_wikitext(page))
     conn.execute(
         """
         insert into raw_pages (
             source_id, pageid, ns, title, revid, parentid, source_timestamp,
-            canonical_url, wikitext, categories_json, templates_json, images_json,
-            externallinks_json, fetched_at
+            canonical_url, wikitext, wikitext_encoding, categories_json,
+            templates_json, images_json, externallinks_json, fetched_at
         )
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         on conflict(source_id, pageid) do update set
             ns=excluded.ns,
             title=excluded.title,
@@ -348,6 +350,7 @@ def write_raw_page(
             source_timestamp=excluded.source_timestamp,
             canonical_url=excluded.canonical_url,
             wikitext=excluded.wikitext,
+            wikitext_encoding=excluded.wikitext_encoding,
             categories_json=excluded.categories_json,
             templates_json=excluded.templates_json,
             images_json=excluded.images_json,
@@ -363,7 +366,8 @@ def write_raw_page(
             _optional_int(revision.get("parentid")),
             _optional_str(revision.get("timestamp")),
             source_url(source.base_url, title),
-            page_wikitext(page),
+            encoded_wikitext,
+            wikitext_encoding,
             json.dumps(page.get("categories", []), ensure_ascii=False),
             json.dumps(page.get("templates", []), ensure_ascii=False),
             json.dumps(page.get("images", []), ensure_ascii=False),

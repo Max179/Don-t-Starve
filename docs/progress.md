@@ -595,6 +595,20 @@ Each profile aggregates:
 
 The table also stores queryable top-level counts such as `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, and `official_mention_count` so applications can build lists without parsing JSON.
 
+## Raw Wikitext Compression
+
+The committed database now stores all 2,252 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while reducing the database from 100,032,512 bytes to 84,021,248 bytes after `VACUUM`, saving 16,011,264 bytes and keeping the repository below GitHub's 100 MiB single-file hard limit.
+
+Use `dst_wiki_db.raw_pages.decode_wikitext(value, encoding)` to read the stored page text. New API ingests write gzip-encoded raw wikitext through `dst_wiki_db.raw_pages.encode_wikitext`, while tests and direct fixtures can still insert plain text because the schema defaults `wikitext_encoding` to `text`.
+
+The compression pass is reproducible with:
+
+```bash
+python3 scripts/compress_raw_wikitext.py \
+  --db data/dont_starve_wiki.sqlite \
+  --report reports/raw_wikitext_compression.json
+```
+
 ## Typed Gameplay Relationship Edges
 
 The database now includes an `entity_gameplay_edges` table that turns resolved recipe and fact targets into typed forward and inverse relationships. This pass generated 4,502 gameplay edges:

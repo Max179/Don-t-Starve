@@ -6,7 +6,7 @@ Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom 
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
-- `raw_pages`: source page evidence, revision ids, categories, templates, image references.
+- `raw_pages`: source page evidence, revision ids, categories, templates, image references, and gzip-capable wikitext payloads. Use `dst_wiki_db.raw_pages.decode_wikitext` to read compressed `wikitext` rows.
 - `entities`: canonical entry records, keyed by normalized English titles.
 - `entity_sources`: cross-source page mappings.
 - `entity_attributes`: infobox fields such as health, damage, attack range, speed, spawn code, recipe data, and DS/DST-specific variants.

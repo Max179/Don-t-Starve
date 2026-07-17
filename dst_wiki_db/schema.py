@@ -42,6 +42,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             source_timestamp text,
             canonical_url text not null,
             wikitext text not null,
+            wikitext_encoding text not null default 'text',
             categories_json text,
             templates_json text,
             images_json text,
@@ -862,6 +863,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         table="entity_media_downloads",
         column="error_text",
         definition="text not null default ''",
+    )
+    _add_column_if_missing(
+        conn,
+        table="raw_pages",
+        column="wikitext_encoding",
+        definition="text not null default 'text'",
     )
 
 
