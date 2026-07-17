@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
 import sqlite3
+from typing import Any
+
+import requests
 
 
 def rebuild_entity_media_downloads(conn: sqlite3.Connection) -> int:
@@ -87,6 +91,85 @@ def rebuild_entity_media_downloads(conn: sqlite3.Connection) -> int:
         count += 1 if cursor.rowcount == 1 else 0
     conn.commit()
     return count
+
+
+def download_pending_media(
+    conn: sqlite3.Connection,
+    *,
+    output_root: Path | str = Path("."),
+    limit: int | None = None,
+    session: Any | None = None,
+    timeout: int = 30,
+    dry_run: bool = False,
+) -> dict[str, int | bool]:
+    rows = _pending_direct_downloads(conn, limit=limit)
+    result = {
+        "attempted": len(rows),
+        "downloaded": 0,
+        "failed": 0,
+        "skipped": 0,
+        "dry_run": dry_run,
+    }
+    if dry_run:
+        result["skipped"] = len(rows)
+        return result
+
+    root = Path(output_root)
+    http = session or requests.Session()
+    for row in rows:
+        destination = root / str(row["target_path"])
+        try:
+            response = http.get(str(row["download_url"]), timeout=timeout)
+            response.raise_for_status()
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(response.content)
+        except Exception as exc:  # pragma: no cover - exact request errors vary
+            conn.execute(
+                """
+                update entity_media_downloads
+                set download_status = 'failed',
+                    error_text = ?
+                where id = ?
+                """,
+                (str(exc), int(row["id"])),
+            )
+            result["failed"] += 1
+            continue
+        conn.execute(
+            """
+            update entity_media_downloads
+            set download_status = 'downloaded',
+                local_path = ?,
+                content_length = ?,
+                downloaded_at = current_timestamp,
+                error_text = ''
+            where id = ?
+            """,
+            (str(destination), len(response.content), int(row["id"])),
+        )
+        result["downloaded"] += 1
+    conn.commit()
+    return result
+
+
+def _pending_direct_downloads(
+    conn: sqlite3.Connection, *, limit: int | None
+) -> list[sqlite3.Row]:
+    limit_clause = "" if limit is None else "limit ?"
+    params: tuple[int, ...] = () if limit is None else (limit,)
+    return conn.execute(
+        f"""
+        select id, download_url, target_path
+        from entity_media_downloads
+        where download_status = 'pending'
+          and url_status = 'direct_url'
+          and download_url is not null
+          and download_url != ''
+        order by priority, id
+        {limit_clause}
+        """,
+        params,
+    ).fetchall()
 
 
 def _url_status(download_url: str | None, file_page_url: str | None) -> str:

@@ -16,7 +16,7 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `page_images`: page-level image references from MediaWiki metadata, including gallery, page, and transcluded file references with source file-page URLs.
 - `image_variants`: filename-derived image variant candidates such as build, burnt, phase, animation, crop growth, and oversized crop forms.
 - `entity_media_assets`: unified infobox/page media rows with URLs, file pages, primary flags, and variant metadata.
-- `entity_media_downloads`: pending media download manifest rows with deterministic target paths, URL status, priority, and queue reasons.
+- `entity_media_downloads`: media download manifest rows with deterministic target paths, URL status, priority, queue reasons, and downloader status fields.
 - `entity_relations`: wiki links with resolved `target_entity_id` values when the target exists in `entities`.
 - `recipe_ingredient_targets`: entity bridges from crafted entries to ingredient entries.
 - `entity_fact_targets`: entity bridges for parsed drops, dropped-by, sold-by, spawn-from, and spawns facts.
@@ -107,6 +107,19 @@ python3 scripts/audit_sources.py \
   --report reports/source_audits.json
 python3 scripts/inspect_database.py data/dont_starve_wiki.sqlite
 ```
+
+Download a small batch of direct media URLs from the manifest:
+
+```bash
+python3 scripts/download_media_assets.py \
+  --db data/dont_starve_wiki.sqlite \
+  --output-root . \
+  --limit 25 \
+  --dry-run \
+  --report reports/media_downloads.json
+```
+
+Remove `--dry-run` to write files under the manifest's `data/images/{source_key}/{entity_slug}/{image_slug}` paths. Downloaded binary files remain ignored by git; commit the database/report metadata, not the image payloads.
 
 Run tests:
 

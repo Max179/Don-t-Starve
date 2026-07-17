@@ -654,4 +654,17 @@ Queue reasons:
 - `variant|missing_url`: 5
 - `page_reference|direct_url`: 1
 
-Each row stores source key, entity slug/title/kind, image name/slug, direct download URL when available, file-page URL, deterministic `data/images/{source_key}/{entity_slug}/{image_slug}` target path, pending download status, priority, queue reason, and variant metadata. Binary image files still remain out of git by default; the manifest gives GitHub Actions or a future downloader a precise queue for primary images, variants, and page references.
+Each row stores source key, entity slug/title/kind, image name/slug, direct download URL when available, file-page URL, deterministic `data/images/{source_key}/{entity_slug}/{image_slug}` target path, download status, priority, queue reason, and variant metadata. Downloader state columns now record local path, content length, downloaded timestamp, and error text.
+
+The manifest is executable with `scripts/download_media_assets.py`. A safe smoke run is:
+
+```bash
+python3 scripts/download_media_assets.py \
+  --db data/dont_starve_wiki.sqlite \
+  --output-root . \
+  --limit 25 \
+  --dry-run \
+  --report reports/media_downloads.json
+```
+
+Only rows with `url_status = 'direct_url'` and `download_status = 'pending'` are fetched. Binary image files remain out of git by default; the downloader updates database/report metadata while leaving the image payloads in ignored `data/images/` paths.

@@ -240,6 +240,10 @@ def init_db(conn: sqlite3.Connection) -> None:
             url_status text not null,
             target_path text not null,
             download_status text not null default 'pending',
+            local_path text,
+            content_length integer,
+            downloaded_at text,
+            error_text text not null default '',
             priority integer not null,
             queue_reason text not null,
             variant_key text not null default '',
@@ -790,6 +794,30 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         table="entity_profile_json",
         column="taxonomy_count",
         definition="integer not null default 0",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_media_downloads",
+        column="local_path",
+        definition="text",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_media_downloads",
+        column="content_length",
+        definition="integer",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_media_downloads",
+        column="downloaded_at",
+        definition="text",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_media_downloads",
+        column="error_text",
+        definition="text not null default ''",
     )
 
 
