@@ -609,6 +609,20 @@ python3 scripts/compress_raw_wikitext.py \
   --report reports/raw_wikitext_compression.json
 ```
 
+## Entity Stat Rollups
+
+The database now includes `entity_stat_rollups`, a query-oriented summary table over all normalized stat rows. It groups by entity, stat name, stat type, and unit, keeping min/max numeric values, raw value texts, numeric value count, evidence row count, source count, and variant count.
+
+This pass generated 5,142 stat rollups across 1,567 entities with stat data. The table covers combat, movement, item, food, survival, and generic stats, so consumers can query one compact row for fields such as health, damage, hunger restored, sanity restored, durability, protection, stack size, spoil time, attack period, and attack range.
+
+Example rollups:
+
+- `Dragonfly`: damage 3-225, health 2,750-27,500, attack range 4-6, walk speed 2-9.1
+- `Football Helmet`: durability 315-450, protection 80%, water resistance 20%, tier 2
+- `Meatballs`: hunger restored 62.5, sanity restored 5, health restored 3, spoil time 10 days
+
+Each compressed entity profile now includes a `stat_rollups` array next to the raw `stats` array. The raw stats preserve exact extracted fields, while rollups give API consumers a compact summary for filtering, comparison, and card/detail rendering.
+
 ## Typed Gameplay Relationship Edges
 
 The database now includes an `entity_gameplay_edges` table that turns resolved recipe and fact targets into typed forward and inverse relationships. This pass generated 4,502 gameplay edges:

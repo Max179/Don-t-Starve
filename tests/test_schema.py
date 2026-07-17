@@ -80,6 +80,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "entity_attributes",
         "entity_stats",
         "entity_stat_values",
+        "entity_stat_rollups",
         "entity_images",
         "page_images",
         "image_variants",

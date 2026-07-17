@@ -139,6 +139,31 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_stat_values_stat
             on entity_stat_values(stat_name);
 
+        create table if not exists entity_stat_rollups (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            stat_name text not null,
+            stat_type text not null,
+            unit text not null,
+            value_min real,
+            value_max real,
+            value_count integer not null default 0,
+            evidence_count integer not null default 0,
+            source_count integer not null default 0,
+            variant_count integer not null default 0,
+            value_texts text not null default '',
+            updated_at text not null default current_timestamp,
+            unique (entity_id, stat_name, stat_type, unit)
+        );
+
+        create index if not exists idx_entity_stat_rollups_entity
+            on entity_stat_rollups(entity_id);
+        create index if not exists idx_entity_stat_rollups_stat
+            on entity_stat_rollups(stat_name, stat_type);
+
         create table if not exists entity_images (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

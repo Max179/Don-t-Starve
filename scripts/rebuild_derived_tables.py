@@ -25,6 +25,7 @@ from dst_wiki_db.entity_profiles import rebuild_entity_profile_json
 from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.source_catalog import rebuild_source_catalog
+from dst_wiki_db.stat_rollups import rebuild_entity_stat_rollups
 from dst_wiki_db.stats import rebuild_entity_stat_values, rebuild_entity_stats
 from dst_wiki_db.taxonomy import rebuild_entity_taxonomy
 from dst_wiki_db.targets import rebuild_entity_targets
@@ -46,6 +47,7 @@ def main(argv=None):
     recipe_count = rebuild_recipe_ingredients(conn)
     stat_count = rebuild_entity_stats(conn)
     stat_value_count = rebuild_entity_stat_values(conn)
+    stat_rollup_count = rebuild_entity_stat_rollups(conn)
     fact_count = rebuild_entity_facts(conn)
     variant_count = rebuild_entity_variants(conn)
     category_count = rebuild_entity_categories(conn)
@@ -71,6 +73,7 @@ def main(argv=None):
         "recipe_ingredient_targets": target_counts["recipe_ingredient_targets"],
         "entity_stats": stat_count,
         "entity_stat_values": stat_value_count,
+        "entity_stat_rollups": stat_rollup_count,
         "entity_facts": fact_count,
         "entity_fact_targets": target_counts["entity_fact_targets"],
         "entity_relation_targets": target_counts["entity_relation_targets"],

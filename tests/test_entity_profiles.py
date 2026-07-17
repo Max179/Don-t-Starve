@@ -110,6 +110,19 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     )
     conn.execute(
         """
+        insert into entity_stat_rollups (
+            entity_id, slug, canonical_title, kind, stat_name, stat_type,
+            unit, value_min, value_max, value_count, evidence_count,
+            source_count, variant_count, value_texts
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                'regrowth_time', 'world', 'days', 3, 5, 2, 1, 1, 0,
+                '3-5 days')
+        """,
+        (entity_id,),
+    )
+    conn.execute(
+        """
         insert into entity_variant_summary (
             entity_id, slug, canonical_title, kind, variant_key,
             variant_type, label, attribute_count, stat_count, fact_count,
@@ -269,6 +282,8 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["media"][0]["image_name"] == "Berry Bush.png"
     assert profile["media"][0]["variant_key"] == "picked"
     assert profile["stats"][0]["stat_name"] == "regrowth_time"
+    assert profile["stat_rollups"][0]["stat_name"] == "regrowth_time"
+    assert profile["stat_rollups"][0]["value_range"] == {"min": 3.0, "max": 5.0}
     assert profile["variants"][0]["variant_key"] == "picked"
     assert profile["categories"] == [{"name": "Plants", "slug": "plants"}]
     assert profile["facts"][0]["fact_type"] == "drops"

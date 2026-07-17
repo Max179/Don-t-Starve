@@ -90,6 +90,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     entity_id = int(row["entity_id"])
     media = _media(conn, entity_id)
     stats = _stats(conn, entity_id)
+    stat_rollups = _stat_rollups(conn, entity_id)
     variants = _variants(conn, entity_id)
     categories = _categories(conn, entity_id)
     facts = _facts(conn, entity_id)
@@ -121,6 +122,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         },
         "media": media,
         "stats": stats,
+        "stat_rollups": stat_rollups,
         "variants": variants,
         "categories": categories,
         "facts": facts,
@@ -290,6 +292,45 @@ def _stats(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
             "value_number": _optional_float(row["value_number"]),
             "unit": str(row["unit"]),
             "variant_key": str(row["variant_key"] or ""),
+        }
+        for row in rows
+    ]
+
+
+def _stat_rollups(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """
+        select
+            stat_name,
+            stat_type,
+            unit,
+            value_min,
+            value_max,
+            value_count,
+            evidence_count,
+            source_count,
+            variant_count,
+            value_texts
+        from entity_stat_rollups
+        where entity_id = ?
+        order by stat_type, stat_name, unit, id
+        """,
+        (entity_id,),
+    ).fetchall()
+    return [
+        {
+            "stat_name": str(row["stat_name"]),
+            "stat_type": str(row["stat_type"]),
+            "unit": str(row["unit"]),
+            "value_range": {
+                "min": _optional_float(row["value_min"]),
+                "max": _optional_float(row["value_max"]),
+            },
+            "value_count": int(row["value_count"]),
+            "evidence_count": int(row["evidence_count"]),
+            "source_count": int(row["source_count"]),
+            "variant_count": int(row["variant_count"]),
+            "value_texts": str(row["value_texts"]),
         }
         for row in rows
     ]
