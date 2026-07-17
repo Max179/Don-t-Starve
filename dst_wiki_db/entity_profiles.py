@@ -99,6 +99,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     relationships = _relationships(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
+    food_profile = _food_profile(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -131,6 +132,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "relationships": relationships,
         "taxonomy": taxonomy,
         "combat_profile": combat_profile,
+        "food_profile": food_profile,
     }
 
 
@@ -637,6 +639,79 @@ def _combat_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] 
             "sources": int(row["source_count"]),
             "variants": int(row["variant_count"]),
         },
+    }
+
+
+def _food_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            health_min,
+            health_max,
+            health_text,
+            hunger_min,
+            hunger_max,
+            hunger_text,
+            sanity_min,
+            sanity_max,
+            sanity_text,
+            food_value_min,
+            food_value_max,
+            food_value_text,
+            spoil_days_min,
+            spoil_days_max,
+            spoil_text,
+            cooktime_seconds_min,
+            cooktime_seconds_max,
+            cooktime_text,
+            priority_min,
+            priority_max,
+            priority_text,
+            stat_count,
+            source_count,
+            variant_count,
+            has_restore_stats,
+            has_food_value
+        from entity_food_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "health": _profile_min_max_text(row, "health"),
+        "hunger": _profile_min_max_text(row, "hunger"),
+        "sanity": _profile_min_max_text(row, "sanity"),
+        "food_value": _profile_min_max_text(row, "food_value"),
+        "spoil_days": {
+            "min": _optional_float(row["spoil_days_min"]),
+            "max": _optional_float(row["spoil_days_max"]),
+            "text": str(row["spoil_text"] or ""),
+        },
+        "cooktime_seconds": {
+            "min": _optional_float(row["cooktime_seconds_min"]),
+            "max": _optional_float(row["cooktime_seconds_max"]),
+            "text": str(row["cooktime_text"] or ""),
+        },
+        "priority": _profile_min_max_text(row, "priority"),
+        "counts": {
+            "stats": int(row["stat_count"]),
+            "sources": int(row["source_count"]),
+            "variants": int(row["variant_count"]),
+        },
+        "flags": {
+            "has_restore_stats": bool(row["has_restore_stats"]),
+            "has_food_value": bool(row["has_food_value"]),
+        },
+    }
+
+
+def _profile_min_max_text(row: sqlite3.Row, prefix: str) -> dict[str, Any]:
+    return {
+        "min": _optional_float(row[f"{prefix}_min"]),
+        "max": _optional_float(row[f"{prefix}_max"]),
+        "text": str(row[f"{prefix}_text"] or ""),
     }
 
 

@@ -712,6 +712,31 @@ Each row stores min/max values, raw text, and evidence counts for health, damage
 
 Each compressed entity profile now includes a nullable `combat_profile` object so API consumers can read these battle/movement summaries directly from `entity_profile_json` without joining the raw stat tables.
 
+## Entity Food Profiles
+
+The database now includes `entity_food_profiles`, a one-row food/restoration summary table built from `entity_stat_rollups`. It normalizes both Food Infobox fields (`health`, `hunger`, `sanity`, `food_value`) and cooked recipe fields (`hp_restored`, `hunger_restored`, `sanity_restored`) into shared health, hunger, and sanity restore columns.
+
+This pass generated 454 food profile rows:
+
+- `item`: 248
+- `character`: 61
+- `food`: 57
+- `boss`: 47
+- `mob`: 29
+- `structure`: 12
+
+Each row stores min/max values and raw text for health, hunger, sanity, food value, spoil time, cook time, and recipe priority, along with stat/source/variant counts and boolean flags for restore stats and food value evidence.
+
+Example food profiles:
+
+- `Meatballs`: health 3, hunger 62.5, sanity 5, spoil time 10 days
+- `Pierogi`: health 40, hunger 37.5, sanity 5, spoil time 20 days
+- `Dragonpie`: health 40, hunger 75, sanity 5, spoil time 15 days
+- `Berries`: health 0-1, hunger 9.375-12.5, food value 0.5, spoil time 3-6 days
+- `Monster Meat`: health -20 to -3, hunger 18.75, sanity -15 to -10, food value 1
+
+Each compressed entity profile now includes a nullable `food_profile` object so applications can render food and restoration cards without joining raw stat tables.
+
 ## Media Download Manifest
 
 The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.

@@ -713,6 +713,48 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_combat_profiles_damage
             on entity_combat_profiles(damage_max);
 
+        create table if not exists entity_food_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            health_min real,
+            health_max real,
+            health_text text not null default '',
+            hunger_min real,
+            hunger_max real,
+            hunger_text text not null default '',
+            sanity_min real,
+            sanity_max real,
+            sanity_text text not null default '',
+            food_value_min real,
+            food_value_max real,
+            food_value_text text not null default '',
+            spoil_days_min real,
+            spoil_days_max real,
+            spoil_text text not null default '',
+            cooktime_seconds_min real,
+            cooktime_seconds_max real,
+            cooktime_text text not null default '',
+            priority_min real,
+            priority_max real,
+            priority_text text not null default '',
+            stat_count integer not null default 0,
+            source_count integer not null default 0,
+            variant_count integer not null default 0,
+            has_restore_stats integer not null default 0,
+            has_food_value integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_food_profiles_kind
+            on entity_food_profiles(kind);
+        create index if not exists idx_entity_food_profiles_hunger
+            on entity_food_profiles(hunger_max);
+        create index if not exists idx_entity_food_profiles_health
+            on entity_food_profiles(health_max);
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

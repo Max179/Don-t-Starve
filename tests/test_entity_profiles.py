@@ -234,6 +234,23 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id,),
     )
+    conn.execute(
+        """
+        insert into entity_food_profiles (
+            entity_id, slug, canonical_title, kind,
+            health_min, health_max, health_text,
+            hunger_min, hunger_max, hunger_text,
+            sanity_min, sanity_max, sanity_text,
+            spoil_days_min, spoil_days_max, spoil_text,
+            stat_count, source_count, variant_count, has_restore_stats,
+            has_food_value
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                1, 1, '1', 12.5, 12.5, '12.5', 0, 0, '0',
+                3, 5, '3-5 days', 4, 1, 0, 1, 0)
+        """,
+        (entity_id,),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
@@ -294,6 +311,8 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["taxonomy"][0]["taxonomy_key"] == "plant"
     assert profile["combat_profile"]["health"]["max"] == 100.0
     assert profile["combat_profile"]["damage"]["text"] == "10 / 20"
+    assert profile["food_profile"]["hunger"]["max"] == 12.5
+    assert profile["food_profile"]["spoil_days"]["text"] == "3-5 days"
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):
