@@ -663,6 +663,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             recipe_ingredient_count integer not null default 0,
             official_mention_count integer not null default 0,
             relationship_count integer not null default 0,
+            taxonomy_count integer not null default 0,
             profile_encoding text not null default 'json',
             profile_json text not null,
             updated_at text not null default current_timestamp
@@ -682,6 +683,26 @@ def init_db(conn: sqlite3.Connection) -> None:
             category_slug text not null,
             unique (entity_id, source_id, raw_page_id, category_slug)
         );
+
+        create table if not exists entity_taxonomy (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            taxonomy_type text not null,
+            taxonomy_key text not null,
+            label text not null,
+            confidence real not null default 0.8,
+            evidence_source text not null,
+            evidence_count integer not null default 1,
+            unique (entity_id, taxonomy_type, taxonomy_key)
+        );
+
+        create index if not exists idx_entity_taxonomy_entity
+            on entity_taxonomy(entity_id);
+        create index if not exists idx_entity_taxonomy_key
+            on entity_taxonomy(taxonomy_type, taxonomy_key);
 
         create table if not exists entity_identity_keys (
             id integer primary key,
@@ -728,6 +749,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         table="entity_profile_json",
         column="profile_encoding",
         definition="text not null default 'json'",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_profile_json",
+        column="taxonomy_count",
+        definition="integer not null default 0",
     )
 
 

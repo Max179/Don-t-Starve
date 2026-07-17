@@ -37,9 +37,10 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 entity_id, slug, canonical_title, kind, coverage_score,
                 media_count, stat_count, variant_count, category_count,
                 fact_count, recipe_ingredient_count, official_mention_count,
-                relationship_count, profile_encoding, profile_json, updated_at
+                relationship_count, taxonomy_count, profile_encoding,
+                profile_json, updated_at
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
             """,
             (
                 entity_id,
@@ -55,6 +56,7 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 counts["recipes"],
                 counts["official_mentions"],
                 counts["relationships"],
+                counts["taxonomy"],
                 PROFILE_ENCODING,
                 dump_profile_json(profile),
             ),
@@ -94,6 +96,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     recipes = _recipes(conn, entity_id)
     official_mentions = _official_mentions(conn, entity_id)
     relationships = _relationships(conn, entity_id)
+    taxonomy = _taxonomy(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -113,6 +116,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
             "recipes": len(recipes),
             "official_mentions": len(official_mentions),
             "relationships": len(relationships),
+            "taxonomy": len(taxonomy),
         },
         "media": media,
         "stats": stats,
@@ -122,6 +126,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "recipes": recipes,
         "official_mentions": official_mentions,
         "relationships": relationships,
+        "taxonomy": taxonomy,
     }
 
 
@@ -503,6 +508,35 @@ def _relationships(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, A
             "probability_text": row["probability_text"],
             "variant_key": str(row["variant_key"] or ""),
             "confidence": _optional_float(row["confidence"]),
+        }
+        for row in rows
+    ]
+
+
+def _taxonomy(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """
+        select
+            taxonomy_type,
+            taxonomy_key,
+            label,
+            confidence,
+            evidence_source,
+            evidence_count
+        from entity_taxonomy
+        where entity_id = ?
+        order by taxonomy_type, taxonomy_key, id
+        """,
+        (entity_id,),
+    ).fetchall()
+    return [
+        {
+            "taxonomy_type": str(row["taxonomy_type"]),
+            "taxonomy_key": str(row["taxonomy_key"]),
+            "label": str(row["label"]),
+            "confidence": _optional_float(row["confidence"]),
+            "evidence_source": str(row["evidence_source"]),
+            "evidence_count": int(row["evidence_count"]),
         }
         for row in rows
     ]

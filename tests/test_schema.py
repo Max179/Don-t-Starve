@@ -99,5 +99,6 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "entity_variant_summary",
         "entity_profile_json",
         "entity_gameplay_edges",
+        "entity_taxonomy",
         "run_metadata",
     }.issubset(tables)

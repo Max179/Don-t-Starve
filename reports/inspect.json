@@ -35,6 +35,7 @@
     "entity_identity_keys": 8690,
     "cross_source_matches": 0,
     "entity_coverage": 2252,
+    "entity_taxonomy": 23810,
     "entity_profile_json": 2252
   },
   "sample_entities": [

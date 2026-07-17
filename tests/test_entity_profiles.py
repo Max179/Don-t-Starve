@@ -195,6 +195,17 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id, berries_id, source_id),
     )
+    conn.execute(
+        """
+        insert into entity_taxonomy (
+            entity_id, slug, canonical_title, kind, taxonomy_type,
+            taxonomy_key, label, confidence, evidence_source, evidence_count
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant', 'kind',
+                'plant', 'Plant', 1.0, 'entities.kind', 1)
+        """,
+        (entity_id,),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
@@ -204,7 +215,8 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         select entity_id, slug, canonical_title, kind, media_count,
                stat_count, variant_count, category_count, fact_count,
                recipe_ingredient_count, official_mention_count,
-               relationship_count, profile_encoding, profile_json
+               relationship_count, taxonomy_count, profile_encoding,
+               profile_json
         from entity_profile_json
         where entity_id = ?
         """,
@@ -226,6 +238,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "recipe_ingredient_count": 1,
         "official_mention_count": 1,
         "relationship_count": 1,
+        "taxonomy_count": 1,
         "profile_encoding": "gzip+base64+json",
         "profile_json": profile,
     }
@@ -248,6 +261,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["official_mentions"][0]["title"] == "Berry Bush update"
     assert profile["relationships"][0]["edge_type"] == "drops"
     assert profile["relationships"][0]["related_title"] == "Berries"
+    assert profile["taxonomy"][0]["taxonomy_key"] == "plant"
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):

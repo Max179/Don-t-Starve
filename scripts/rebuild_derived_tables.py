@@ -24,6 +24,7 @@ from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.source_catalog import rebuild_source_catalog
 from dst_wiki_db.stats import rebuild_entity_stat_values, rebuild_entity_stats
+from dst_wiki_db.taxonomy import rebuild_entity_taxonomy
 from dst_wiki_db.targets import rebuild_entity_targets
 from dst_wiki_db.variant_summary import rebuild_entity_variant_summary
 from dst_wiki_db.variants import rebuild_entity_variants
@@ -59,6 +60,7 @@ def main(argv=None):
     gameplay_edge_count = rebuild_entity_gameplay_edges(conn)
     variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
+    taxonomy_count = rebuild_entity_taxonomy(conn)
     profile_count = rebuild_entity_profile_json(conn)
     payload = {
         "recipe_ingredients": recipe_count,
@@ -92,6 +94,7 @@ def main(argv=None):
         "entity_identity_keys": identity_count,
         "entity_variant_summary": variant_summary_count,
         "entity_coverage": coverage_count,
+        "entity_taxonomy": taxonomy_count,
         "entity_profile_json": profile_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
