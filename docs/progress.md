@@ -737,6 +737,28 @@ Example food profiles:
 
 Each compressed entity profile now includes a nullable `food_profile` object so applications can render food and restoration cards without joining raw stat tables.
 
+## Entity Item Profiles
+
+The database now includes `entity_item_profiles`, a one-row item/equipment summary table built from `entity_stat_rollups`. It keeps item-oriented fields separate from mob combat profiles by limiting rows to `kind in ('item', 'food')`, while still bringing weapon `damage` from combat stats into item cards.
+
+This pass generated 788 item profile rows:
+
+- `item`: 730
+- `food`: 58
+
+Each row stores min/max values and raw text for damage, durability, protection, water resistance, stack, stack limit, burn time, tier, resources, renew, and priority, plus stat/source/variant counts and boolean flags for weapon, armor, and stack evidence.
+
+Example item profiles:
+
+- `Football Helmet`: durability 315-450, protection 80%, water resistance 20%, tier 2, does not stack
+- `Log Suit`: durability 315-450, protection 80%, tier 1, does not stack
+- `Spear`: durability 150, tier 1, does not stack
+- `Tentacle Spike`: damage 51, durability 100
+- `Torch`: damage up to 80, water resistance 20%, tier 0
+- `Backpack`: tier 1, does not stack
+
+Each compressed entity profile now includes a nullable `item_profile` object so applications can render inventory, equipment, weapon, and armor cards without joining raw stat tables.
+
 ## Media Download Manifest
 
 The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.

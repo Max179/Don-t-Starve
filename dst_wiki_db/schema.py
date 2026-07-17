@@ -755,6 +755,61 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_food_profiles_health
             on entity_food_profiles(health_max);
 
+        create table if not exists entity_item_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            damage_min real,
+            damage_max real,
+            damage_text text not null default '',
+            durability_min real,
+            durability_max real,
+            durability_text text not null default '',
+            protection_min real,
+            protection_max real,
+            protection_text text not null default '',
+            water_resistance_min real,
+            water_resistance_max real,
+            water_resistance_text text not null default '',
+            stack_min real,
+            stack_max real,
+            stack_text text not null default '',
+            stacklimit_min real,
+            stacklimit_max real,
+            stacklimit_text text not null default '',
+            burn_time_seconds_min real,
+            burn_time_seconds_max real,
+            burn_time_text text not null default '',
+            tier_min real,
+            tier_max real,
+            tier_text text not null default '',
+            resources_min real,
+            resources_max real,
+            resources_text text not null default '',
+            renew_min real,
+            renew_max real,
+            renew_text text not null default '',
+            priority_min real,
+            priority_max real,
+            priority_text text not null default '',
+            stat_count integer not null default 0,
+            source_count integer not null default 0,
+            variant_count integer not null default 0,
+            has_weapon_stats integer not null default 0,
+            has_armor_stats integer not null default 0,
+            has_stack_stats integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_item_profiles_kind
+            on entity_item_profiles(kind);
+        create index if not exists idx_entity_item_profiles_damage
+            on entity_item_profiles(damage_max);
+        create index if not exists idx_entity_item_profiles_durability
+            on entity_item_profiles(durability_max);
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

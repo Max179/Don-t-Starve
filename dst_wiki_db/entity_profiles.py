@@ -100,6 +100,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     taxonomy = _taxonomy(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
     food_profile = _food_profile(conn, entity_id)
+    item_profile = _item_profile(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -133,6 +134,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "taxonomy": taxonomy,
         "combat_profile": combat_profile,
         "food_profile": food_profile,
+        "item_profile": item_profile,
     }
 
 
@@ -703,6 +705,85 @@ def _food_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | 
         "flags": {
             "has_restore_stats": bool(row["has_restore_stats"]),
             "has_food_value": bool(row["has_food_value"]),
+        },
+    }
+
+
+def _item_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            damage_min,
+            damage_max,
+            damage_text,
+            durability_min,
+            durability_max,
+            durability_text,
+            protection_min,
+            protection_max,
+            protection_text,
+            water_resistance_min,
+            water_resistance_max,
+            water_resistance_text,
+            stack_min,
+            stack_max,
+            stack_text,
+            stacklimit_min,
+            stacklimit_max,
+            stacklimit_text,
+            burn_time_seconds_min,
+            burn_time_seconds_max,
+            burn_time_text,
+            tier_min,
+            tier_max,
+            tier_text,
+            resources_min,
+            resources_max,
+            resources_text,
+            renew_min,
+            renew_max,
+            renew_text,
+            priority_min,
+            priority_max,
+            priority_text,
+            stat_count,
+            source_count,
+            variant_count,
+            has_weapon_stats,
+            has_armor_stats,
+            has_stack_stats
+        from entity_item_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "damage": _profile_min_max_text(row, "damage"),
+        "durability": _profile_min_max_text(row, "durability"),
+        "protection": _profile_min_max_text(row, "protection"),
+        "water_resistance": _profile_min_max_text(row, "water_resistance"),
+        "stack": _profile_min_max_text(row, "stack"),
+        "stacklimit": _profile_min_max_text(row, "stacklimit"),
+        "burn_time_seconds": {
+            "min": _optional_float(row["burn_time_seconds_min"]),
+            "max": _optional_float(row["burn_time_seconds_max"]),
+            "text": str(row["burn_time_text"] or ""),
+        },
+        "tier": _profile_min_max_text(row, "tier"),
+        "resources": _profile_min_max_text(row, "resources"),
+        "renew": _profile_min_max_text(row, "renew"),
+        "priority": _profile_min_max_text(row, "priority"),
+        "counts": {
+            "stats": int(row["stat_count"]),
+            "sources": int(row["source_count"]),
+            "variants": int(row["variant_count"]),
+        },
+        "flags": {
+            "has_weapon_stats": bool(row["has_weapon_stats"]),
+            "has_armor_stats": bool(row["has_armor_stats"]),
+            "has_stack_stats": bool(row["has_stack_stats"]),
         },
     }
 

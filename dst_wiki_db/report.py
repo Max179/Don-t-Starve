@@ -41,6 +41,7 @@ COUNT_TABLES = [
     "entity_gameplay_edges",
     "entity_combat_profiles",
     "entity_food_profiles",
+    "entity_item_profiles",
     "entity_variants",
     "entity_variant_summary",
     "entity_categories",

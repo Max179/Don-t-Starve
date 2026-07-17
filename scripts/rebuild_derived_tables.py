@@ -16,6 +16,7 @@ from dst_wiki_db.food_profiles import rebuild_entity_food_profiles
 from dst_wiki_db.gameplay_edges import rebuild_entity_gameplay_edges
 from dst_wiki_db.image_variants import rebuild_image_variants
 from dst_wiki_db.identity import rebuild_identity_keys
+from dst_wiki_db.item_profiles import rebuild_entity_item_profiles
 from dst_wiki_db.media_assets import rebuild_entity_media_assets
 from dst_wiki_db.media_downloads import rebuild_entity_media_downloads
 from dst_wiki_db.official_mentions import rebuild_official_record_mentions
@@ -66,6 +67,7 @@ def main(argv=None):
     gameplay_edge_count = rebuild_entity_gameplay_edges(conn)
     combat_profile_count = rebuild_entity_combat_profiles(conn)
     food_profile_count = rebuild_entity_food_profiles(conn)
+    item_profile_count = rebuild_entity_item_profiles(conn)
     variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
     taxonomy_count = rebuild_entity_taxonomy(conn)
@@ -82,6 +84,7 @@ def main(argv=None):
         "entity_gameplay_edges": gameplay_edge_count,
         "entity_combat_profiles": combat_profile_count,
         "entity_food_profiles": food_profile_count,
+        "entity_item_profiles": item_profile_count,
         "entity_variants": variant_count,
         "entity_categories": category_count,
         "page_images": page_image_count,

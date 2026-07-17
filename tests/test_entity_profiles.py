@@ -251,6 +251,21 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id,),
     )
+    conn.execute(
+        """
+        insert into entity_item_profiles (
+            entity_id, slug, canonical_title, kind,
+            durability_min, durability_max, durability_text,
+            stack_text, tier_min, tier_max, tier_text,
+            stat_count, source_count, variant_count, has_weapon_stats,
+            has_armor_stats, has_stack_stats
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                5, 10, '5 / 10', 'Does not stack', 1, 2, '1 / 2',
+                3, 1, 0, 1, 0, 1)
+        """,
+        (entity_id,),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
@@ -313,6 +328,9 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["combat_profile"]["damage"]["text"] == "10 / 20"
     assert profile["food_profile"]["hunger"]["max"] == 12.5
     assert profile["food_profile"]["spoil_days"]["text"] == "3-5 days"
+    assert profile["item_profile"]["durability"]["max"] == 10.0
+    assert profile["item_profile"]["stack"]["text"] == "Does not stack"
+    assert profile["item_profile"]["flags"]["has_stack_stats"] is True
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):
