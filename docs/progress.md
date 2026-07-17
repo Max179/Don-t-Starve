@@ -609,6 +609,33 @@ python3 scripts/compress_raw_wikitext.py \
   --report reports/raw_wikitext_compression.json
 ```
 
+## Community Guide Library
+
+The database now includes a curated Chinese community-guide discovery layer. It is intentionally separate from canonical mechanics tables: guide rows are metadata, summaries, reliability labels, topic tags, and verification reminders rather than copied article bodies or promoted gameplay facts.
+
+This pass imported [data/community_guides_seed.json](../data/community_guides_seed.json) into SQLite:
+
+- `community_guide_sources`: 21 rows
+- `community_guide_topics`: 77 rows
+- `community_guide_topic_index`: 5 rows
+
+Platform coverage:
+
+- `Bilibili`: 8
+- `Zhihu`: 5
+- `Gamersky`: 4
+- `TapTap`: 3
+- `Xiaohongshu`: 1 blocked/search placeholder
+
+Status coverage:
+
+- `accepted`: 16
+- `accepted_with_caution`: 3
+- `candidate`: 1
+- `needs_login`: 1
+
+The topic index currently covers beginner routes, food/healing, farming/giant crops, caves/ancient ruins, and bosses. Each topic stores recommended guide ids and explicit verification reminders such as checking food stats, nutrient tables, boss phase mechanics, loot probabilities, and DS-vs-DST differences against the local database, official sources, or current Wiki pages.
+
 ## Entity Stat Rollups
 
 The database now includes `entity_stat_rollups`, a query-oriented summary table over all normalized stat rows. It groups by entity, stat name, stat type, and unit, keeping min/max numeric values, raw value texts, numeric value count, evidence row count, source count, and variant count.

@@ -1,0 +1,312 @@
+{
+  "generated_at": "2026-07-18T00:00:00+08:00",
+  "scope": "Chinese community guide curation for Don't Starve / Don't Starve Together",
+  "policy": {
+    "store": "metadata, short summaries, reliability notes, topic tags, review status",
+    "avoid": "bulk copying platform articles, images, or unverifiable claims",
+    "verify_precise_facts_against": [
+      "data/dont_starve_wiki.sqlite",
+      "Klei official updates",
+      "Steam official records",
+      "current community wiki"
+    ]
+  },
+  "source_records": [
+    {
+      "id": "bilibili-yadan-beginner-bv1n8411d7sl",
+      "platform": "Bilibili",
+      "title": "饥荒萌新终极入门攻略！",
+      "author": "亚丹Ardent",
+      "url": "https://www.bilibili.com/video/BV1n8411d7SL/",
+      "published": "2023-08-05",
+      "observed": "2026-07-18",
+      "reliability": "A",
+      "topics": ["beginner", "opening_route", "biomes", "dst"],
+      "status": "accepted",
+      "notes": "High-engagement video series entry; useful as the main visual beginner route. Recheck new mechanics and role skill trees."
+    },
+    {
+      "id": "zhihu-large-guide-index",
+      "platform": "Zhihu",
+      "title": "饥荒联机版大型攻略——简介与目录",
+      "author": "烤土豆不加盐",
+      "url": "https://zhuanlan.zhihu.com/p/156956476",
+      "observed": "2026-07-18",
+      "reliability": "A",
+      "topics": ["guide_index", "dst", "longform"],
+      "status": "accepted",
+      "notes": "Structured longform guide index and column entry; use as text-based table of contents."
+    },
+    {
+      "id": "zhihu-large-guide-column",
+      "platform": "Zhihu",
+      "title": "饥荒联机版大型攻略",
+      "author": "烤土豆不加盐",
+      "url": "https://www.zhihu.com/column/c_1263263104403988480",
+      "observed": "2026-07-18",
+      "reliability": "A",
+      "topics": ["guide_index", "dst", "longform"],
+      "status": "accepted",
+      "notes": "Column observed with multiple guide entries and strong community signal."
+    },
+    {
+      "id": "taptap-april-full-beginner-route",
+      "platform": "TapTap",
+      "title": "(第4次更新) 饥荒联机版(新手向)全程攻略持续更新补充",
+      "author": "April",
+      "url": "https://www.taptap.cn/moment/156969472316409026",
+      "updated": "2023-05-30",
+      "observed": "2026-07-18",
+      "reliability": "B+",
+      "topics": ["beginner", "timeline", "seasonal_survival", "boss_intro", "dst"],
+      "status": "accepted",
+      "notes": "Useful 1-75 day scaffold. Treat as route advice and verify version-sensitive claims."
+    },
+    {
+      "id": "gamersky-dst-guide-index",
+      "platform": "Gamersky",
+      "title": "饥荒：联机版攻略秘籍",
+      "url": "https://www.gamersky.com/z/dont-starve-together/744249_66425/",
+      "observed": "2026-07-18",
+      "reliability": "B",
+      "topics": ["guide_index", "dst", "chinese_portal"],
+      "status": "accepted",
+      "notes": "Portal/index page for Chinese guides; individual articles still need per-page review."
+    },
+    {
+      "id": "zhihu-survival-chapter",
+      "platform": "Zhihu",
+      "title": "饥荒联机版大型攻略——生存篇",
+      "url": "https://zhuanlan.zhihu.com/p/156964823",
+      "observed": "2026-07-18",
+      "reliability": "A-",
+      "topics": ["survival", "food_basics", "beginner", "dst"],
+      "status": "accepted",
+      "notes": "Good text reference for basic survival and early cooking; verify exact food stats."
+    },
+    {
+      "id": "zhihu-food-chapter",
+      "platform": "Zhihu",
+      "title": "饥荒联机版大型攻略——食物篇",
+      "url": "https://zhuanlan.zhihu.com/p/160941435",
+      "observed": "2026-07-18",
+      "reliability": "A-",
+      "topics": ["food", "recipes", "healing", "dst"],
+      "status": "accepted",
+      "notes": "Useful for recipe recommendations; exact recipe predicates should be verified against database or wiki."
+    },
+    {
+      "id": "gamersky-recipes-2016",
+      "platform": "Gamersky",
+      "title": "《饥荒》实用食谱及推荐做法",
+      "url": "https://www.gamersky.com/handbook/201612/847156_3.shtml",
+      "published": "2016-12-14",
+      "observed": "2026-07-18",
+      "reliability": "B-",
+      "topics": ["food", "recipes", "legacy"],
+      "status": "accepted_with_caution",
+      "notes": "Older recipe article; useful as a recipe idea source, not a current DST fact authority."
+    },
+    {
+      "id": "gamersky-giant-crop-2022",
+      "platform": "Gamersky",
+      "title": "《饥荒》巨大作物种植攻略 巨大作物怎么种",
+      "url": "https://www.gamersky.com/handbook/202206/1487506.shtml",
+      "published": "2022-06-01",
+      "observed": "2026-07-18",
+      "reliability": "B",
+      "topics": ["farming", "giant_crops", "dst"],
+      "status": "accepted",
+      "notes": "Clear giant crop setup guide; cross-check nutrients and crop details."
+    },
+    {
+      "id": "zhihu-giant-crop-math",
+      "platform": "Zhihu",
+      "title": "饥荒联机版巨大农作物种植搭配技巧",
+      "url": "https://zhuanlan.zhihu.com/p/429409488",
+      "observed": "2026-07-18",
+      "reliability": "B+",
+      "topics": ["farming", "nutrients", "giant_crops", "dst"],
+      "status": "accepted",
+      "notes": "Mechanics-oriented farming source for nutrient and crop pairing logic."
+    },
+    {
+      "id": "bilibili-giant-crop-2025",
+      "platform": "Bilibili",
+      "title": "巨大果实种植方法",
+      "url": "https://www.bilibili.com/opus/1111623753429680169",
+      "published": "2025-09-12",
+      "observed": "2026-07-18",
+      "reliability": "B",
+      "topics": ["farming", "giant_crops", "beginner", "dst"],
+      "status": "accepted",
+      "notes": "Newer Bilibili note for giant crop basics; verify nutrient tables and crop combinations."
+    },
+    {
+      "id": "bilibili-ancient-ruins-diagrams",
+      "platform": "Bilibili",
+      "title": "「饥荒联机版」洞穴远古区知识点汇总图",
+      "author": "悲象BluElephant",
+      "url": "https://www.bilibili.com/opus/905368020717666325",
+      "updated": "2024-03-06",
+      "observed": "2026-07-18",
+      "reliability": "B+",
+      "topics": ["caves", "ancient_ruins", "ancient_guardian", "dst"],
+      "status": "accepted",
+      "notes": "Diagram-based knowledge cards for ruins. Recheck loot probabilities and current mechanics."
+    },
+    {
+      "id": "bilibili-fuelweaver-ancient-guide",
+      "platform": "Bilibili",
+      "title": "洞穴远古全攻略：暗影编织者Boss解析",
+      "url": "https://www.bilibili.com/video/BV1Y7411j7Xd/",
+      "published": "2020-02-20",
+      "observed": "2026-07-18",
+      "reliability": "B",
+      "topics": ["caves", "ancient_ruins", "fuelweaver", "dst", "legacy"],
+      "status": "accepted_with_caution",
+      "notes": "Older but substantial cave/ancient route video; use for route concepts, verify current boss details."
+    },
+    {
+      "id": "bilibili-cave-map-analysis",
+      "platform": "Bilibili",
+      "title": "地图解析视频（洞穴篇/远古篇）",
+      "author": "穆白white",
+      "url": "https://www.bilibili.com/video/BV1NS4y1Z7fD/",
+      "published": "2022-01-24",
+      "observed": "2026-07-18",
+      "reliability": "B",
+      "topics": ["caves", "map_generation", "ancient_ruins", "dst"],
+      "status": "accepted",
+      "notes": "Useful cave map generation and location-reading reference."
+    },
+    {
+      "id": "gamersky-dragonfly-2016",
+      "platform": "Gamersky",
+      "title": "《饥荒》联机版龙蝇打法图文教程",
+      "url": "https://www.gamersky.com/handbook/201611/831232.shtml",
+      "published": "2016-11",
+      "observed": "2026-07-18",
+      "reliability": "C+",
+      "topics": ["boss", "dragonfly", "legacy", "dst"],
+      "status": "accepted_with_caution",
+      "notes": "Old tactic source. Keep as historical method only; require modern verification before recommendation."
+    },
+    {
+      "id": "taptap-beginner-tips-2025",
+      "platform": "TapTap",
+      "title": "饥荒新手需要知道一些东西",
+      "url": "https://www.taptap.cn/moment/640156117896267673",
+      "published": "2025-02-16",
+      "observed": "2026-07-18",
+      "reliability": "B-",
+      "topics": ["beginner_tips", "food", "tech", "armor", "dst"],
+      "status": "accepted",
+      "notes": "Compact forum checklist; verify statements that differ between DS and DST."
+    },
+    {
+      "id": "taptap-guide-collection",
+      "platform": "TapTap",
+      "title": "饥荒合辑版攻略",
+      "url": "https://www.taptap.cn/collection/moment?id=%E9%A5%A5%E8%8D%92%E5%90%88%E8%BE%91%E7%89%88-%E6%94%BB%E7%95%A5-1106940401",
+      "observed": "2026-07-18",
+      "reliability": "C+",
+      "topics": ["guide_index", "mobile", "community_discovery"],
+      "status": "candidate",
+      "notes": "Collection page for discovery; split and review individual entries before accepting."
+    },
+    {
+      "id": "bilibili-task-based-beginner-cv16443362",
+      "platform": "Bilibili",
+      "title": "饥荒联机版任务化新手教程（初见向）",
+      "url": "https://www.bilibili.com/read/cv16443362/",
+      "observed": "2026-07-18",
+      "reliability": "B",
+      "topics": ["beginner", "checklist", "dst"],
+      "status": "accepted",
+      "notes": "Good candidate for a task/checklist-style beginner flow."
+    },
+    {
+      "id": "bilibili-beginner-entry-cv23367764",
+      "platform": "Bilibili",
+      "title": "饥荒联机版新手入坑攻略",
+      "url": "https://www.bilibili.com/read/cv23367764/",
+      "observed": "2026-07-18",
+      "reliability": "B-",
+      "topics": ["beginner", "world_setup", "character_selection", "dst"],
+      "status": "accepted",
+      "notes": "Basic entry article; use as supporting source."
+    },
+    {
+      "id": "bilibili-longform-beginner-opus-926001627708522512",
+      "platform": "Bilibili",
+      "title": "饥荒联机版新手攻略！万字长文！看完轻松过四季！！！",
+      "url": "https://www.bilibili.com/opus/926001627708522512",
+      "observed": "2026-07-18",
+      "reliability": "B",
+      "topics": ["beginner", "seasonal_survival", "dst"],
+      "status": "accepted",
+      "notes": "Longform beginner article. Check whether it mirrors the Zhihu article before using both as independent evidence."
+    },
+    {
+      "id": "xiaohongshu-search-beginner-guides",
+      "platform": "Xiaohongshu",
+      "title": "小红书搜索：饥荒联机版攻略",
+      "url": "https://www.xiaohongshu.com/search_result?keyword=%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88%E6%94%BB%E7%95%A5",
+      "observed": "2026-07-18",
+      "reliability": "blocked",
+      "topics": ["community_discovery", "needs_login"],
+      "status": "needs_login",
+      "notes": "Search page returns only frontend shell in non-login/static access; no auditable note links were accepted."
+    }
+  ],
+  "topic_index": [
+    {
+      "topic": "beginner_route",
+      "recommended_sources": [
+        "bilibili-yadan-beginner-bv1n8411d7sl",
+        "zhihu-large-guide-index",
+        "taptap-april-full-beginner-route",
+        "bilibili-task-based-beginner-cv16443362"
+      ],
+      "verify": ["world settings", "season timing", "first boss timing", "role skill tree changes"]
+    },
+    {
+      "topic": "food_and_healing",
+      "recommended_sources": [
+        "zhihu-food-chapter",
+        "zhihu-survival-chapter",
+        "gamersky-recipes-2016",
+        "taptap-beginner-tips-2025"
+      ],
+      "verify": ["recipe predicates", "food stats", "spoilage", "DS vs DST differences"]
+    },
+    {
+      "topic": "farming_giant_crops",
+      "recommended_sources": [
+        "gamersky-giant-crop-2022",
+        "zhihu-giant-crop-math",
+        "bilibili-giant-crop-2025"
+      ],
+      "verify": ["nutrient table", "crop pairings", "growth stages", "version changes"]
+    },
+    {
+      "topic": "caves_and_ancient_ruins",
+      "recommended_sources": [
+        "bilibili-ancient-ruins-diagrams",
+        "bilibili-fuelweaver-ancient-guide",
+        "bilibili-cave-map-analysis"
+      ],
+      "verify": ["loot probabilities", "ancient crafting", "boss mechanics", "ruins reset behavior"]
+    },
+    {
+      "topic": "bosses",
+      "recommended_sources": [
+        "taptap-april-full-beginner-route",
+        "gamersky-dragonfly-2016",
+        "bilibili-fuelweaver-ancient-guide"
+      ],
+      "verify": ["health", "damage", "phase mechanics", "drops", "respawn timer"]
+    }
+  ]
+}

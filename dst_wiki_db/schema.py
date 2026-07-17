@@ -813,6 +813,48 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_taxonomy_key
             on entity_taxonomy(taxonomy_type, taxonomy_key);
 
+        create table if not exists community_guide_sources (
+            id integer primary key,
+            guide_id text not null unique,
+            platform text not null,
+            title text not null,
+            author text not null default '',
+            url text not null,
+            published text,
+            updated text,
+            observed text not null,
+            reliability text not null,
+            status text not null,
+            notes text not null default '',
+            scope text not null default '',
+            generated_at text not null default '',
+            imported_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_community_guide_sources_platform
+            on community_guide_sources(platform);
+        create index if not exists idx_community_guide_sources_status
+            on community_guide_sources(status);
+
+        create table if not exists community_guide_topics (
+            id integer primary key,
+            guide_source_id integer not null references community_guide_sources(id) on delete cascade,
+            guide_id text not null,
+            topic text not null,
+            unique (guide_source_id, topic)
+        );
+
+        create index if not exists idx_community_guide_topics_topic
+            on community_guide_topics(topic);
+
+        create table if not exists community_guide_topic_index (
+            id integer primary key,
+            topic text not null unique,
+            recommended_source_ids text not null,
+            verify_text text not null default '',
+            source_count integer not null default 0
+        );
+
         create table if not exists entity_identity_keys (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

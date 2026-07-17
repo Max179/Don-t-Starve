@@ -62,6 +62,14 @@ Checked on 2026-07-17 Asia/Shanghai during this build session. The ranked source
 - PatchBot: https://patchbot.io/games/dont-starve-together for update-discovery signals only.
 - Constraint: these sources do not replace wiki.gg, Klei, Steam, or Fandom evidence for mechanics, stats, images, or entity records.
 
+## 7. Chinese Community Guide Library
+
+- Local index: [docs/community_guides/README.md](community_guides/README.md)
+- Role: curated guide-discovery and play-route layer for Bilibili, Zhihu, Gamersky, TapTap, and Xiaohongshu.
+- Best use: collect beginner routes, seasonal checklists, food/farming recommendations, cave-route explanations, and boss-tactic candidates.
+- Constraint: community guides are not canonical data sources. Store metadata, short summaries, topic tags, reliability notes, and URLs; verify exact mechanics against official records, the local wiki database, or current Wiki pages before promoting facts into structured tables.
+- Current Xiaohongshu status: search pages returned a JavaScript application shell during this audit and no specific note links were accepted into the library without login/manual review.
+
 ## Common Wiki Structures
 
 Core categories to prioritize:
