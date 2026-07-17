@@ -33,6 +33,7 @@ from dst_wiki_db.taxonomy import rebuild_entity_taxonomy
 from dst_wiki_db.targets import rebuild_entity_targets
 from dst_wiki_db.variant_summary import rebuild_entity_variant_summary
 from dst_wiki_db.variants import rebuild_entity_variants
+from dst_wiki_db.world_profiles import rebuild_entity_world_profiles
 from dst_wiki_db.schema import connect, init_db
 
 
@@ -68,6 +69,7 @@ def main(argv=None):
     combat_profile_count = rebuild_entity_combat_profiles(conn)
     food_profile_count = rebuild_entity_food_profiles(conn)
     item_profile_count = rebuild_entity_item_profiles(conn)
+    world_profile_count = rebuild_entity_world_profiles(conn)
     variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
     taxonomy_count = rebuild_entity_taxonomy(conn)
@@ -85,6 +87,7 @@ def main(argv=None):
         "entity_combat_profiles": combat_profile_count,
         "entity_food_profiles": food_profile_count,
         "entity_item_profiles": item_profile_count,
+        "entity_world_profiles": world_profile_count,
         "entity_variants": variant_count,
         "entity_categories": category_count,
         "page_images": page_image_count,

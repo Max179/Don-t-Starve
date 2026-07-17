@@ -810,6 +810,55 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_item_profiles_durability
             on entity_item_profiles(durability_max);
 
+        create table if not exists entity_world_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            biome_text text not null default '',
+            spawn_code_text text not null default '',
+            renew_text text not null default '',
+            resources_min real,
+            resources_max real,
+            resources_text text not null default '',
+            tool_text text not null default '',
+            perk_text text not null default '',
+            special_ability_text text not null default '',
+            growth_formula_text text not null default '',
+            seasons_text text not null default '',
+            health_min real,
+            health_max real,
+            health_text text not null default '',
+            damage_min real,
+            damage_max real,
+            damage_text text not null default '',
+            attack_range_min real,
+            attack_range_max real,
+            attack_range_text text not null default '',
+            attack_period_min real,
+            attack_period_max real,
+            attack_period_text text not null default '',
+            attribute_count integer not null default 0,
+            stat_count integer not null default 0,
+            source_count integer not null default 0,
+            variant_count integer not null default 0,
+            has_biome integer not null default 0,
+            has_spawn_code integer not null default 0,
+            is_renewable integer not null default 0,
+            has_resources integer not null default 0,
+            has_growth_data integer not null default 0,
+            has_combat_stats integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_world_profiles_kind
+            on entity_world_profiles(kind);
+        create index if not exists idx_entity_world_profiles_renewable
+            on entity_world_profiles(is_renewable);
+        create index if not exists idx_entity_world_profiles_combat
+            on entity_world_profiles(has_combat_stats);
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

@@ -759,6 +759,27 @@ Example item profiles:
 
 Each compressed entity profile now includes a nullable `item_profile` object so applications can render inventory, equipment, weapon, and armor cards without joining raw stat tables.
 
+## Entity World Profiles
+
+The database now includes `entity_world_profiles`, a one-row summary table for plants, structures, and biome/world objects. It combines selected infobox attributes (`biome`, `spawn_code`, `renew`, `tool`, `perk`, `special_ability`, `growth_formula`, `seasons`) with normalized rollup stats for resources, health, damage, attack range, and attack period.
+
+This pass generated 249 world profile rows:
+
+- `structure`: 202
+- `plant`: 45
+- `biome`: 2
+
+Each row stores raw text evidence for biome, spawn code, renewability, tools, perks, special abilities, growth formulas, and seasons, plus min/max/text values for resources and world-object combat stats. It also exposes flags for biome evidence, spawn-code evidence, renewable status, resource evidence, growth data, and combat data.
+
+Example world profiles:
+
+- `Berry Bush`: biome `GrasslandForestJungle ()Cultivated ()`, spawn codes `berrybush | berrybush2`, renewable via cave regeneration/world regrowth
+- `Evergreen`: biome `ForestGrassland`, spawn codes for tall/normal/short/burnt/stump/sapling forms, resources up to 3
+- `Hanging Vine`: biome `Deep Rainforest`, spawn codes `grabbing_vine | hanging_vine`, damage 10, attack range 3, attack period 1
+- `Campfire`: spawn codes `campfire | firepit`
+
+Each compressed entity profile now includes a nullable `world_profile` object so plant, structure, and world-object pages can be rendered with habitat, prefab/spawn-code, renewability, resource, and defensive stat details without joining raw attributes.
+
 ## Media Download Manifest
 
 The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.

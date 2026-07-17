@@ -266,6 +266,26 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id,),
     )
+    conn.execute(
+        """
+        insert into entity_world_profiles (
+            entity_id, slug, canonical_title, kind,
+            biome_text, spawn_code_text, renew_text,
+            resources_min, resources_max, resources_text,
+            perk_text, health_min, health_max, health_text,
+            attribute_count, stat_count, source_count, variant_count,
+            has_biome, has_spawn_code, is_renewable, has_resources,
+            has_growth_data, has_combat_stats
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                'Grassland', 'berrybush | berrybush2',
+                'Yes:Cave RegenerationWorld Regrowth',
+                1, 3, 'Berries x1 | x3', 'Can be replanted',
+                10, 20, '10 / 20', 4, 2, 1, 0,
+                1, 1, 1, 1, 0, 1)
+        """,
+        (entity_id,),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
@@ -331,6 +351,10 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["item_profile"]["durability"]["max"] == 10.0
     assert profile["item_profile"]["stack"]["text"] == "Does not stack"
     assert profile["item_profile"]["flags"]["has_stack_stats"] is True
+    assert profile["world_profile"]["biome_text"] == "Grassland"
+    assert profile["world_profile"]["spawn_code_text"] == "berrybush | berrybush2"
+    assert profile["world_profile"]["resources"]["max"] == 3.0
+    assert profile["world_profile"]["flags"]["is_renewable"] is True
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):

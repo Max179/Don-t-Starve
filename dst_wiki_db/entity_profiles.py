@@ -101,6 +101,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     combat_profile = _combat_profile(conn, entity_id)
     food_profile = _food_profile(conn, entity_id)
     item_profile = _item_profile(conn, entity_id)
+    world_profile = _world_profile(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -135,6 +136,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "combat_profile": combat_profile,
         "food_profile": food_profile,
         "item_profile": item_profile,
+        "world_profile": world_profile,
     }
 
 
@@ -784,6 +786,85 @@ def _item_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | 
             "has_weapon_stats": bool(row["has_weapon_stats"]),
             "has_armor_stats": bool(row["has_armor_stats"]),
             "has_stack_stats": bool(row["has_stack_stats"]),
+        },
+    }
+
+
+def _world_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            biome_text,
+            spawn_code_text,
+            renew_text,
+            resources_min,
+            resources_max,
+            resources_text,
+            tool_text,
+            perk_text,
+            special_ability_text,
+            growth_formula_text,
+            seasons_text,
+            health_min,
+            health_max,
+            health_text,
+            damage_min,
+            damage_max,
+            damage_text,
+            attack_range_min,
+            attack_range_max,
+            attack_range_text,
+            attack_period_min,
+            attack_period_max,
+            attack_period_text,
+            attribute_count,
+            stat_count,
+            source_count,
+            variant_count,
+            has_biome,
+            has_spawn_code,
+            is_renewable,
+            has_resources,
+            has_growth_data,
+            has_combat_stats
+        from entity_world_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "biome_text": str(row["biome_text"] or ""),
+        "spawn_code_text": str(row["spawn_code_text"] or ""),
+        "renew_text": str(row["renew_text"] or ""),
+        "resources": {
+            "min": _optional_float(row["resources_min"]),
+            "max": _optional_float(row["resources_max"]),
+            "text": str(row["resources_text"] or ""),
+        },
+        "tool_text": str(row["tool_text"] or ""),
+        "perk_text": str(row["perk_text"] or ""),
+        "special_ability_text": str(row["special_ability_text"] or ""),
+        "growth_formula_text": str(row["growth_formula_text"] or ""),
+        "seasons_text": str(row["seasons_text"] or ""),
+        "health": _profile_min_max_text(row, "health"),
+        "damage": _profile_min_max_text(row, "damage"),
+        "attack_range": _profile_min_max_text(row, "attack_range"),
+        "attack_period": _profile_min_max_text(row, "attack_period"),
+        "counts": {
+            "attributes": int(row["attribute_count"]),
+            "stats": int(row["stat_count"]),
+            "sources": int(row["source_count"]),
+            "variants": int(row["variant_count"]),
+        },
+        "flags": {
+            "has_biome": bool(row["has_biome"]),
+            "has_spawn_code": bool(row["has_spawn_code"]),
+            "is_renewable": bool(row["is_renewable"]),
+            "has_resources": bool(row["has_resources"]),
+            "has_growth_data": bool(row["has_growth_data"]),
+            "has_combat_stats": bool(row["has_combat_stats"]),
         },
     }
 

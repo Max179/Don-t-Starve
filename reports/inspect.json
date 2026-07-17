@@ -37,6 +37,7 @@
     "entity_combat_profiles": 409,
     "entity_food_profiles": 454,
     "entity_item_profiles": 788,
+    "entity_world_profiles": 249,
     "entity_variants": 1282,
     "entity_variant_summary": 2982,
     "entity_categories": 12973,
