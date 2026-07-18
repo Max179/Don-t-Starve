@@ -780,6 +780,23 @@ Example world profiles:
 
 Each compressed entity profile now includes a nullable `world_profile` object so plant, structure, and world-object pages can be rendered with habitat, prefab/spawn-code, renewability, resource, and defensive stat details without joining raw attributes.
 
+## Entity Character Profiles
+
+The database now includes `entity_character_profiles`, a one-row summary table for character entries. It combines selected character infobox fields (`nick`, `motto`, `birthday`, `gender`, `species`, `voice`, `games`, `spawn_code`, `perk`, `survivability`, `bio`, `favorite_food`, `start_item`, and `item`) with normalized rollup stats for health, hunger, sanity, and damage.
+
+This pass generated 72 character profile rows.
+
+Each row stores raw text evidence for identity/flavor fields, spawn codes, perks, survivability, biography, favorite food, starting equipment, and character-specific items. It also stores min/max/text values for health, hunger, sanity, and damage, plus flags for core stat coverage, perks, start items, and bio availability.
+
+Example character profiles:
+
+- `Wigfrid`: health 200, hunger 120, sanity 120, damage 0.75-1.25, spawn code `wathgrithr`, nick `The Performance Artist`
+- `Wormwood`: health 150, hunger 150, sanity 200, spawn code `wormwood`, nick `The Lonesome`
+- `Wendy`: character identity row present, with source coverage currently coming mainly from identity/media fields
+- `Wilson`: character identity row present, with source coverage currently coming mainly from identity/media fields
+
+Each compressed entity profile now includes a nullable `character_profile` object so character pages can expose survivability, lore/flavor fields, prefab/spawn-code details, perks, starting items, and core stats without joining raw attributes.
+
 ## Media Download Manifest
 
 The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.

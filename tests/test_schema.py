@@ -108,6 +108,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "entity_food_profiles",
         "entity_item_profiles",
         "entity_world_profiles",
+        "entity_character_profiles",
         "entity_taxonomy",
         "run_metadata",
     }.issubset(tables)

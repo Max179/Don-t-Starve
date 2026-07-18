@@ -102,6 +102,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     food_profile = _food_profile(conn, entity_id)
     item_profile = _item_profile(conn, entity_id)
     world_profile = _world_profile(conn, entity_id)
+    character_profile = _character_profile(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -137,6 +138,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "food_profile": food_profile,
         "item_profile": item_profile,
         "world_profile": world_profile,
+        "character_profile": character_profile,
     }
 
 
@@ -865,6 +867,85 @@ def _world_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] |
             "has_resources": bool(row["has_resources"]),
             "has_growth_data": bool(row["has_growth_data"]),
             "has_combat_stats": bool(row["has_combat_stats"]),
+        },
+    }
+
+
+def _character_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            nick_text,
+            motto_text,
+            birthday_text,
+            gender_text,
+            species_text,
+            voice_text,
+            games_text,
+            spawn_code_text,
+            perk_text,
+            survivability_text,
+            bio_text,
+            favorite_food_text,
+            start_item_text,
+            character_item_text,
+            health_min,
+            health_max,
+            health_text,
+            hunger_min,
+            hunger_max,
+            hunger_text,
+            sanity_min,
+            sanity_max,
+            sanity_text,
+            damage_min,
+            damage_max,
+            damage_text,
+            attribute_count,
+            stat_count,
+            source_count,
+            variant_count,
+            has_core_stats,
+            has_perks,
+            has_start_items,
+            has_bio
+        from entity_character_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "nick_text": str(row["nick_text"] or ""),
+        "motto_text": str(row["motto_text"] or ""),
+        "birthday_text": str(row["birthday_text"] or ""),
+        "gender_text": str(row["gender_text"] or ""),
+        "species_text": str(row["species_text"] or ""),
+        "voice_text": str(row["voice_text"] or ""),
+        "games_text": str(row["games_text"] or ""),
+        "spawn_code_text": str(row["spawn_code_text"] or ""),
+        "perk_text": str(row["perk_text"] or ""),
+        "survivability_text": str(row["survivability_text"] or ""),
+        "bio_text": str(row["bio_text"] or ""),
+        "favorite_food_text": str(row["favorite_food_text"] or ""),
+        "start_item_text": str(row["start_item_text"] or ""),
+        "character_item_text": str(row["character_item_text"] or ""),
+        "health": _profile_min_max_text(row, "health"),
+        "hunger": _profile_min_max_text(row, "hunger"),
+        "sanity": _profile_min_max_text(row, "sanity"),
+        "damage": _profile_min_max_text(row, "damage"),
+        "counts": {
+            "attributes": int(row["attribute_count"]),
+            "stats": int(row["stat_count"]),
+            "sources": int(row["source_count"]),
+            "variants": int(row["variant_count"]),
+        },
+        "flags": {
+            "has_core_stats": bool(row["has_core_stats"]),
+            "has_perks": bool(row["has_perks"]),
+            "has_start_items": bool(row["has_start_items"]),
+            "has_bio": bool(row["has_bio"]),
         },
     }
 

@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
 
 from dst_wiki_db.facts import rebuild_entity_facts
 from dst_wiki_db.categories import rebuild_entity_categories
+from dst_wiki_db.character_profiles import rebuild_entity_character_profiles
 from dst_wiki_db.combat_profiles import rebuild_entity_combat_profiles
 from dst_wiki_db.entity_coverage import rebuild_entity_coverage
 from dst_wiki_db.food_profiles import rebuild_entity_food_profiles
@@ -70,6 +71,7 @@ def main(argv=None):
     food_profile_count = rebuild_entity_food_profiles(conn)
     item_profile_count = rebuild_entity_item_profiles(conn)
     world_profile_count = rebuild_entity_world_profiles(conn)
+    character_profile_count = rebuild_entity_character_profiles(conn)
     variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
     taxonomy_count = rebuild_entity_taxonomy(conn)
@@ -88,6 +90,7 @@ def main(argv=None):
         "entity_food_profiles": food_profile_count,
         "entity_item_profiles": item_profile_count,
         "entity_world_profiles": world_profile_count,
+        "entity_character_profiles": character_profile_count,
         "entity_variants": variant_count,
         "entity_categories": category_count,
         "page_images": page_image_count,

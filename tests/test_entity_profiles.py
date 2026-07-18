@@ -286,6 +286,25 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id,),
     )
+    conn.execute(
+        """
+        insert into entity_character_profiles (
+            entity_id, slug, canonical_title, kind,
+            nick_text, motto_text, birthday_text, spawn_code_text,
+            perk_text, start_item_text, health_min, health_max, health_text,
+            hunger_min, hunger_max, hunger_text, sanity_min, sanity_max,
+            sanity_text, attribute_count, stat_count, source_count,
+            variant_count, has_core_stats, has_perks, has_start_items,
+            has_bio
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                'The Bush', 'Stay berry ready.', 'April 1',
+                'berrybush', 'Can be replanted', 'Berries',
+                10, 20, '10 / 20', 50, 75, '50 / 75',
+                100, 100, '100', 6, 3, 1, 0, 1, 1, 1, 0)
+        """,
+        (entity_id,),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
@@ -355,6 +374,9 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["world_profile"]["spawn_code_text"] == "berrybush | berrybush2"
     assert profile["world_profile"]["resources"]["max"] == 3.0
     assert profile["world_profile"]["flags"]["is_renewable"] is True
+    assert profile["character_profile"]["nick_text"] == "The Bush"
+    assert profile["character_profile"]["health"]["max"] == 20.0
+    assert profile["character_profile"]["flags"]["has_perks"] is True
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):

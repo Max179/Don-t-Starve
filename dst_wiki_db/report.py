@@ -43,6 +43,7 @@ COUNT_TABLES = [
     "entity_food_profiles",
     "entity_item_profiles",
     "entity_world_profiles",
+    "entity_character_profiles",
     "entity_variants",
     "entity_variant_summary",
     "entity_categories",

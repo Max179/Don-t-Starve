@@ -859,6 +859,56 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_world_profiles_combat
             on entity_world_profiles(has_combat_stats);
 
+        create table if not exists entity_character_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            nick_text text not null default '',
+            motto_text text not null default '',
+            birthday_text text not null default '',
+            gender_text text not null default '',
+            species_text text not null default '',
+            voice_text text not null default '',
+            games_text text not null default '',
+            spawn_code_text text not null default '',
+            perk_text text not null default '',
+            survivability_text text not null default '',
+            bio_text text not null default '',
+            favorite_food_text text not null default '',
+            start_item_text text not null default '',
+            character_item_text text not null default '',
+            health_min real,
+            health_max real,
+            health_text text not null default '',
+            hunger_min real,
+            hunger_max real,
+            hunger_text text not null default '',
+            sanity_min real,
+            sanity_max real,
+            sanity_text text not null default '',
+            damage_min real,
+            damage_max real,
+            damage_text text not null default '',
+            attribute_count integer not null default 0,
+            stat_count integer not null default 0,
+            source_count integer not null default 0,
+            variant_count integer not null default 0,
+            has_core_stats integer not null default 0,
+            has_perks integer not null default 0,
+            has_start_items integer not null default 0,
+            has_bio integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_character_profiles_core
+            on entity_character_profiles(has_core_stats);
+        create index if not exists idx_entity_character_profiles_health
+            on entity_character_profiles(health_max);
+        create index if not exists idx_entity_character_profiles_damage
+            on entity_character_profiles(damage_max);
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,
