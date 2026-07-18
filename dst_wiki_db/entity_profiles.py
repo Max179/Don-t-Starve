@@ -9,6 +9,7 @@ from typing import Any
 
 PROFILE_ENCODING = "gzip+json"
 LEGACY_PROFILE_ENCODING = "gzip+base64+json"
+PROFILE_MEDIA_LIMIT = 50
 
 
 def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
@@ -118,6 +119,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     entity_id = int(row["entity_id"])
     attributes = _attributes(conn, entity_id)
     media = _media(conn, entity_id)
+    media_total = _media_total(conn, entity_id)
     stats = _stats(conn, entity_id)
     stat_rollups = _stat_rollups(conn, entity_id)
     variants = _variants(conn, entity_id)
@@ -151,7 +153,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "coverage": _coverage(conn, entity_id),
         "counts": {
             "attributes": len(attributes),
-            "media": len(media),
+            "media": media_total,
             "stats": len(stats),
             "variants": len(variants),
             "categories": len(categories),
@@ -339,8 +341,9 @@ def _media(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
         from entity_media_assets
         where entity_id = ?
         order by is_primary desc, is_variant desc, asset_source, image_name, id
+        limit ?
         """,
-        (entity_id,),
+        (entity_id, PROFILE_MEDIA_LIMIT),
     ).fetchall()
     return [
         {
@@ -363,6 +366,14 @@ def _media(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
         }
         for row in rows
     ]
+
+
+def _media_total(conn: sqlite3.Connection, entity_id: int) -> int:
+    row = conn.execute(
+        "select count(*) as value from entity_media_assets where entity_id = ?",
+        (entity_id,),
+    ).fetchone()
+    return int(row["value"])
 
 
 def _media_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:

@@ -8,17 +8,19 @@ PRIMARY_INFOBOX_ROLES = {"image", "inventoryimage", "inventoryImage"}
 
 
 def rebuild_entity_media_assets(conn: sqlite3.Connection) -> int:
-    existing_metadata = _existing_asset_metadata(conn)
+    existing_metadata, loose_metadata = _existing_asset_metadata(conn)
     conn.execute("delete from entity_media_assets")
     count = 0
-    count += _insert_infobox_assets(conn, existing_metadata)
-    count += _insert_page_assets(conn, existing_metadata)
+    count += _insert_infobox_assets(conn, existing_metadata, loose_metadata)
+    count += _insert_page_assets(conn, existing_metadata, loose_metadata)
     conn.commit()
     return count
 
 
 def _insert_infobox_assets(
-    conn: sqlite3.Connection, existing_metadata: dict[tuple[object, ...], dict[str, object]]
+    conn: sqlite3.Connection,
+    existing_metadata: dict[tuple[object, ...], dict[str, object]],
+    loose_metadata: dict[tuple[object, ...], dict[str, object]],
 ) -> int:
     rows = conn.execute(
         """
@@ -47,8 +49,10 @@ def _insert_infobox_assets(
         variant_type = _infobox_variant_type(variant_key)
         variant_label = _variant_label(variant_key)
         image_slug = _slug_from_image_name(str(row["image_name"]))
-        preserved = existing_metadata.get(
-            _asset_key(
+        preserved = _preserved_metadata(
+            existing_metadata,
+            loose_metadata,
+            exact_key=_asset_key(
                 entity_id=int(row["entity_id"]),
                 source_id=int(row["source_id"]),
                 asset_source="infobox",
@@ -56,7 +60,12 @@ def _insert_infobox_assets(
                 role=str(row["role"]),
                 description_url=row["description_url"],
             ),
-            {},
+            loose_key=_loose_asset_key(
+                entity_id=int(row["entity_id"]),
+                source_id=int(row["source_id"]),
+                asset_source="infobox",
+                image_slug=image_slug,
+            ),
         )
         conn.execute(
             """
@@ -97,7 +106,9 @@ def _insert_infobox_assets(
 
 
 def _insert_page_assets(
-    conn: sqlite3.Connection, existing_metadata: dict[tuple[object, ...], dict[str, object]]
+    conn: sqlite3.Connection,
+    existing_metadata: dict[tuple[object, ...], dict[str, object]],
+    loose_metadata: dict[tuple[object, ...], dict[str, object]],
 ) -> int:
     rows = conn.execute(
         """
@@ -123,8 +134,10 @@ def _insert_page_assets(
     count = 0
     for row in rows:
         variant_key = str(row["variant_key"] or "")
-        preserved = existing_metadata.get(
-            _asset_key(
+        preserved = _preserved_metadata(
+            existing_metadata,
+            loose_metadata,
+            exact_key=_asset_key(
                 entity_id=int(row["entity_id"]),
                 source_id=int(row["source_id"]),
                 asset_source="page_reference",
@@ -132,7 +145,12 @@ def _insert_page_assets(
                 role=str(row["role"]),
                 description_url=row["description_url"],
             ),
-            {},
+            loose_key=_loose_asset_key(
+                entity_id=int(row["entity_id"]),
+                source_id=int(row["source_id"]),
+                asset_source="page_reference",
+                image_slug=str(row["image_slug"]),
+            ),
         )
         conn.execute(
             """
@@ -172,7 +190,9 @@ def _insert_page_assets(
     return count
 
 
-def _existing_asset_metadata(conn: sqlite3.Connection) -> dict[tuple[object, ...], dict[str, object]]:
+def _existing_asset_metadata(
+    conn: sqlite3.Connection,
+) -> tuple[dict[tuple[object, ...], dict[str, object]], dict[tuple[object, ...], dict[str, object]]]:
     rows = conn.execute(
         """
         select
@@ -187,7 +207,7 @@ def _existing_asset_metadata(conn: sqlite3.Connection) -> dict[tuple[object, ...
            or coalesce(sha1, '') != ''
         """
     ).fetchall()
-    return {
+    exact = {
         _asset_key(
             entity_id=int(row["entity_id"]),
             source_id=int(row["source_id"]),
@@ -205,6 +225,35 @@ def _existing_asset_metadata(conn: sqlite3.Connection) -> dict[tuple[object, ...
         }
         for row in rows
     }
+    loose: dict[tuple[object, ...], dict[str, object]] = {}
+    for row in rows:
+        loose.setdefault(
+            _loose_asset_key(
+                entity_id=int(row["entity_id"]),
+                source_id=int(row["source_id"]),
+                asset_source=str(row["asset_source"]),
+                image_slug=str(row["image_slug"]),
+            ),
+            {
+                "original_url": row["original_url"],
+                "local_path": row["local_path"],
+                "width": row["width"],
+                "height": row["height"],
+                "mime": row["mime"],
+                "sha1": row["sha1"],
+            },
+        )
+    return exact, loose
+
+
+def _preserved_metadata(
+    existing_metadata: dict[tuple[object, ...], dict[str, object]],
+    loose_metadata: dict[tuple[object, ...], dict[str, object]],
+    *,
+    exact_key: tuple[object, ...],
+    loose_key: tuple[object, ...],
+) -> dict[str, object]:
+    return existing_metadata.get(exact_key) or loose_metadata.get(loose_key, {})
 
 
 def _asset_key(
@@ -224,6 +273,16 @@ def _asset_key(
         role,
         str(description_url or ""),
     )
+
+
+def _loose_asset_key(
+    *,
+    entity_id: int,
+    source_id: int,
+    asset_source: str,
+    image_slug: str,
+) -> tuple[object, ...]:
+    return (entity_id, source_id, asset_source, image_slug)
 
 
 def _slug_from_image_name(image_name: str) -> str:

@@ -146,6 +146,54 @@ def test_rebuild_entity_media_profiles_is_idempotent_without_media(tmp_path):
     assert rebuild_entity_media_profiles(conn) == 0
 
 
+def test_rebuild_entity_media_profiles_caps_embedded_asset_summaries(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    source_id = upsert_source(
+        conn,
+        key="fandom",
+        name="Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+    entity_id = upsert_entity(
+        conn,
+        canonical_title="Map",
+        kind="item",
+        primary_source_id=source_id,
+        primary_page_id=1,
+        canonical_url="https://example.test/Map",
+        summary="",
+    )
+    for index in range(30):
+        _asset(
+            conn,
+            entity_id,
+            source_id,
+            f"Map Variant {index:02d}.png",
+            role="page_reference",
+            original_url=f"https://img.test/map-{index:02d}.png",
+            description_url=f"https://example.test/File:Map_Variant_{index:02d}.png",
+            variant_key=f"variant-{index:02d}",
+            variant_type="visual_variant",
+            variant_label=f"Variant {index:02d}",
+            is_variant=1,
+        )
+
+    rebuild_entity_media_profiles(conn)
+
+    row = conn.execute(
+        """
+        select media_count, variant_count, variant_assets_json
+        from entity_media_profiles
+        """
+    ).fetchone()
+    assert row["media_count"] == 30
+    assert row["variant_count"] == 30
+    assert len(json.loads(row["variant_assets_json"])) == 25
+
+
 def _asset(
     conn,
     entity_id,

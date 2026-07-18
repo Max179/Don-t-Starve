@@ -5,6 +5,9 @@ import sqlite3
 from typing import Any
 
 
+ASSET_SUMMARY_LIMIT = 25
+
+
 def rebuild_entity_media_profiles(conn: sqlite3.Connection) -> int:
     conn.execute("delete from entity_media_profiles")
     grouped: dict[int, dict[str, Any]] = {}
@@ -48,6 +51,8 @@ def rebuild_entity_media_profiles(conn: sqlite3.Connection) -> int:
             key=lambda item: (item["variant_type"], item["variant_key"], item["image_name"]),
         )
         primary = primary_assets[0] if primary_assets else {}
+        primary_asset_summaries = primary_assets[:ASSET_SUMMARY_LIMIT]
+        variant_asset_summaries = variant_assets[:ASSET_SUMMARY_LIMIT]
         url_counts = bucket["url_status_counts"]
         download_counts = bucket["download_status_counts"]
         conn.execute(
@@ -93,8 +98,8 @@ def rebuild_entity_media_profiles(conn: sqlite3.Connection) -> int:
                 primary.get("width"),
                 primary.get("height"),
                 primary.get("mime"),
-                json.dumps(primary_assets, ensure_ascii=False, sort_keys=True),
-                json.dumps(variant_assets, ensure_ascii=False, sort_keys=True),
+                json.dumps(primary_asset_summaries, ensure_ascii=False, sort_keys=True),
+                json.dumps(variant_asset_summaries, ensure_ascii=False, sort_keys=True),
                 int(bool(primary_assets)),
                 int(bool(url_counts.get("direct_url", 0))),
                 int(bool(variant_assets)),

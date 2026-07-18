@@ -217,17 +217,24 @@ def test_rebuild_entity_media_assets_preserves_resolved_page_reference_metadata(
             sha1 = 'def'
         """
     )
+    conn.execute(
+        """
+        update page_images
+        set description_url = 'https://example.test/File:Bee_Frozen.png?stable=1'
+        """
+    )
 
     rebuild_entity_media_assets(conn)
 
     row = conn.execute(
         """
-        select original_url, width, height, mime, sha1
+        select original_url, description_url, width, height, mime, sha1
         from entity_media_assets
         """
     ).fetchone()
     assert dict(row) == {
         "original_url": "https://img.test/Bee_Frozen.png",
+        "description_url": "https://example.test/File:Bee_Frozen.png?stable=1",
         "width": 128,
         "height": 96,
         "mime": "image/png",

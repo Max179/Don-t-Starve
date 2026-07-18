@@ -574,3 +574,60 @@ def test_rebuild_entity_profile_json_is_idempotent(tmp_path):
     second = rebuild_entity_profile_json(conn)
 
     assert first == second == 0
+
+
+def test_rebuild_entity_profile_json_caps_embedded_media_without_changing_counts(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    source_id = upsert_source(
+        conn,
+        key="fandom",
+        name="Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+    entity_id = upsert_entity(
+        conn,
+        canonical_title="Map",
+        kind="item",
+        primary_source_id=source_id,
+        primary_page_id=1,
+        canonical_url="https://example.test/Map",
+        summary="",
+    )
+    for index in range(55):
+        conn.execute(
+            """
+            insert into entity_media_assets (
+                entity_id, source_id, asset_source, image_name, image_slug,
+                role, original_url, description_url, is_primary, is_variant,
+                confidence
+            )
+            values (?, ?, 'page_reference', ?, ?, 'page_reference',
+                    ?, ?, 0, 0, 1.0)
+            """,
+            (
+                entity_id,
+                source_id,
+                f"Map Image {index:02d}.png",
+                f"map-image-{index:02d}-png",
+                f"https://img.test/map-{index:02d}.png",
+                f"https://example.test/File:Map_Image_{index:02d}.png",
+            ),
+        )
+
+    rebuild_entity_profile_json(conn)
+
+    row = conn.execute(
+        """
+        select media_count, profile_json, profile_encoding
+        from entity_profile_json
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    profile = load_profile_json(row)
+    assert row["media_count"] == 55
+    assert profile["counts"]["media"] == 55
+    assert len(profile["media"]) == 50
