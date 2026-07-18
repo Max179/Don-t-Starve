@@ -39,10 +39,10 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 attribute_count, media_count, stat_count, variant_count,
                 category_count, fact_count, recipe_ingredient_count,
                 official_mention_count, relationship_count, wiki_link_count,
-                taxonomy_count, profile_encoding,
+                prefab_count, taxonomy_count, profile_encoding,
                 profile_json, updated_at
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
             """,
             (
                 entity_id,
@@ -60,6 +60,7 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 counts["official_mentions"],
                 counts["relationships"],
                 counts["wiki_links"],
+                counts["prefabs"],
                 counts["taxonomy"],
                 PROFILE_ENCODING,
                 dump_profile_json(profile),
@@ -124,6 +125,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     official_mentions = _official_mentions(conn, entity_id)
     relationships = _relationships(conn, entity_id)
     link_profile = _link_profile(conn, entity_id)
+    prefab_profile = _prefab_profile(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
     media_profile = _media_profile(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
@@ -154,6 +156,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
             "official_mentions": len(official_mentions),
             "relationships": len(relationships),
             "wiki_links": _link_count(link_profile),
+            "prefabs": _prefab_count(prefab_profile),
             "taxonomy": len(taxonomy),
         },
         "attributes": attributes,
@@ -167,6 +170,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "official_mentions": official_mentions,
         "relationships": relationships,
         "link_profile": link_profile,
+        "prefab_profile": prefab_profile,
         "taxonomy": taxonomy,
         "media_profile": media_profile,
         "combat_profile": combat_profile,
@@ -767,6 +771,65 @@ def _link_count(link_profile: dict[str, Any] | None) -> int:
     if link_profile is None:
         return 0
     return int(link_profile["counts"]["wiki_links"])
+
+
+def _prefab_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            prefab_count,
+            primary_prefab,
+            prefab_codes_json,
+            source_fields_text,
+            category_count,
+            code_categories_text,
+            upgraded_prefab_count,
+            reskin_prefab_count,
+            mast_upgrade_prefab_count,
+            chest_upgrade_prefab_count,
+            merm_upgrade_prefab_count,
+            has_prefabs,
+            has_upgraded_prefab,
+            has_reskin_prefab,
+            has_mast_upgrade_prefab,
+            has_chest_upgrade_prefab,
+            has_merm_upgrade_prefab
+        from entity_prefab_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "primary_prefab": str(row["primary_prefab"] or ""),
+        "prefabs": json.loads(str(row["prefab_codes_json"] or "[]")),
+        "source_fields_text": str(row["source_fields_text"] or ""),
+        "code_categories_text": str(row["code_categories_text"] or ""),
+        "counts": {
+            "prefabs": int(row["prefab_count"]),
+            "categories": int(row["category_count"]),
+            "upgraded_prefabs": int(row["upgraded_prefab_count"]),
+            "reskin_prefabs": int(row["reskin_prefab_count"]),
+            "mast_upgrade_prefabs": int(row["mast_upgrade_prefab_count"]),
+            "chest_upgrade_prefabs": int(row["chest_upgrade_prefab_count"]),
+            "merm_upgrade_prefabs": int(row["merm_upgrade_prefab_count"]),
+        },
+        "flags": {
+            "has_prefabs": bool(row["has_prefabs"]),
+            "has_upgraded_prefab": bool(row["has_upgraded_prefab"]),
+            "has_reskin_prefab": bool(row["has_reskin_prefab"]),
+            "has_mast_upgrade_prefab": bool(row["has_mast_upgrade_prefab"]),
+            "has_chest_upgrade_prefab": bool(row["has_chest_upgrade_prefab"]),
+            "has_merm_upgrade_prefab": bool(row["has_merm_upgrade_prefab"]),
+        },
+    }
+
+
+def _prefab_count(prefab_profile: dict[str, Any] | None) -> int:
+    if prefab_profile is None:
+        return 0
+    return int(prefab_profile["counts"]["prefabs"])
 
 
 def _taxonomy(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:

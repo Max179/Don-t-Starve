@@ -372,6 +372,39 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_link_profiles_resolved
             on entity_link_profiles(has_resolved_links, resolved_link_count);
 
+        create table if not exists entity_prefab_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            prefab_count integer not null default 0,
+            primary_prefab text not null default '',
+            prefab_codes_json text not null default '[]',
+            source_fields_text text not null default '',
+            category_count integer not null default 0,
+            code_categories_text text not null default '',
+            upgraded_prefab_count integer not null default 0,
+            reskin_prefab_count integer not null default 0,
+            mast_upgrade_prefab_count integer not null default 0,
+            chest_upgrade_prefab_count integer not null default 0,
+            merm_upgrade_prefab_count integer not null default 0,
+            has_prefabs integer not null default 0,
+            has_upgraded_prefab integer not null default 0,
+            has_reskin_prefab integer not null default 0,
+            has_mast_upgrade_prefab integer not null default 0,
+            has_chest_upgrade_prefab integer not null default 0,
+            has_merm_upgrade_prefab integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_prefab_profiles_kind
+            on entity_prefab_profiles(kind);
+        create index if not exists idx_entity_prefab_profiles_prefab_count
+            on entity_prefab_profiles(prefab_count);
+        create index if not exists idx_entity_prefab_profiles_upgraded
+            on entity_prefab_profiles(has_upgraded_prefab, upgraded_prefab_count);
+
         create table if not exists verification_checks (
             id integer primary key,
             entity_id integer references entities(id) on delete cascade,
@@ -1139,6 +1172,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             official_mention_count integer not null default 0,
             relationship_count integer not null default 0,
             wiki_link_count integer not null default 0,
+            prefab_count integer not null default 0,
             taxonomy_count integer not null default 0,
             profile_encoding text not null default 'json',
             profile_json blob not null,
@@ -1278,6 +1312,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         conn,
         table="entity_profile_json",
         column="wiki_link_count",
+        definition="integer not null default 0",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_profile_json",
+        column="prefab_count",
         definition="integer not null default 0",
     )
     _add_column_if_missing(

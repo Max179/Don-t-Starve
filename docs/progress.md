@@ -40,6 +40,7 @@ Coverage:
 - Wiki-link relations: 58,997
 - Resolved wiki-link targets: 43,734
 - Entity link profile rows: 2,198
+- Entity prefab profile rows: 1,647
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 161
 - Steam DLC appdetails records: 53
@@ -500,6 +501,29 @@ Examples verified in the current database:
 
 `cross_source_matches` is currently empty because the committed snapshot contains one wiki source (`fandom`). Once wiki.gg is ingested, shared identity keys will be used to populate cross-source matches.
 
+## Entity Prefab Profiles
+
+The database now includes `entity_prefab_profiles`, a one-row prefab/spawn-code summary table derived from `entity_identity_keys.key_type = 'spawn_code'`. It makes prefab lookup queryable without scanning all identity keys and records upgrade-like prefab categories from conservative code-pattern evidence.
+
+This pass generated 1,647 prefab profile rows:
+
+- Spawn-code/prefab values summarized: 2,779
+- Upgraded prefab codes: 14
+- Reskin prefab codes: 1
+- Mast-upgrade prefab codes: 4
+- Chest-upgrade prefab codes: 1
+- Merm-upgrade prefab codes: 4
+
+Example prefab profiles:
+
+- `Armermry`: `merm_armory | merm_armory_upgraded`, with `merm_upgrade` and `upgraded` flags.
+- `Chest`: `treasurechest | treasurechest_upgraded`, with `upgraded` flag.
+- `Clean Sweeper`: `reskin_tool`, with `reskin` flag.
+- `Elastispacer`: `chestupgrade_stacksize`, with `chest_upgrade` and `upgraded` flags.
+- `Berry Bush`: `berrybush | berrybush2`, standard prefab codes.
+
+Each compressed entity profile now includes a nullable `prefab_profile` object with the primary prefab, full prefab code list, source fields, category text, category counts, and upgrade/reskin flags. This gives applications a direct way to map wiki entries to game prefab names and to flag upgrade-related prefab forms while keeping the noisier material names such as `Pig Skin` out of upgrade/skin relationship tables.
+
 ## Source Access Audit
 
 The database now includes a `source_catalog` table and `source_catalog_evidence` table for ranked source discovery and verification planning. This pass generated 8 source catalog rows and 26 evidence rows:
@@ -586,7 +610,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,252 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, embedded attributes, media profile expansion, link profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 97,263,616 bytes, about 93 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, embedded attributes, media profile expansion, link profile expansion, prefab profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 98,291,712 bytes, about 94 MiB.
 
 Each profile aggregates:
 
@@ -597,9 +621,9 @@ Each profile aggregates:
 - media_profile: query-ready primary image, variant image, URL-readiness, and download-state summary
 - stats: normalized stat rows with raw field names, numeric values when available, units, and variant keys
 - variants: merged variant evidence from data, recipes, facts, explicit variants, and media
-- categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, wiki-link profile, and official Steam/Klei mentions
+- categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, wiki-link profile, prefab profile, and official Steam/Klei mentions
 
-The table also stores queryable top-level counts such as `attribute_count`, `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, `wiki_link_count`, and `official_mention_count` so applications can build lists without parsing JSON.
+The table also stores queryable top-level counts such as `attribute_count`, `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, `wiki_link_count`, `prefab_count`, and `official_mention_count` so applications can build lists without parsing JSON.
 
 ## Entity Link Profiles
 

@@ -29,6 +29,7 @@ from dst_wiki_db.official_updates import rebuild_official_update_events
 from dst_wiki_db.official_update_sections import rebuild_official_update_sections
 from dst_wiki_db.entity_profiles import rebuild_entity_profile_json
 from dst_wiki_db.page_images import rebuild_page_images
+from dst_wiki_db.prefab_profiles import rebuild_entity_prefab_profiles
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.recipe_profiles import rebuild_entity_recipe_profiles
 from dst_wiki_db.source_catalog import rebuild_source_catalog
@@ -72,6 +73,7 @@ def main(argv=None):
     identity_count = rebuild_identity_keys(conn)
     target_counts = rebuild_entity_targets(conn)
     link_profile_count = rebuild_entity_link_profiles(conn)
+    prefab_profile_count = rebuild_entity_prefab_profiles(conn)
     gameplay_edge_count = rebuild_entity_gameplay_edges(conn)
     combat_profile_count = rebuild_entity_combat_profiles(conn)
     food_profile_count = rebuild_entity_food_profiles(conn)
@@ -125,6 +127,7 @@ def main(argv=None):
         ],
         "entity_identity_keys": identity_count,
         "entity_link_profiles": link_profile_count,
+        "entity_prefab_profiles": prefab_profile_count,
         "entity_variant_summary": variant_summary_count,
         "entity_coverage": coverage_count,
         "entity_taxonomy": taxonomy_count,

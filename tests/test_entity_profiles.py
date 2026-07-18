@@ -253,6 +253,25 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     )
     conn.execute(
         """
+        insert into entity_prefab_profiles (
+            entity_id, slug, canonical_title, kind, prefab_count,
+            primary_prefab, prefab_codes_json, source_fields_text,
+            category_count, code_categories_text, upgraded_prefab_count,
+            reskin_prefab_count, mast_upgrade_prefab_count,
+            chest_upgrade_prefab_count, merm_upgrade_prefab_count,
+            has_prefabs, has_upgraded_prefab, has_reskin_prefab,
+            has_mast_upgrade_prefab, has_chest_upgrade_prefab,
+            has_merm_upgrade_prefab
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant', 2, 'berrybush',
+                '[{"code":"berrybush","categories":["standard"],"source_id":1,"source_key":"fandom","raw_page_id":1,"source_field":"spawnCode","confidence":0.98},{"code":"berrybush_upgraded","categories":["upgraded"],"source_id":1,"source_key":"fandom","raw_page_id":1,"source_field":"spawnCode","confidence":0.98}]',
+                'spawnCode', 2, 'standard | upgraded', 1, 0, 0, 0, 0,
+                1, 1, 0, 0, 0, 0)
+        """,
+        (entity_id,),
+    )
+    conn.execute(
+        """
         insert into entity_taxonomy (
             entity_id, slug, canonical_title, kind, taxonomy_type,
             taxonomy_key, label, confidence, evidence_source, evidence_count
@@ -396,7 +415,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         select entity_id, slug, canonical_title, kind, attribute_count,
                media_count, stat_count, variant_count, category_count,
                fact_count, recipe_ingredient_count, official_mention_count,
-               relationship_count, wiki_link_count, taxonomy_count,
+               relationship_count, wiki_link_count, prefab_count, taxonomy_count,
                profile_encoding,
                profile_json
         from entity_profile_json
@@ -421,6 +440,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "official_mention_count": 1,
         "relationship_count": 1,
         "wiki_link_count": 2,
+        "prefab_count": 2,
         "taxonomy_count": 1,
         "profile_encoding": "gzip+json",
         "profile_json": profile,
@@ -468,6 +488,10 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["link_profile"]["counts"]["resolved_links"] == 1
     assert profile["link_profile"]["top_resolved_targets"][0]["title"] == "Berries"
     assert profile["link_profile"]["top_unresolved_targets"][0]["title"] == "Missing Thing"
+    assert profile["prefab_profile"]["primary_prefab"] == "berrybush"
+    assert profile["prefab_profile"]["counts"]["prefabs"] == 2
+    assert profile["prefab_profile"]["counts"]["upgraded_prefabs"] == 1
+    assert profile["prefab_profile"]["flags"]["has_upgraded_prefab"] is True
     assert profile["taxonomy"][0]["taxonomy_key"] == "plant"
     assert profile["combat_profile"]["health"]["max"] == 100.0
     assert profile["combat_profile"]["damage"]["text"] == "10 / 20"
