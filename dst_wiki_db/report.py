@@ -22,6 +22,8 @@ COUNT_TABLES = [
     "entity_relations",
     "entity_link_profiles",
     "entity_prefab_profiles",
+    "entity_aliases",
+    "entity_alias_profiles",
     "verification_checks",
     "official_records",
     "official_record_mentions",

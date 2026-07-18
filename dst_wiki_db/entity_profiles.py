@@ -39,10 +39,10 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 attribute_count, media_count, stat_count, variant_count,
                 category_count, fact_count, recipe_ingredient_count,
                 official_mention_count, relationship_count, wiki_link_count,
-                prefab_count, taxonomy_count, profile_encoding,
+                prefab_count, alias_count, taxonomy_count, profile_encoding,
                 profile_json, updated_at
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
             """,
             (
                 entity_id,
@@ -61,6 +61,7 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 counts["relationships"],
                 counts["wiki_links"],
                 counts["prefabs"],
+                counts["aliases"],
                 counts["taxonomy"],
                 PROFILE_ENCODING,
                 dump_profile_json(profile),
@@ -126,6 +127,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     relationships = _relationships(conn, entity_id)
     link_profile = _link_profile(conn, entity_id)
     prefab_profile = _prefab_profile(conn, entity_id)
+    alias_profile = _alias_profile(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
     media_profile = _media_profile(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
@@ -157,6 +159,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
             "relationships": len(relationships),
             "wiki_links": _link_count(link_profile),
             "prefabs": _prefab_count(prefab_profile),
+            "aliases": _alias_count(alias_profile),
             "taxonomy": len(taxonomy),
         },
         "attributes": attributes,
@@ -171,6 +174,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "relationships": relationships,
         "link_profile": link_profile,
         "prefab_profile": prefab_profile,
+        "alias_profile": alias_profile,
         "taxonomy": taxonomy,
         "media_profile": media_profile,
         "combat_profile": combat_profile,
@@ -830,6 +834,61 @@ def _prefab_count(prefab_profile: dict[str, Any] | None) -> int:
     if prefab_profile is None:
         return 0
     return int(prefab_profile["counts"]["prefabs"])
+
+
+def _alias_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            alias_count,
+            title_alias_count,
+            source_title_count,
+            identity_key_count,
+            prefab_alias_count,
+            image_alias_count,
+            search_key_count,
+            source_count,
+            source_keys_text,
+            primary_search_key,
+            aliases_json,
+            search_keys_json,
+            has_source_titles,
+            has_prefab_aliases,
+            has_image_aliases
+        from entity_alias_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "primary_search_key": str(row["primary_search_key"] or ""),
+        "source_keys_text": str(row["source_keys_text"] or ""),
+        "aliases": json.loads(str(row["aliases_json"] or "[]")),
+        "search_keys": json.loads(str(row["search_keys_json"] or "[]")),
+        "counts": {
+            "aliases": int(row["alias_count"]),
+            "title_aliases": int(row["title_alias_count"]),
+            "source_titles": int(row["source_title_count"]),
+            "identity_keys": int(row["identity_key_count"]),
+            "prefab_aliases": int(row["prefab_alias_count"]),
+            "image_aliases": int(row["image_alias_count"]),
+            "search_keys": int(row["search_key_count"]),
+            "sources": int(row["source_count"]),
+        },
+        "flags": {
+            "has_source_titles": bool(row["has_source_titles"]),
+            "has_prefab_aliases": bool(row["has_prefab_aliases"]),
+            "has_image_aliases": bool(row["has_image_aliases"]),
+        },
+    }
+
+
+def _alias_count(alias_profile: dict[str, Any] | None) -> int:
+    if alias_profile is None:
+        return 0
+    return int(alias_profile["counts"]["aliases"])
 
 
 def _taxonomy(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:

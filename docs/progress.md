@@ -41,6 +41,8 @@ Coverage:
 - Resolved wiki-link targets: 43,734
 - Entity link profile rows: 2,198
 - Entity prefab profile rows: 1,647
+- Entity alias/search-key rows: 15,532
+- Entity alias profile rows: 2,252
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 161
 - Steam DLC appdetails records: 53
@@ -64,6 +66,13 @@ Coverage:
 - Distinct category slugs: 288
 - Identity keys for source alignment: 8,690
 - Source-access audit records: 9
+
+The database also includes an `entity_aliases` lookup table and one-row
+`entity_alias_profiles` summaries. These map each canonical entity to compact
+English-first search keys from canonical titles, source page titles, source
+slugs, spawn/prefab codes, and readable image-name stems. Full alias rows stay
+queryable in `entity_aliases`; the per-entity profile stores counts, flags,
+source-key coverage, capped display aliases, and capped search keys.
 
 Entity kind distribution:
 

@@ -405,6 +405,52 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_prefab_profiles_upgraded
             on entity_prefab_profiles(has_upgraded_prefab, upgraded_prefab_count);
 
+        create table if not exists entity_aliases (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            alias_type text not null,
+            alias_value text not null,
+            alias_key text not null,
+            source_key text not null default '',
+            source_field text not null default '',
+            confidence real not null default 0.8,
+            unique (entity_id, alias_type, alias_key, source_key, source_field)
+        );
+
+        create index if not exists idx_entity_aliases_key
+            on entity_aliases(alias_key);
+        create index if not exists idx_entity_aliases_entity
+            on entity_aliases(entity_id);
+
+        create table if not exists entity_alias_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            alias_count integer not null default 0,
+            title_alias_count integer not null default 0,
+            source_title_count integer not null default 0,
+            identity_key_count integer not null default 0,
+            prefab_alias_count integer not null default 0,
+            image_alias_count integer not null default 0,
+            search_key_count integer not null default 0,
+            source_count integer not null default 0,
+            source_keys_text text not null default '',
+            primary_search_key text not null default '',
+            aliases_json text not null default '[]',
+            search_keys_json text not null default '[]',
+            has_source_titles integer not null default 0,
+            has_prefab_aliases integer not null default 0,
+            has_image_aliases integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_alias_profiles_kind
+            on entity_alias_profiles(kind);
+        create index if not exists idx_entity_alias_profiles_prefab
+            on entity_alias_profiles(has_prefab_aliases, prefab_alias_count);
+
         create table if not exists verification_checks (
             id integer primary key,
             entity_id integer references entities(id) on delete cascade,
@@ -1173,6 +1219,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             relationship_count integer not null default 0,
             wiki_link_count integer not null default 0,
             prefab_count integer not null default 0,
+            alias_count integer not null default 0,
             taxonomy_count integer not null default 0,
             profile_encoding text not null default 'json',
             profile_json blob not null,
@@ -1318,6 +1365,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         conn,
         table="entity_profile_json",
         column="prefab_count",
+        definition="integer not null default 0",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_profile_json",
+        column="alias_count",
         definition="integer not null default 0",
     )
     _add_column_if_missing(

@@ -90,6 +90,8 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "entity_relations",
         "entity_link_profiles",
         "entity_prefab_profiles",
+        "entity_aliases",
+        "entity_alias_profiles",
         "verification_checks",
         "official_record_mentions",
         "official_products",

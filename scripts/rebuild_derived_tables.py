@@ -9,6 +9,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from dst_wiki_db.facts import rebuild_entity_facts
+from dst_wiki_db.alias_profiles import rebuild_entity_alias_profiles
 from dst_wiki_db.categories import rebuild_entity_categories
 from dst_wiki_db.character_profiles import rebuild_entity_character_profiles
 from dst_wiki_db.combat_profiles import rebuild_entity_combat_profiles
@@ -74,6 +75,7 @@ def main(argv=None):
     target_counts = rebuild_entity_targets(conn)
     link_profile_count = rebuild_entity_link_profiles(conn)
     prefab_profile_count = rebuild_entity_prefab_profiles(conn)
+    alias_profile_counts = rebuild_entity_alias_profiles(conn)
     gameplay_edge_count = rebuild_entity_gameplay_edges(conn)
     combat_profile_count = rebuild_entity_combat_profiles(conn)
     food_profile_count = rebuild_entity_food_profiles(conn)
@@ -128,6 +130,8 @@ def main(argv=None):
         "entity_identity_keys": identity_count,
         "entity_link_profiles": link_profile_count,
         "entity_prefab_profiles": prefab_profile_count,
+        "entity_aliases": alias_profile_counts["entity_aliases"],
+        "entity_alias_profiles": alias_profile_counts["entity_alias_profiles"],
         "entity_variant_summary": variant_summary_count,
         "entity_coverage": coverage_count,
         "entity_taxonomy": taxonomy_count,
