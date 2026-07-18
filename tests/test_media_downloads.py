@@ -126,6 +126,14 @@ def test_rebuild_entity_media_downloads_prioritizes_primary_and_variant_assets(t
             "variant_key": "build",
         },
     ]
+    compact_row = conn.execute(
+        """
+        select download_url, file_page_url
+        from entity_media_downloads
+        where url_status = 'direct_url'
+        """
+    ).fetchone()
+    assert tuple(compact_row) == (None, None)
 
 
 def test_rebuild_entity_media_downloads_is_idempotent(tmp_path):
@@ -238,7 +246,7 @@ def test_resolve_file_page_download_urls_updates_manifest_and_media_asset(tmp_pa
     manifest = conn.execute(
         """
         select download_url, url_status, priority, queue_reason
-        from entity_media_downloads
+        from entity_media_download_manifest
         """
     ).fetchone()
     assert dict(manifest) == {
@@ -343,12 +351,10 @@ def _seed_pending_direct_download(conn):
     conn.execute(
         """
         insert into entity_media_downloads (
-            entity_media_asset_id, entity_id, source_id, download_url,
-            file_page_url, url_status, download_status, priority, queue_reason
+            entity_media_asset_id, entity_id, source_id, url_status,
+            download_status, priority, queue_reason
         )
-        values (?, ?, ?, 'https://img.test/Bee.png',
-                'https://example.test/File:Bee.png', 'direct_url',
-                'pending', 10, 'primary|direct_url')
+        values (?, ?, ?, 'direct_url', 'pending', 10, 'primary|direct_url')
         """,
         (media_asset_id, entity_id, source_id),
     )
@@ -406,12 +412,10 @@ def _seed_file_page_only_download(conn):
     conn.execute(
         """
         insert into entity_media_downloads (
-            entity_media_asset_id, entity_id, source_id, download_url,
-            file_page_url, url_status, download_status, priority, queue_reason
+            entity_media_asset_id, entity_id, source_id, url_status,
+            download_status, priority, queue_reason
         )
-        values (?, ?, ?, null,
-                'https://example.test/File:Bee_Build.png', 'file_page_only',
-                'pending', 35, 'variant|file_page_only')
+        values (?, ?, ?, 'file_page_only', 'pending', 35, 'variant|file_page_only')
         """,
         (media_asset_id, entity_id, source_id),
     )

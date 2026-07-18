@@ -50,18 +50,15 @@ def rebuild_entity_media_downloads(conn: sqlite3.Connection) -> int:
         cursor = conn.execute(
             """
             insert or ignore into entity_media_downloads (
-                entity_media_asset_id, entity_id, source_id, download_url,
-                file_page_url, url_status, download_status, priority,
-                queue_reason
+                entity_media_asset_id, entity_id, source_id, url_status,
+                download_status, priority, queue_reason
             )
-            values (?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+            values (?, ?, ?, ?, 'pending', ?, ?)
             """,
             (
                 int(row["entity_media_asset_id"]),
                 int(row["entity_id"]),
                 int(row["source_id"]),
-                row["original_url"],
-                row["description_url"],
                 url_status,
                 priority,
                 _queue_reason(
@@ -199,15 +196,13 @@ def resolve_file_page_download_urls(
                 conn.execute(
                     """
                     update entity_media_downloads
-                    set download_url = ?,
-                        url_status = ?,
+                    set url_status = ?,
                         priority = ?,
                         queue_reason = ?,
                         error_text = ''
                     where id = ?
                     """,
                     (
-                        str(download_url),
                         url_status,
                         priority,
                         queue_reason,
@@ -263,9 +258,8 @@ def _file_page_only_rows(
 ) -> list[sqlite3.Row]:
     filters = [
         "emd.url_status = 'file_page_only'",
-        "(emd.download_url is null or emd.download_url = '')",
-        "emd.file_page_url is not null",
-        "emd.file_page_url != ''",
+        "(coalesce(emd.download_url, ema.original_url, '') = '')",
+        "coalesce(emd.file_page_url, ema.description_url, '') != ''",
     ]
     params: list[object] = []
     if source_key:

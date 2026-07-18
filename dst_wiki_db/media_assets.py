@@ -8,15 +8,18 @@ PRIMARY_INFOBOX_ROLES = {"image", "inventoryimage", "inventoryImage"}
 
 
 def rebuild_entity_media_assets(conn: sqlite3.Connection) -> int:
+    existing_metadata = _existing_asset_metadata(conn)
     conn.execute("delete from entity_media_assets")
     count = 0
-    count += _insert_infobox_assets(conn)
-    count += _insert_page_assets(conn)
+    count += _insert_infobox_assets(conn, existing_metadata)
+    count += _insert_page_assets(conn, existing_metadata)
     conn.commit()
     return count
 
 
-def _insert_infobox_assets(conn: sqlite3.Connection) -> int:
+def _insert_infobox_assets(
+    conn: sqlite3.Connection, existing_metadata: dict[tuple[object, ...], dict[str, object]]
+) -> int:
     rows = conn.execute(
         """
         select
@@ -43,6 +46,18 @@ def _insert_infobox_assets(conn: sqlite3.Connection) -> int:
         variant_key = str(row["variant_key"] or "")
         variant_type = _infobox_variant_type(variant_key)
         variant_label = _variant_label(variant_key)
+        image_slug = _slug_from_image_name(str(row["image_name"]))
+        preserved = existing_metadata.get(
+            _asset_key(
+                entity_id=int(row["entity_id"]),
+                source_id=int(row["source_id"]),
+                asset_source="infobox",
+                image_slug=image_slug,
+                role=str(row["role"]),
+                description_url=row["description_url"],
+            ),
+            {},
+        )
         conn.execute(
             """
             insert into entity_media_assets (
@@ -61,15 +76,15 @@ def _insert_infobox_assets(conn: sqlite3.Connection) -> int:
                 None if row["raw_page_id"] is None else int(row["raw_page_id"]),
                 int(row["entity_image_id"]),
                 str(row["image_name"]),
-                _slug_from_image_name(str(row["image_name"])),
+                image_slug,
                 str(row["role"]),
-                row["original_url"],
+                row["original_url"] or preserved.get("original_url"),
                 row["description_url"],
-                row["local_path"],
-                row["width"],
-                row["height"],
-                row["mime"],
-                row["sha1"],
+                row["local_path"] or preserved.get("local_path"),
+                row["width"] if row["width"] is not None else preserved.get("width"),
+                row["height"] if row["height"] is not None else preserved.get("height"),
+                row["mime"] or preserved.get("mime"),
+                row["sha1"] or preserved.get("sha1"),
                 variant_key,
                 variant_type,
                 variant_label,
@@ -81,7 +96,9 @@ def _insert_infobox_assets(conn: sqlite3.Connection) -> int:
     return count
 
 
-def _insert_page_assets(conn: sqlite3.Connection) -> int:
+def _insert_page_assets(
+    conn: sqlite3.Connection, existing_metadata: dict[tuple[object, ...], dict[str, object]]
+) -> int:
     rows = conn.execute(
         """
         select
@@ -106,6 +123,17 @@ def _insert_page_assets(conn: sqlite3.Connection) -> int:
     count = 0
     for row in rows:
         variant_key = str(row["variant_key"] or "")
+        preserved = existing_metadata.get(
+            _asset_key(
+                entity_id=int(row["entity_id"]),
+                source_id=int(row["source_id"]),
+                asset_source="page_reference",
+                image_slug=str(row["image_slug"]),
+                role=str(row["role"]),
+                description_url=row["description_url"],
+            ),
+            {},
+        )
         conn.execute(
             """
             insert into entity_media_assets (
@@ -115,8 +143,8 @@ def _insert_page_assets(conn: sqlite3.Connection) -> int:
                 height, mime, sha1, variant_key, variant_type,
                 variant_label, is_variant, is_primary, confidence
             )
-            values (?, ?, ?, 'page_reference', null, ?, ?, ?, ?, null, ?, ?,
-                    null, null, null, null, ?, ?, ?, ?, 0, ?)
+            values (?, ?, ?, 'page_reference', null, ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
             """,
             (
                 int(row["entity_id"]),
@@ -126,8 +154,13 @@ def _insert_page_assets(conn: sqlite3.Connection) -> int:
                 str(row["image_name"]),
                 str(row["image_slug"]),
                 str(row["role"]),
+                preserved.get("original_url"),
                 row["description_url"],
-                row["local_path"],
+                row["local_path"] or preserved.get("local_path"),
+                preserved.get("width"),
+                preserved.get("height"),
+                preserved.get("mime"),
+                preserved.get("sha1"),
                 variant_key,
                 str(row["variant_type"] or ""),
                 str(row["variant_label"] or ""),
@@ -137,6 +170,60 @@ def _insert_page_assets(conn: sqlite3.Connection) -> int:
         )
         count += 1
     return count
+
+
+def _existing_asset_metadata(conn: sqlite3.Connection) -> dict[tuple[object, ...], dict[str, object]]:
+    rows = conn.execute(
+        """
+        select
+            entity_id, source_id, asset_source, image_slug, role,
+            description_url, original_url, local_path, width, height, mime, sha1
+        from entity_media_assets
+        where coalesce(original_url, '') != ''
+           or coalesce(local_path, '') != ''
+           or width is not null
+           or height is not null
+           or coalesce(mime, '') != ''
+           or coalesce(sha1, '') != ''
+        """
+    ).fetchall()
+    return {
+        _asset_key(
+            entity_id=int(row["entity_id"]),
+            source_id=int(row["source_id"]),
+            asset_source=str(row["asset_source"]),
+            image_slug=str(row["image_slug"]),
+            role=str(row["role"]),
+            description_url=row["description_url"],
+        ): {
+            "original_url": row["original_url"],
+            "local_path": row["local_path"],
+            "width": row["width"],
+            "height": row["height"],
+            "mime": row["mime"],
+            "sha1": row["sha1"],
+        }
+        for row in rows
+    }
+
+
+def _asset_key(
+    *,
+    entity_id: int,
+    source_id: int,
+    asset_source: str,
+    image_slug: str,
+    role: str,
+    description_url: object,
+) -> tuple[object, ...]:
+    return (
+        entity_id,
+        source_id,
+        asset_source,
+        image_slug,
+        role,
+        str(description_url or ""),
+    )
 
 
 def _slug_from_image_name(image_name: str) -> str:
