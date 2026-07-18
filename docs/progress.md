@@ -1,6 +1,6 @@
 # Current Database Progress
 
-Last updated: 2026-07-17 Asia/Shanghai.
+Last updated: 2026-07-18 Asia/Shanghai.
 
 ## Committed Database
 
@@ -32,6 +32,7 @@ Coverage:
 - Registered images with fetched URL metadata: 1,785
 - Page-level image references: 44,437
 - Unified entity media assets: 46,311
+- Entity media profile rows: 1,224
 - Entities with page-level image references: 275
 - Image-variant candidates: 419
 - Wiki-link relations: 58,997
@@ -582,13 +583,14 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,252 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+base64+json` in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows. After compression and `vacuum`, `data/dont_starve_wiki.sqlite` is about 71 MiB instead of about 96 MiB.
+Profile payloads are stored as `gzip+base64+json` in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows. After compression, media profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 90,701,824 bytes, about 87 MiB.
 
 Each profile aggregates:
 
 - identity: id, slug, title, kind, canonical URL, and summary
 - coverage: coverage score, detailed evidence counts, boolean coverage flags, and missing-data labels
 - media: unified infobox/page media assets with primary flags, URLs, dimensions, local paths, and variant metadata
+- media_profile: query-ready primary image, variant image, URL-readiness, and download-state summary
 - stats: normalized stat rows with raw field names, numeric values when available, units, and variant keys
 - variants: merged variant evidence from data, recipes, facts, explicit variants, and media
 - categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, and official Steam/Klei mentions
@@ -843,6 +845,27 @@ Example recipe profiles:
 - `Cut Stone`: 1 recipe from `Rocks`, and used in 46 other recipes
 
 Each compressed entity profile now includes a nullable `recipe_profile` object so item, food, structure, and ingredient pages can render crafting cards and reverse ingredient usage without joining recipe tables.
+
+## Entity Media Profiles
+
+The database now includes `entity_media_profiles`, a one-row media summary table for entities with image evidence. It is built from `entity_media_assets` and `entity_media_downloads`, so list/detail APIs can read primary images, variant-image summaries, URL readiness, and download status without scanning the full 46,311-row manifest.
+
+This pass generated 1,224 media profile rows.
+
+URL readiness across the underlying media manifest:
+
+- `direct_url`: 2,034 rows
+- `file_page_only`: 44,188 rows
+- `missing_url`: 89 rows
+
+Example media profiles:
+
+- `Berry Bush`: 2 media rows, 2 variant rows, 2 direct URLs, variant images for numbered infobox forms.
+- `Crock Pot`: 501 media rows, 2 primary rows, 3 variant rows, primary image `Crock Pot Build.png`.
+- `Deerclops`: 449 media rows, 35 variant rows, 35 direct URLs.
+- `Wilson`: 50 media rows, 3 variant rows, 1 direct URL.
+
+Each compressed entity profile now includes a nullable `media_profile` object with query-ready counts, flags, primary image metadata, and compact primary/variant asset arrays. The file-page resolver refreshes both `entity_media_profiles` and `entity_profile_json` after non-dry-run URL resolution so profile payloads keep the same direct/file-page/missing counts as `entity_media_downloads`.
 
 ## Media Download Manifest
 

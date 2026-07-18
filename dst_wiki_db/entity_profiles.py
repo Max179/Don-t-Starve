@@ -98,6 +98,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     official_mentions = _official_mentions(conn, entity_id)
     relationships = _relationships(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
+    media_profile = _media_profile(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
     food_profile = _food_profile(conn, entity_id)
     item_profile = _item_profile(conn, entity_id)
@@ -136,6 +137,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "official_mentions": official_mentions,
         "relationships": relationships,
         "taxonomy": taxonomy,
+        "media_profile": media_profile,
         "combat_profile": combat_profile,
         "food_profile": food_profile,
         "item_profile": item_profile,
@@ -276,6 +278,81 @@ def _media(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
         }
         for row in rows
     ]
+
+
+def _media_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            media_count,
+            primary_count,
+            variant_count,
+            direct_url_count,
+            file_page_only_count,
+            missing_url_count,
+            pending_download_count,
+            downloaded_count,
+            failed_download_count,
+            variant_type_count,
+            variant_types_text,
+            primary_image_name,
+            primary_role,
+            primary_asset_source,
+            primary_download_url,
+            primary_file_page_url,
+            primary_target_path,
+            primary_local_path,
+            primary_width,
+            primary_height,
+            primary_mime,
+            primary_assets_json,
+            variant_assets_json,
+            has_primary_image,
+            has_direct_url,
+            has_variants,
+            has_downloaded_media
+        from entity_media_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "primary": {
+            "image_name": str(row["primary_image_name"] or ""),
+            "role": str(row["primary_role"] or ""),
+            "asset_source": str(row["primary_asset_source"] or ""),
+            "download_url": row["primary_download_url"],
+            "file_page_url": row["primary_file_page_url"],
+            "target_path": row["primary_target_path"],
+            "local_path": row["primary_local_path"],
+            "width": _optional_int(row["primary_width"]),
+            "height": _optional_int(row["primary_height"]),
+            "mime": row["primary_mime"],
+        },
+        "primary_assets": json.loads(str(row["primary_assets_json"] or "[]")),
+        "variant_assets": json.loads(str(row["variant_assets_json"] or "[]")),
+        "variant_types_text": str(row["variant_types_text"] or ""),
+        "counts": {
+            "media": int(row["media_count"]),
+            "primary": int(row["primary_count"]),
+            "variants": int(row["variant_count"]),
+            "direct_url": int(row["direct_url_count"]),
+            "file_page_only": int(row["file_page_only_count"]),
+            "missing_url": int(row["missing_url_count"]),
+            "pending_download": int(row["pending_download_count"]),
+            "downloaded": int(row["downloaded_count"]),
+            "failed_download": int(row["failed_download_count"]),
+            "variant_types": int(row["variant_type_count"]),
+        },
+        "flags": {
+            "has_primary_image": bool(row["has_primary_image"]),
+            "has_direct_url": bool(row["has_direct_url"]),
+            "has_variants": bool(row["has_variants"]),
+            "has_downloaded_media": bool(row["has_downloaded_media"]),
+        },
+    }
 
 
 def _stats(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:

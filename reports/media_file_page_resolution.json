@@ -3,5 +3,9 @@
   "resolved": 249,
   "missing": 1,
   "skipped": 0,
-  "dry_run": false
+  "dry_run": false,
+  "derived_refresh": {
+    "entity_media_profiles": 1224,
+    "entity_profile_json": 2252
+  }
 }

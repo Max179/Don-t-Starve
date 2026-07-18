@@ -2,7 +2,7 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
-Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 2,252 entity coverage rows, 2,252 entity JSON profiles, 22,921 parsed attributes, 6,866 normalized stat rows, 6,844 parsed stat value rows, 5,142 per-entity stat rollups, 409 combat profile rows, 454 food profile rows, 788 item profile rows, 249 world profile rows, 72 character profile rows, 412 creature profile rows, 783 recipe profile rows, 1,874 registered infobox images, 44,437 page-level image references, 46,311 unified entity media asset rows, 46,311 media download manifest rows, 419 image-variant candidates, 43,734 resolved wiki-link targets, 4,502 typed gameplay relationship edges, 23,810 taxonomy tags, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 2,982 merged entity variant summary rows, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 161 official Steam/Klei verification records, 55 normalized official product records, 223 official product media URLs, 50 normalized official update events, 80 normalized official update sections, 397 official update section items, 5 official update media URLs, 678 official-record entity mentions, 8 ranked source catalog rows, 26 source catalog evidence rows, 21 curated community guide source rows, 77 community guide topic rows, 5 community guide topic-index rows, and 9 source-access audit records. The official layer includes appdetails for all 53 Steam-listed DLC ids, with official header, capsule, and description image URLs. See [docs/progress.md](docs/progress.md).
+Current committed output: `data/dont_starve_wiki.sqlite` contains a full Fandom historical comparison build with 2,252 pages, 2,252 entity coverage rows, 2,252 entity JSON profiles, 22,921 parsed attributes, 6,866 normalized stat rows, 6,844 parsed stat value rows, 5,142 per-entity stat rollups, 409 combat profile rows, 454 food profile rows, 788 item profile rows, 249 world profile rows, 72 character profile rows, 412 creature profile rows, 783 recipe profile rows, 1,874 registered infobox images, 44,437 page-level image references, 46,311 unified entity media asset rows, 46,311 media download manifest rows, 1,224 entity media profile rows, 419 image-variant candidates, 43,734 resolved wiki-link targets, 4,502 typed gameplay relationship edges, 23,810 taxonomy tags, 12,973 category links, 8,690 identity keys for cross-source matching, 1,282 variant records, 2,982 merged entity variant summary rows, 1,954 structured recipe ingredients, 1,816 resolved recipe ingredient targets, 1,246 structured drop/source/sold/spawn facts, 435 resolved fact targets, 161 official Steam/Klei verification records, 55 normalized official product records, 223 official product media URLs, 50 normalized official update events, 80 normalized official update sections, 397 official update section items, 5 official update media URLs, 678 official-record entity mentions, 8 ranked source catalog rows, 26 source catalog evidence rows, 21 curated community guide source rows, 77 community guide topic rows, 5 community guide topic-index rows, and 9 source-access audit records. The official layer includes appdetails for all 53 Steam-listed DLC ids, with official header, capsule, and description image URLs. See [docs/progress.md](docs/progress.md).
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
@@ -25,6 +25,7 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `image_variants`: filename-derived image variant candidates such as build, burnt, phase, animation, crop growth, and oversized crop forms.
 - `entity_media_assets`: unified infobox/page media rows with URLs, file pages, primary flags, and variant metadata.
 - `entity_media_downloads`: media download manifest rows with deterministic target paths, URL status, priority, queue reasons, and downloader status fields.
+- `entity_media_profiles`: one-row media summaries for entities with images, including primary image metadata, direct/file-page/missing URL counts, download-state counts, variant image counts, and compact primary/variant JSON arrays.
 - `entity_relations`: wiki links with resolved `target_entity_id` values when the target exists in `entities`.
 - `recipe_ingredient_targets`: entity bridges from crafted entries to ingredient entries.
 - `entity_fact_targets`: entity bridges for parsed drops, dropped-by, sold-by, spawn-from, and spawns facts.
@@ -32,7 +33,7 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `entity_taxonomy`: multi-label kind, source category, gameplay, DLC/game-mode, and data-availability tags for filtering and faceted browsing.
 - `entity_coverage`: per-entry coverage score, evidence counts, and missing-data summary for triage.
 - `entity_variant_summary`: merged per-entry variant evidence across attributes, stats, recipes, facts, explicit variants, and media assets.
-- `entity_profile_json`: one compressed JSON profile per entity for direct wiki/API consumption, aggregating identity, coverage, media, stats, stat rollups, combat profile, food profile, item profile, world profile, character profile, creature profile, recipe profile, variants, categories, facts, recipes, typed relationships, taxonomy, and official mentions. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode `profile_json`.
+- `entity_profile_json`: one compressed JSON profile per entity for direct wiki/API consumption, aggregating identity, coverage, media, media profile, stats, stat rollups, combat profile, food profile, item profile, world profile, character profile, creature profile, recipe profile, variants, categories, facts, recipes, typed relationships, taxonomy, and official mentions. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode `profile_json`.
 - `verification_checks`: source-presence and cross-source verification records.
 - `official_records`: official Steam/Klei products, DLC listings, DLC appdetails, update posts, and page probes with source payloads.
 - `official_products`: queryable Steam product facts derived from official appdetails records.
@@ -129,6 +130,8 @@ python3 scripts/resolve_media_file_pages.py \
   --batch-size 50 \
   --report reports/media_file_page_resolution.json
 ```
+
+By default this also refreshes `entity_media_profiles` and `entity_profile_json` so media URL counts in profile payloads stay in sync with resolved file-page URLs.
 
 Download a small batch of direct media URLs from the manifest:
 

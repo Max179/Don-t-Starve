@@ -287,6 +287,49 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_media_downloads_url_status
             on entity_media_downloads(url_status);
 
+        create table if not exists entity_media_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            media_count integer not null default 0,
+            primary_count integer not null default 0,
+            variant_count integer not null default 0,
+            direct_url_count integer not null default 0,
+            file_page_only_count integer not null default 0,
+            missing_url_count integer not null default 0,
+            pending_download_count integer not null default 0,
+            downloaded_count integer not null default 0,
+            failed_download_count integer not null default 0,
+            variant_type_count integer not null default 0,
+            variant_types_text text not null default '',
+            primary_image_name text not null default '',
+            primary_role text not null default '',
+            primary_asset_source text not null default '',
+            primary_download_url text,
+            primary_file_page_url text,
+            primary_target_path text,
+            primary_local_path text,
+            primary_width integer,
+            primary_height integer,
+            primary_mime text,
+            primary_assets_json text not null default '[]',
+            variant_assets_json text not null default '[]',
+            has_primary_image integer not null default 0,
+            has_direct_url integer not null default 0,
+            has_variants integer not null default 0,
+            has_downloaded_media integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_media_profiles_kind
+            on entity_media_profiles(kind);
+        create index if not exists idx_entity_media_profiles_primary
+            on entity_media_profiles(has_primary_image);
+        create index if not exists idx_entity_media_profiles_direct
+            on entity_media_profiles(has_direct_url, direct_url_count);
+
         create table if not exists entity_relations (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

@@ -21,6 +21,7 @@ from dst_wiki_db.identity import rebuild_identity_keys
 from dst_wiki_db.item_profiles import rebuild_entity_item_profiles
 from dst_wiki_db.media_assets import rebuild_entity_media_assets
 from dst_wiki_db.media_downloads import rebuild_entity_media_downloads
+from dst_wiki_db.media_profiles import rebuild_entity_media_profiles
 from dst_wiki_db.official_mentions import rebuild_official_record_mentions
 from dst_wiki_db.official_products import rebuild_official_products
 from dst_wiki_db.official_updates import rebuild_official_update_events
@@ -61,6 +62,7 @@ def main(argv=None):
     image_variant_count = rebuild_image_variants(conn)
     media_asset_count = rebuild_entity_media_assets(conn)
     media_download_count = rebuild_entity_media_downloads(conn)
+    media_profile_count = rebuild_entity_media_profiles(conn)
     official_mention_count = rebuild_official_record_mentions(conn)
     official_product_counts = rebuild_official_products(conn)
     official_update_counts = rebuild_official_update_events(conn)
@@ -103,6 +105,7 @@ def main(argv=None):
         "image_variants": image_variant_count,
         "entity_media_assets": media_asset_count,
         "entity_media_downloads": media_download_count,
+        "entity_media_profiles": media_profile_count,
         "official_record_mentions": official_mention_count,
         "official_products": official_product_counts["official_products"],
         "official_product_media": official_product_counts["official_product_media"],

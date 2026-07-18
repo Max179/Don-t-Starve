@@ -86,6 +86,33 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     )
     conn.execute(
         """
+        insert into entity_media_profiles (
+            entity_id, slug, canonical_title, kind,
+            media_count, primary_count, variant_count, direct_url_count,
+            file_page_only_count, missing_url_count, pending_download_count,
+            downloaded_count, failed_download_count, variant_type_count,
+            variant_types_text, primary_image_name, primary_role,
+            primary_asset_source, primary_download_url, primary_file_page_url,
+            primary_target_path, primary_local_path, primary_width,
+            primary_height, primary_mime, primary_assets_json,
+            variant_assets_json, has_primary_image, has_direct_url,
+            has_variants, has_downloaded_media
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 'growth_stage',
+                'Berry Bush.png', 'image', 'infobox',
+                'https://img.test/berry.png',
+                'https://example.test/File:Berry_Bush.png',
+                'data/images/fandom/berry-bush/berry-bush-png',
+                null, 64, 64, 'image/png',
+                '[{"image_name":"Berry Bush.png","download_url":"https://img.test/berry.png"}]',
+                '[{"image_name":"Berry Bush Picked.png","variant_key":"picked","variant_type":"growth_stage"}]',
+                1, 1, 1, 0)
+        """,
+        (entity_id,),
+    )
+    conn.execute(
+        """
         insert into entity_attributes (
             entity_id, source_id, raw_page_id, template_index, template_name,
             raw_name, canonical_name, value_text, value_number, unit,
@@ -391,6 +418,9 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["coverage"]["coverage_score"] == 80
     assert profile["media"][0]["image_name"] == "Berry Bush.png"
     assert profile["media"][0]["variant_key"] == "picked"
+    assert profile["media_profile"]["primary"]["image_name"] == "Berry Bush.png"
+    assert profile["media_profile"]["counts"]["direct_url"] == 1
+    assert profile["media_profile"]["variant_assets"][0]["variant_key"] == "picked"
     assert profile["stats"][0]["stat_name"] == "regrowth_time"
     assert profile["stat_rollups"][0]["stat_name"] == "regrowth_time"
     assert profile["stat_rollups"][0]["value_range"] == {"min": 3.0, "max": 5.0}

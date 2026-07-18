@@ -18,6 +18,7 @@ COUNT_TABLES = [
     "image_variants",
     "entity_media_assets",
     "entity_media_downloads",
+    "entity_media_profiles",
     "entity_relations",
     "verification_checks",
     "official_records",
