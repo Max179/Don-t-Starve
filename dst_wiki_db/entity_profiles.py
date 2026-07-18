@@ -35,12 +35,13 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
             """
             insert into entity_profile_json (
                 entity_id, slug, canonical_title, kind, coverage_score,
-                media_count, stat_count, variant_count, category_count,
-                fact_count, recipe_ingredient_count, official_mention_count,
-                relationship_count, taxonomy_count, profile_encoding,
+                attribute_count, media_count, stat_count, variant_count,
+                category_count, fact_count, recipe_ingredient_count,
+                official_mention_count, relationship_count, taxonomy_count,
+                profile_encoding,
                 profile_json, updated_at
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
             """,
             (
                 entity_id,
@@ -48,6 +49,7 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 str(row["canonical_title"]),
                 str(row["kind"]),
                 coverage_score,
+                counts["attributes"],
                 counts["media"],
                 counts["stats"],
                 counts["variants"],
@@ -88,6 +90,7 @@ def load_profile_json(row_or_text: sqlite3.Row | str, encoding: str | None = Non
 
 def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str, Any]:
     entity_id = int(row["entity_id"])
+    attributes = _attributes(conn, entity_id)
     media = _media(conn, entity_id)
     stats = _stats(conn, entity_id)
     stat_rollups = _stat_rollups(conn, entity_id)
@@ -117,6 +120,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         },
         "coverage": _coverage(conn, entity_id),
         "counts": {
+            "attributes": len(attributes),
             "media": len(media),
             "stats": len(stats),
             "variants": len(variants),
@@ -127,6 +131,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
             "relationships": len(relationships),
             "taxonomy": len(taxonomy),
         },
+        "attributes": attributes,
         "media": media,
         "stats": stats,
         "stat_rollups": stat_rollups,
@@ -146,6 +151,48 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "creature_profile": creature_profile,
         "recipe_profile": recipe_profile,
     }
+
+
+def _attributes(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """
+        select
+            ea.id,
+            ea.source_id,
+            s.key as source_key,
+            ea.raw_page_id,
+            ea.template_index,
+            ea.template_name,
+            ea.raw_name,
+            ea.canonical_name,
+            ea.value_text,
+            ea.value_number,
+            ea.unit,
+            ea.variant_key
+        from entity_attributes ea
+        join sources s on s.id = ea.source_id
+        where ea.entity_id = ?
+        order by ea.template_index, ea.canonical_name, ea.raw_name, ea.id
+        """,
+        (entity_id,),
+    ).fetchall()
+    return [
+        {
+            "id": int(row["id"]),
+            "source_id": int(row["source_id"]),
+            "source_key": str(row["source_key"]),
+            "raw_page_id": int(row["raw_page_id"]),
+            "template_index": int(row["template_index"]),
+            "template_name": row["template_name"],
+            "raw_name": str(row["raw_name"]),
+            "canonical_name": str(row["canonical_name"]),
+            "value_text": str(row["value_text"]),
+            "value_number": _optional_float(row["value_number"]),
+            "unit": row["unit"],
+            "variant_key": str(row["variant_key"] or ""),
+        }
+        for row in rows
+    ]
 
 
 def _coverage(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any]:

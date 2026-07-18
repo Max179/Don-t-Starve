@@ -1100,6 +1100,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             canonical_title text not null,
             kind text not null,
             coverage_score integer not null default 0,
+            attribute_count integer not null default 0,
             media_count integer not null default 0,
             stat_count integer not null default 0,
             variant_count integer not null default 0,
@@ -1225,6 +1226,12 @@ def init_db(conn: sqlite3.Connection) -> None:
 
 
 def _migrate_schema(conn: sqlite3.Connection) -> None:
+    _add_column_if_missing(
+        conn,
+        table="entity_profile_json",
+        column="attribute_count",
+        definition="integer not null default 0",
+    )
     _add_column_if_missing(
         conn,
         table="entity_profile_json",

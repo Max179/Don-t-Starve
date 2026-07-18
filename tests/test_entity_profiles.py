@@ -377,9 +377,9 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert result == 2
     row = conn.execute(
         """
-        select entity_id, slug, canonical_title, kind, media_count,
-               stat_count, variant_count, category_count, fact_count,
-               recipe_ingredient_count, official_mention_count,
+        select entity_id, slug, canonical_title, kind, attribute_count,
+               media_count, stat_count, variant_count, category_count,
+               fact_count, recipe_ingredient_count, official_mention_count,
                relationship_count, taxonomy_count, profile_encoding,
                profile_json
         from entity_profile_json
@@ -395,6 +395,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "slug": "berry-bush",
         "canonical_title": "Berry Bush",
         "kind": "plant",
+        "attribute_count": 1,
         "media_count": 1,
         "stat_count": 1,
         "variant_count": 1,
@@ -416,6 +417,21 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "summary": "A harvestable bush.",
     }
     assert profile["coverage"]["coverage_score"] == 80
+    assert profile["counts"]["attributes"] == 1
+    assert profile["attributes"][0] == {
+        "id": attribute_id,
+        "source_id": source_id,
+        "source_key": "fandom",
+        "raw_page_id": raw_page_id,
+        "template_index": 0,
+        "template_name": "Plant Infobox",
+        "raw_name": "regrowth time",
+        "canonical_name": "regrowth time",
+        "value_text": "3-5 days",
+        "value_number": None,
+        "unit": "days",
+        "variant_key": "",
+    }
     assert profile["media"][0]["image_name"] == "Berry Bush.png"
     assert profile["media"][0]["variant_key"] == "picked"
     assert profile["media_profile"]["primary"]["image_name"] == "Berry Bush.png"

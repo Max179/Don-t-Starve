@@ -24,8 +24,10 @@ Coverage:
 - Raw pages: 2,252
 - Entities: 2,252
 - Entity coverage rows: 2,252
+- Entity JSON profiles: 2,252
 - Source mappings: 2,252
 - Parsed attributes: 22,921
+- Embedded profile attribute rows: 22,921
 - Normalized stat rows: 6,866
 - Parsed stat value rows: 6,844
 - Registered infobox images: 1,874
@@ -583,19 +585,20 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,252 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+base64+json` in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows. After compression, media profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 90,701,824 bytes, about 87 MiB.
+Profile payloads are stored as `gzip+base64+json` in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows. After compression, embedded attributes, media profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 91,303,936 bytes, about 87 MiB.
 
 Each profile aggregates:
 
 - identity: id, slug, title, kind, canonical URL, and summary
 - coverage: coverage score, detailed evidence counts, boolean coverage flags, and missing-data labels
+- attributes: raw and normalized infobox fields with source id/key, raw page id, template name/index, raw name, canonical name, value text, parsed number, unit, and variant key
 - media: unified infobox/page media assets with primary flags, URLs, dimensions, local paths, and variant metadata
 - media_profile: query-ready primary image, variant image, URL-readiness, and download-state summary
 - stats: normalized stat rows with raw field names, numeric values when available, units, and variant keys
 - variants: merged variant evidence from data, recipes, facts, explicit variants, and media
 - categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, and official Steam/Klei mentions
 
-The table also stores queryable top-level counts such as `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, and `official_mention_count` so applications can build lists without parsing JSON.
+The table also stores queryable top-level counts such as `attribute_count`, `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, and `official_mention_count` so applications can build lists without parsing JSON.
 
 ## Raw Wikitext Compression
 
