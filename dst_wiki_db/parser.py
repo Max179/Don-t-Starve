@@ -124,6 +124,23 @@ def _classify_kind(infoboxes: List[ParsedInfobox], categories: List[str]) -> str
     for kind, needles in infobox_checks:
         if any(needle in infobox_text for needle in needles):
             return kind
+    if "object infobox" in infobox_text:
+        if any(
+            needle in category_text
+            for needle in (
+                "item",
+                "items",
+                "filter",
+                "craftable",
+                "clothing",
+                "armor",
+                "weapon",
+                "tool",
+            )
+        ):
+            return "item"
+        if any(needle in category_text for needle in ("structure", "building")):
+            return "structure"
 
     checks = [
         ("boss", ("boss", "giant")),

@@ -61,3 +61,16 @@ def test_parse_page_prefers_infobox_type_over_loose_categories():
     parsed = parse_page("Abigail", text)
 
     assert parsed.kind == "mob"
+
+
+def test_parse_page_prefers_object_infobox_item_categories_over_survivor_text():
+    text = """{{Object Infobox
+|image=Ammo Pouch.png
+|spawnCode="slingshotammo_container"
+}}
+[[Category:Survivor Items Filter]]
+"""
+
+    parsed = parse_page("Ammo Pouch", text)
+
+    assert parsed.kind == "item"
