@@ -7,7 +7,8 @@ import sqlite3
 from typing import Any
 
 
-PROFILE_ENCODING = "gzip+base64+json"
+PROFILE_ENCODING = "gzip+json"
+LEGACY_PROFILE_ENCODING = "gzip+base64+json"
 
 
 def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
@@ -69,22 +70,43 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
     return count
 
 
-def dump_profile_json(profile: dict[str, Any]) -> str:
+def dump_profile_json(profile: dict[str, Any]) -> bytes:
     payload = json.dumps(profile, ensure_ascii=False, sort_keys=True).encode("utf-8")
-    return base64.b64encode(gzip.compress(payload, compresslevel=9)).decode("ascii")
+    return gzip.compress(payload, compresslevel=9)
 
 
 def load_profile_json(row_or_text: sqlite3.Row | str, encoding: str | None = None) -> dict[str, Any]:
-    if isinstance(row_or_text, str):
-        text = row_or_text
+    if isinstance(row_or_text, bytes):
+        text_or_bytes: str | bytes = row_or_text
+        profile_encoding = encoding or PROFILE_ENCODING
+    elif isinstance(row_or_text, str):
+        text_or_bytes = row_or_text
         profile_encoding = encoding or "json"
     else:
-        text = str(row_or_text["profile_json"])
+        text_or_bytes = row_or_text["profile_json"]
         profile_encoding = str(row_or_text["profile_encoding"])
     if profile_encoding == PROFILE_ENCODING:
+        payload_bytes = (
+            text_or_bytes.encode("latin1")
+            if isinstance(text_or_bytes, str)
+            else text_or_bytes
+        )
+        payload = gzip.decompress(payload_bytes).decode("utf-8")
+        return json.loads(payload)
+    if profile_encoding == LEGACY_PROFILE_ENCODING:
+        text = (
+            text_or_bytes.decode("ascii")
+            if isinstance(text_or_bytes, bytes)
+            else str(text_or_bytes)
+        )
         payload = gzip.decompress(base64.b64decode(text.encode("ascii"))).decode("utf-8")
         return json.loads(payload)
     if profile_encoding == "json":
+        text = (
+            text_or_bytes.decode("utf-8")
+            if isinstance(text_or_bytes, bytes)
+            else str(text_or_bytes)
+        )
         return json.loads(text)
     raise ValueError(f"Unsupported profile encoding: {profile_encoding}")
 

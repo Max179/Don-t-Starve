@@ -1141,7 +1141,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             wiki_link_count integer not null default 0,
             taxonomy_count integer not null default 0,
             profile_encoding text not null default 'json',
-            profile_json text not null,
+            profile_json blob not null,
             updated_at text not null default current_timestamp
         );
 

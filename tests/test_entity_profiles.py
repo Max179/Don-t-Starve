@@ -1,6 +1,3 @@
-import json
-import pytest
-
 from dst_wiki_db.entity_profiles import load_profile_json, rebuild_entity_profile_json
 from dst_wiki_db.schema import connect, init_db, upsert_entity, upsert_source
 
@@ -407,8 +404,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id,),
     ).fetchone()
-    with pytest.raises(json.JSONDecodeError):
-        json.loads(row["profile_json"])
+    assert isinstance(row["profile_json"], bytes)
     profile = load_profile_json(row)
     assert dict(row) | {"profile_json": profile} == {
         "entity_id": entity_id,
@@ -426,7 +422,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "relationship_count": 1,
         "wiki_link_count": 2,
         "taxonomy_count": 1,
-        "profile_encoding": "gzip+base64+json",
+        "profile_encoding": "gzip+json",
         "profile_json": profile,
     }
     assert profile["identity"] == {

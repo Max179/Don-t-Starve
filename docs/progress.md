@@ -586,7 +586,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,252 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+base64+json` in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows. After compression, embedded attributes, media profile expansion, link profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 99,098,624 bytes, about 95 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, embedded attributes, media profile expansion, link profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 97,263,616 bytes, about 93 MiB.
 
 Each profile aggregates:
 
