@@ -343,6 +343,35 @@ def init_db(conn: sqlite3.Connection) -> None:
             unique (entity_id, source_id, raw_page_id, relation_type, target_slug)
         );
 
+        create table if not exists entity_link_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            wiki_link_count integer not null default 0,
+            resolved_link_count integer not null default 0,
+            unresolved_link_count integer not null default 0,
+            unique_target_count integer not null default 0,
+            unique_resolved_target_count integer not null default 0,
+            unique_unresolved_target_count integer not null default 0,
+            target_kind_count integer not null default 0,
+            target_kind_counts_json text not null default '[]',
+            top_resolved_targets_json text not null default '[]',
+            top_unresolved_targets_json text not null default '[]',
+            has_wiki_links integer not null default 0,
+            has_resolved_links integer not null default 0,
+            has_unresolved_links integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_link_profiles_kind
+            on entity_link_profiles(kind);
+        create index if not exists idx_entity_link_profiles_link_count
+            on entity_link_profiles(wiki_link_count);
+        create index if not exists idx_entity_link_profiles_resolved
+            on entity_link_profiles(has_resolved_links, resolved_link_count);
+
         create table if not exists verification_checks (
             id integer primary key,
             entity_id integer references entities(id) on delete cascade,
@@ -1109,6 +1138,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             recipe_ingredient_count integer not null default 0,
             official_mention_count integer not null default 0,
             relationship_count integer not null default 0,
+            wiki_link_count integer not null default 0,
             taxonomy_count integer not null default 0,
             profile_encoding text not null default 'json',
             profile_json text not null,
@@ -1243,6 +1273,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         table="entity_profile_json",
         column="profile_encoding",
         definition="text not null default 'json'",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_profile_json",
+        column="wiki_link_count",
+        definition="integer not null default 0",
     )
     _add_column_if_missing(
         conn,

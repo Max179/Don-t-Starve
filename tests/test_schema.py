@@ -88,6 +88,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "entity_media_downloads",
         "entity_media_profiles",
         "entity_relations",
+        "entity_link_profiles",
         "verification_checks",
         "official_record_mentions",
         "official_products",

@@ -1,6 +1,6 @@
 # Current Database Progress
 
-Last updated: 2026-07-18 Asia/Shanghai.
+Last updated: 2026-07-19 Asia/Shanghai.
 
 ## Committed Database
 
@@ -39,6 +39,7 @@ Coverage:
 - Image-variant candidates: 419
 - Wiki-link relations: 58,997
 - Resolved wiki-link targets: 43,734
+- Entity link profile rows: 2,198
 - Source-presence verification checks: 2,252
 - Official Steam/Klei verification records: 161
 - Steam DLC appdetails records: 53
@@ -585,7 +586,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,252 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+base64+json` in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows. After compression, embedded attributes, media profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 91,303,936 bytes, about 87 MiB.
+Profile payloads are stored as `gzip+base64+json` in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows. After compression, embedded attributes, media profile expansion, link profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 99,098,624 bytes, about 95 MiB.
 
 Each profile aggregates:
 
@@ -596,9 +597,30 @@ Each profile aggregates:
 - media_profile: query-ready primary image, variant image, URL-readiness, and download-state summary
 - stats: normalized stat rows with raw field names, numeric values when available, units, and variant keys
 - variants: merged variant evidence from data, recipes, facts, explicit variants, and media
-- categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, and official Steam/Klei mentions
+- categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, wiki-link profile, and official Steam/Klei mentions
 
-The table also stores queryable top-level counts such as `attribute_count`, `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, and `official_mention_count` so applications can build lists without parsing JSON.
+The table also stores queryable top-level counts such as `attribute_count`, `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, `wiki_link_count`, and `official_mention_count` so applications can build lists without parsing JSON.
+
+## Entity Link Profiles
+
+The database now includes `entity_link_profiles`, a one-row navigation and cross-reference summary built from the full `entity_relations` table. It keeps the 58,997 raw wiki-link rows intact while exposing compact per-entry counts and top targets for API/list/detail use.
+
+This pass generated 2,198 link profile rows:
+
+- Source wiki-link rows summarized: 58,997
+- Resolved links to known entities: 43,734
+- Unresolved links kept as unresolved target summaries: 15,263
+
+Example link profiles:
+
+- `Don't Starve Together`: 325 wiki links, 274 resolved, 51 unresolved, 9 target kinds.
+- `Crock Pot`: 122 wiki links, 97 resolved, 25 unresolved, 7 target kinds.
+- `Deerclops`: 76 wiki links, 57 resolved, 19 unresolved, 6 target kinds.
+- `Berry Bush`: 54 wiki links, 40 resolved, 14 unresolved, 8 target kinds.
+- `Wilson`: 54 wiki links, 28 resolved, 26 unresolved, 5 target kinds.
+- `Spear`: 17 wiki links, 11 resolved, 6 unresolved, 4 target kinds.
+
+Each compressed entity profile now includes a nullable `link_profile` object with resolved/unresolved counts, unique target counts, target-kind distributions, and compact top resolved/unresolved target arrays. The top-target arrays are capped at 10 items per direction so the committed SQLite database stays below GitHub's 100 MiB file limit; full relation evidence remains queryable in `entity_relations`.
 
 ## Raw Wikitext Compression
 

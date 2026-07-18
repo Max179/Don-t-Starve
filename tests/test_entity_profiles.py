@@ -237,6 +237,25 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     )
     conn.execute(
         """
+        insert into entity_link_profiles (
+            entity_id, slug, canonical_title, kind, wiki_link_count,
+            resolved_link_count, unresolved_link_count, unique_target_count,
+            unique_resolved_target_count, unique_unresolved_target_count,
+            target_kind_count, target_kind_counts_json,
+            top_resolved_targets_json, top_unresolved_targets_json,
+            has_wiki_links, has_resolved_links, has_unresolved_links
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant', 2, 1, 1, 2, 1,
+                1, 1, '[{"kind":"item","count":1}]',
+                '[{"entity_id":%d,"title":"Berries","slug":"berries","kind":"item","link_count":1,"target_title":"Berries","target_slug":"berries"}]',
+                '[{"title":"Missing Thing","slug":"missing-thing","link_count":1}]',
+                1, 1, 1)
+        """
+        % berries_id,
+        (entity_id,),
+    )
+    conn.execute(
+        """
         insert into entity_taxonomy (
             entity_id, slug, canonical_title, kind, taxonomy_type,
             taxonomy_key, label, confidence, evidence_source, evidence_count
@@ -380,7 +399,8 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         select entity_id, slug, canonical_title, kind, attribute_count,
                media_count, stat_count, variant_count, category_count,
                fact_count, recipe_ingredient_count, official_mention_count,
-               relationship_count, taxonomy_count, profile_encoding,
+               relationship_count, wiki_link_count, taxonomy_count,
+               profile_encoding,
                profile_json
         from entity_profile_json
         where entity_id = ?
@@ -404,6 +424,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "recipe_ingredient_count": 1,
         "official_mention_count": 1,
         "relationship_count": 1,
+        "wiki_link_count": 2,
         "taxonomy_count": 1,
         "profile_encoding": "gzip+base64+json",
         "profile_json": profile,
@@ -447,6 +468,10 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["official_mentions"][0]["title"] == "Berry Bush update"
     assert profile["relationships"][0]["edge_type"] == "drops"
     assert profile["relationships"][0]["related_title"] == "Berries"
+    assert profile["link_profile"]["counts"]["wiki_links"] == 2
+    assert profile["link_profile"]["counts"]["resolved_links"] == 1
+    assert profile["link_profile"]["top_resolved_targets"][0]["title"] == "Berries"
+    assert profile["link_profile"]["top_unresolved_targets"][0]["title"] == "Missing Thing"
     assert profile["taxonomy"][0]["taxonomy_key"] == "plant"
     assert profile["combat_profile"]["health"]["max"] == 100.0
     assert profile["combat_profile"]["damage"]["text"] == "10 / 20"

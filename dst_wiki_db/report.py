@@ -20,6 +20,7 @@ COUNT_TABLES = [
     "entity_media_downloads",
     "entity_media_profiles",
     "entity_relations",
+    "entity_link_profiles",
     "verification_checks",
     "official_records",
     "official_record_mentions",

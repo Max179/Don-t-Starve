@@ -37,11 +37,11 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 entity_id, slug, canonical_title, kind, coverage_score,
                 attribute_count, media_count, stat_count, variant_count,
                 category_count, fact_count, recipe_ingredient_count,
-                official_mention_count, relationship_count, taxonomy_count,
-                profile_encoding,
+                official_mention_count, relationship_count, wiki_link_count,
+                taxonomy_count, profile_encoding,
                 profile_json, updated_at
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
             """,
             (
                 entity_id,
@@ -58,6 +58,7 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 counts["recipes"],
                 counts["official_mentions"],
                 counts["relationships"],
+                counts["wiki_links"],
                 counts["taxonomy"],
                 PROFILE_ENCODING,
                 dump_profile_json(profile),
@@ -100,6 +101,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     recipes = _recipes(conn, entity_id)
     official_mentions = _official_mentions(conn, entity_id)
     relationships = _relationships(conn, entity_id)
+    link_profile = _link_profile(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
     media_profile = _media_profile(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
@@ -129,6 +131,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
             "recipes": len(recipes),
             "official_mentions": len(official_mentions),
             "relationships": len(relationships),
+            "wiki_links": _link_count(link_profile),
             "taxonomy": len(taxonomy),
         },
         "attributes": attributes,
@@ -141,6 +144,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "recipes": recipes,
         "official_mentions": official_mentions,
         "relationships": relationships,
+        "link_profile": link_profile,
         "taxonomy": taxonomy,
         "media_profile": media_profile,
         "combat_profile": combat_profile,
@@ -690,6 +694,57 @@ def _relationships(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, A
         }
         for row in rows
     ]
+
+
+def _link_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            wiki_link_count,
+            resolved_link_count,
+            unresolved_link_count,
+            unique_target_count,
+            unique_resolved_target_count,
+            unique_unresolved_target_count,
+            target_kind_count,
+            target_kind_counts_json,
+            top_resolved_targets_json,
+            top_unresolved_targets_json,
+            has_wiki_links,
+            has_resolved_links,
+            has_unresolved_links
+        from entity_link_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "counts": {
+            "wiki_links": int(row["wiki_link_count"]),
+            "resolved_links": int(row["resolved_link_count"]),
+            "unresolved_links": int(row["unresolved_link_count"]),
+            "unique_targets": int(row["unique_target_count"]),
+            "unique_resolved_targets": int(row["unique_resolved_target_count"]),
+            "unique_unresolved_targets": int(row["unique_unresolved_target_count"]),
+            "target_kinds": int(row["target_kind_count"]),
+        },
+        "flags": {
+            "has_wiki_links": bool(row["has_wiki_links"]),
+            "has_resolved_links": bool(row["has_resolved_links"]),
+            "has_unresolved_links": bool(row["has_unresolved_links"]),
+        },
+        "target_kind_counts": json.loads(str(row["target_kind_counts_json"] or "[]")),
+        "top_resolved_targets": json.loads(str(row["top_resolved_targets_json"] or "[]")),
+        "top_unresolved_targets": json.loads(str(row["top_unresolved_targets_json"] or "[]")),
+    }
+
+
+def _link_count(link_profile: dict[str, Any] | None) -> int:
+    if link_profile is None:
+        return 0
+    return int(link_profile["counts"]["wiki_links"])
 
 
 def _taxonomy(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
