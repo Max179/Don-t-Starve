@@ -5,7 +5,7 @@ import sqlite3
 from typing import Any
 
 
-TOP_TARGET_LIMIT = 10
+TOP_TARGET_LIMIT = 5
 
 
 def rebuild_entity_link_profiles(conn: sqlite3.Connection) -> int:
