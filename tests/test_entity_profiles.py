@@ -290,6 +290,25 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     )
     conn.execute(
         """
+        insert into entity_source_profiles (
+            entity_id, source_key, slug, canonical_title, kind,
+            matched_page_count, exact_page_count, game_variant_page_count,
+            prefab_page_count, image_page_count, method_count,
+            match_methods_json, primary_page_title, primary_page_url,
+            matched_pages_json, has_exact_page, has_game_variant_pages,
+            has_prefab_page, has_image_page
+        )
+        values (?, 'wiki.gg', 'berry-bush', 'Berry Bush', 'plant',
+                2, 1, 1, 0, 0, 2,
+                '[{"method":"alias:canonical_title","count":1},{"method":"alias_game_variant_suffix:canonical_title","count":1}]',
+                'Berry Bush', 'https://dontstarve.wiki.gg/wiki/Berry_Bush',
+                '[{"pageid":10,"title":"Berry Bush","slug":"berry-bush","url":"https://dontstarve.wiki.gg/wiki/Berry_Bush","match_method":"alias:canonical_title","confidence":1.0},{"pageid":11,"title":"Berry Bush/DST","slug":"berry-bush-dst","url":"https://dontstarve.wiki.gg/wiki/Berry_Bush/DST","match_method":"alias_game_variant_suffix:canonical_title","confidence":0.88}]',
+                1, 1, 0, 0)
+        """,
+        (entity_id,),
+    )
+    conn.execute(
+        """
         insert into entity_taxonomy (
             entity_id, slug, canonical_title, kind, taxonomy_type,
             taxonomy_key, label, confidence, evidence_source, evidence_count
@@ -434,7 +453,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
                media_count, stat_count, variant_count, category_count,
                fact_count, recipe_ingredient_count, official_mention_count,
                relationship_count, wiki_link_count, prefab_count, alias_count,
-               taxonomy_count,
+               source_match_count, taxonomy_count,
                profile_encoding,
                profile_json
         from entity_profile_json
@@ -461,6 +480,7 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "wiki_link_count": 2,
         "prefab_count": 2,
         "alias_count": 4,
+        "source_match_count": 2,
         "taxonomy_count": 1,
         "profile_encoding": "gzip+json",
         "profile_json": profile,
@@ -519,6 +539,10 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         "berrybush",
         "berry-bush-png",
     ]
+    assert profile["source_profiles"][0]["source_key"] == "wiki.gg"
+    assert profile["source_profiles"][0]["primary_page"]["title"] == "Berry Bush"
+    assert profile["source_profiles"][0]["counts"]["matched_pages"] == 2
+    assert profile["source_profiles"][0]["flags"]["has_game_variant_pages"] is True
     assert profile["taxonomy"][0]["taxonomy_key"] == "plant"
     assert profile["combat_profile"]["health"]["max"] == 100.0
     assert profile["combat_profile"]["damage"]["text"] == "10 / 20"

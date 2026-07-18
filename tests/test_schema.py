@@ -104,6 +104,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "source_catalog_evidence",
         "source_page_index",
         "source_page_entity_matches",
+        "entity_source_profiles",
         "community_guide_sources",
         "community_guide_topics",
         "community_guide_topic_index",

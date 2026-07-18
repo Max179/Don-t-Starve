@@ -39,10 +39,10 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 attribute_count, media_count, stat_count, variant_count,
                 category_count, fact_count, recipe_ingredient_count,
                 official_mention_count, relationship_count, wiki_link_count,
-                prefab_count, alias_count, taxonomy_count, profile_encoding,
-                profile_json, updated_at
+                prefab_count, alias_count, source_match_count,
+                taxonomy_count, profile_encoding, profile_json, updated_at
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
             """,
             (
                 entity_id,
@@ -62,6 +62,7 @@ def rebuild_entity_profile_json(conn: sqlite3.Connection) -> int:
                 counts["wiki_links"],
                 counts["prefabs"],
                 counts["aliases"],
+                counts["source_matches"],
                 counts["taxonomy"],
                 PROFILE_ENCODING,
                 dump_profile_json(profile),
@@ -128,6 +129,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     link_profile = _link_profile(conn, entity_id)
     prefab_profile = _prefab_profile(conn, entity_id)
     alias_profile = _alias_profile(conn, entity_id)
+    source_profiles = _source_profiles(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
     media_profile = _media_profile(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
@@ -160,6 +162,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
             "wiki_links": _link_count(link_profile),
             "prefabs": _prefab_count(prefab_profile),
             "aliases": _alias_count(alias_profile),
+            "source_matches": _source_match_count(source_profiles),
             "taxonomy": len(taxonomy),
         },
         "attributes": attributes,
@@ -175,6 +178,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "link_profile": link_profile,
         "prefab_profile": prefab_profile,
         "alias_profile": alias_profile,
+        "source_profiles": source_profiles,
         "taxonomy": taxonomy,
         "media_profile": media_profile,
         "combat_profile": combat_profile,
@@ -889,6 +893,63 @@ def _alias_count(alias_profile: dict[str, Any] | None) -> int:
     if alias_profile is None:
         return 0
     return int(alias_profile["counts"]["aliases"])
+
+
+def _source_profiles(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """
+        select
+            source_key,
+            matched_page_count,
+            exact_page_count,
+            game_variant_page_count,
+            prefab_page_count,
+            image_page_count,
+            method_count,
+            match_methods_json,
+            primary_page_title,
+            primary_page_url,
+            matched_pages_json,
+            has_exact_page,
+            has_game_variant_pages,
+            has_prefab_page,
+            has_image_page
+        from entity_source_profiles
+        where entity_id = ?
+        order by source_key
+        """,
+        (entity_id,),
+    ).fetchall()
+    return [
+        {
+            "source_key": str(row["source_key"]),
+            "primary_page": {
+                "title": str(row["primary_page_title"] or ""),
+                "url": str(row["primary_page_url"] or ""),
+            },
+            "matched_pages": json.loads(str(row["matched_pages_json"] or "[]")),
+            "match_methods": json.loads(str(row["match_methods_json"] or "[]")),
+            "counts": {
+                "matched_pages": int(row["matched_page_count"]),
+                "exact_pages": int(row["exact_page_count"]),
+                "game_variant_pages": int(row["game_variant_page_count"]),
+                "prefab_pages": int(row["prefab_page_count"]),
+                "image_pages": int(row["image_page_count"]),
+                "methods": int(row["method_count"]),
+            },
+            "flags": {
+                "has_exact_page": bool(row["has_exact_page"]),
+                "has_game_variant_pages": bool(row["has_game_variant_pages"]),
+                "has_prefab_page": bool(row["has_prefab_page"]),
+                "has_image_page": bool(row["has_image_page"]),
+            },
+        }
+        for row in rows
+    ]
+
+
+def _source_match_count(source_profiles: list[dict[str, Any]]) -> int:
+    return sum(int(profile["counts"]["matched_pages"]) for profile in source_profiles)
 
 
 def _taxonomy(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:

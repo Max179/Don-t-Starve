@@ -57,6 +57,7 @@ Coverage:
 - Source catalog evidence rows: 26
 - External source page index rows: 3,231
 - External source page/entity matches: 2,769
+- Entity source profile rows: 2,200
 - Structured recipe ingredients: 1,954
 - Resolved recipe ingredient targets: 1,816
 - Structured drop/source/sold/spawn facts: 1,246
@@ -82,6 +83,12 @@ wiki.gg title-index pass stores 3,231 main-namespace page titles and maps 2,769
 of them to local entities. Matching uses the alias/search-key layer, including
 safe `/DS` and `/DST` game-version suffix fallbacks such as `Axe/DST` -> `Axe`
 and `Alchemy Engine/DST` -> `Alchemy Engine`.
+
+Those page matches are also summarized in `entity_source_profiles`: 2,200 local
+entities now have wiki.gg source profiles, covering 2,769 matched canonical
+wiki pages and 492 DS/DST game-version pages. Entity JSON profiles include
+these source summaries through `source_profiles` plus top-level
+`source_match_count`.
 
 Entity kind distribution:
 
@@ -628,7 +635,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,252 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, embedded attributes, media profile expansion, link profile expansion, prefab profile expansion, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 98,291,712 bytes, about 94 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 97,869,824 bytes, about 93 MiB.
 
 Each profile aggregates:
 
@@ -639,9 +646,9 @@ Each profile aggregates:
 - media_profile: query-ready primary image, variant image, URL-readiness, and download-state summary
 - stats: normalized stat rows with raw field names, numeric values when available, units, and variant keys
 - variants: merged variant evidence from data, recipes, facts, explicit variants, and media
-- categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, wiki-link profile, prefab profile, and official Steam/Klei mentions
+- categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, wiki-link profile, prefab profile, source profiles, and official Steam/Klei mentions
 
-The table also stores queryable top-level counts such as `attribute_count`, `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, `wiki_link_count`, `prefab_count`, and `official_mention_count` so applications can build lists without parsing JSON.
+The table also stores queryable top-level counts such as `attribute_count`, `media_count`, `stat_count`, `variant_count`, `category_count`, `taxonomy_count`, `fact_count`, `recipe_ingredient_count`, `relationship_count`, `wiki_link_count`, `prefab_count`, `source_match_count`, and `official_mention_count` so applications can build lists without parsing JSON.
 
 ## Entity Link Profiles
 

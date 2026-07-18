@@ -750,6 +750,36 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_source_page_entity_matches_entity
             on source_page_entity_matches(entity_id);
 
+        create table if not exists entity_source_profiles (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            source_key text not null,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            matched_page_count integer not null default 0,
+            exact_page_count integer not null default 0,
+            game_variant_page_count integer not null default 0,
+            prefab_page_count integer not null default 0,
+            image_page_count integer not null default 0,
+            method_count integer not null default 0,
+            match_methods_json text not null default '[]',
+            primary_page_title text not null default '',
+            primary_page_url text not null default '',
+            matched_pages_json text not null default '[]',
+            has_exact_page integer not null default 0,
+            has_game_variant_pages integer not null default 0,
+            has_prefab_page integer not null default 0,
+            has_image_page integer not null default 0,
+            updated_at text not null default current_timestamp,
+            unique (entity_id, source_key)
+        );
+
+        create index if not exists idx_entity_source_profiles_source
+            on entity_source_profiles(source_key, matched_page_count);
+        create index if not exists idx_entity_source_profiles_entity
+            on entity_source_profiles(entity_id);
+
         create table if not exists entity_coverage (
             id integer primary key,
             entity_id integer not null unique references entities(id) on delete cascade,
@@ -1282,6 +1312,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             wiki_link_count integer not null default 0,
             prefab_count integer not null default 0,
             alias_count integer not null default 0,
+            source_match_count integer not null default 0,
             taxonomy_count integer not null default 0,
             profile_encoding text not null default 'json',
             profile_json blob not null,
@@ -1433,6 +1464,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         conn,
         table="entity_profile_json",
         column="alias_count",
+        definition="integer not null default 0",
+    )
+    _add_column_if_missing(
+        conn,
+        table="entity_profile_json",
+        column="source_match_count",
         definition="integer not null default 0",
     )
     _add_column_if_missing(
