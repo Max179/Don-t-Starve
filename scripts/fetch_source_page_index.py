@@ -9,6 +9,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from dst_wiki_db.schema import connect, init_db
+from dst_wiki_db.source_page_gaps import rebuild_source_page_gaps
 from dst_wiki_db.source_page_index import fetch_source_page_index
 
 
@@ -36,6 +37,9 @@ def main(argv=None):
         source_key=args.source_key,
         limit=None if args.limit == 0 else args.limit,
         sleep_seconds=args.sleep,
+    )
+    result["source_page_gaps"] = rebuild_source_page_gaps(
+        conn, source_key=args.source_key
     )
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")

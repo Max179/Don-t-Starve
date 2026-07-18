@@ -780,6 +780,27 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_source_profiles_entity
             on entity_source_profiles(entity_id);
 
+        create table if not exists source_page_gaps (
+            id integer primary key,
+            source_page_index_id integer not null unique references source_page_index(id) on delete cascade,
+            source_key text not null,
+            source_pageid integer not null,
+            title text not null,
+            title_slug text not null,
+            page_url text not null,
+            gap_type text not null,
+            priority integer not null default 50,
+            suggested_title text not null default '',
+            suggested_slug text not null default '',
+            notes text not null default '',
+            detected_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_source_page_gaps_source
+            on source_page_gaps(source_key, gap_type, priority);
+        create index if not exists idx_source_page_gaps_priority
+            on source_page_gaps(priority, source_key);
+
         create table if not exists entity_coverage (
             id integer primary key,
             entity_id integer not null unique references entities(id) on delete cascade,

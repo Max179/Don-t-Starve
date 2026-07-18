@@ -58,6 +58,7 @@ Coverage:
 - External source page index rows: 3,231
 - External source page/entity matches: 2,769
 - Entity source profile rows: 2,200
+- External source page gap rows: 462
 - Structured recipe ingredients: 1,954
 - Resolved recipe ingredient targets: 1,816
 - Structured drop/source/sold/spawn facts: 1,246
@@ -89,6 +90,20 @@ entities now have wiki.gg source profiles, covering 2,769 matched canonical
 wiki pages and 492 DS/DST game-version pages. Entity JSON profiles include
 these source summaries through `source_profiles` plus top-level
 `source_match_count`.
+
+Unmatched wiki.gg pages are tracked in `source_page_gaps` as a review and
+ingestion backlog. Current gap distribution:
+
+- `potential_new_entity`: 321
+- `unmatched_subpage`: 84
+- `unmatched_game_variant_page`: 31
+- `event_or_seasonal_page`: 15
+- `guide_or_reference_page`: 6
+- `cosmetic_or_curio_page`: 5
+
+The gap table stores page id, title, URL, normalized slug, gap type, priority,
+suggested base title/slug for unmatched DS/DST subpages, and notes. This keeps
+canonical wiki coverage holes queryable for the next ingestion pass.
 
 Entity kind distribution:
 

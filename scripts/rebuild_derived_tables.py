@@ -34,6 +34,7 @@ from dst_wiki_db.prefab_profiles import rebuild_entity_prefab_profiles
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.recipe_profiles import rebuild_entity_recipe_profiles
 from dst_wiki_db.source_catalog import rebuild_source_catalog
+from dst_wiki_db.source_page_gaps import rebuild_source_page_gaps
 from dst_wiki_db.source_page_index import rebuild_source_page_entity_matches
 from dst_wiki_db.source_profiles import rebuild_entity_source_profiles
 from dst_wiki_db.stat_rollups import rebuild_entity_stat_rollups
@@ -80,6 +81,7 @@ def main(argv=None):
     alias_profile_counts = rebuild_entity_alias_profiles(conn)
     source_page_match_count = rebuild_source_page_entity_matches(conn)
     entity_source_profile_count = rebuild_entity_source_profiles(conn)
+    source_page_gap_count = rebuild_source_page_gaps(conn)
     gameplay_edge_count = rebuild_entity_gameplay_edges(conn)
     combat_profile_count = rebuild_entity_combat_profiles(conn)
     food_profile_count = rebuild_entity_food_profiles(conn)
@@ -138,6 +140,7 @@ def main(argv=None):
         "entity_alias_profiles": alias_profile_counts["entity_alias_profiles"],
         "source_page_entity_matches": source_page_match_count,
         "entity_source_profiles": entity_source_profile_count,
+        "source_page_gaps": source_page_gap_count,
         "entity_variant_summary": variant_summary_count,
         "entity_coverage": coverage_count,
         "entity_taxonomy": taxonomy_count,
