@@ -28,6 +28,7 @@ from dst_wiki_db.official_update_sections import rebuild_official_update_section
 from dst_wiki_db.entity_profiles import rebuild_entity_profile_json
 from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
+from dst_wiki_db.recipe_profiles import rebuild_entity_recipe_profiles
 from dst_wiki_db.source_catalog import rebuild_source_catalog
 from dst_wiki_db.stat_rollups import rebuild_entity_stat_rollups
 from dst_wiki_db.stats import rebuild_entity_stat_values, rebuild_entity_stats
@@ -74,6 +75,7 @@ def main(argv=None):
     world_profile_count = rebuild_entity_world_profiles(conn)
     character_profile_count = rebuild_entity_character_profiles(conn)
     creature_profile_count = rebuild_entity_creature_profiles(conn)
+    recipe_profile_count = rebuild_entity_recipe_profiles(conn)
     variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
     taxonomy_count = rebuild_entity_taxonomy(conn)
@@ -94,6 +96,7 @@ def main(argv=None):
         "entity_world_profiles": world_profile_count,
         "entity_character_profiles": character_profile_count,
         "entity_creature_profiles": creature_profile_count,
+        "entity_recipe_profiles": recipe_profile_count,
         "entity_variants": variant_count,
         "entity_categories": category_count,
         "page_images": page_image_count,

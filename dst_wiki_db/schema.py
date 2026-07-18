@@ -975,6 +975,37 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_creature_profiles_flags
             on entity_creature_profiles(is_boss, has_drop_data, has_spawn_data);
 
+        create table if not exists entity_recipe_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            recipe_count integer not null default 0,
+            ingredient_count integer not null default 0,
+            resolved_ingredient_count integer not null default 0,
+            unresolved_ingredient_count integer not null default 0,
+            used_in_count integer not null default 0,
+            source_count integer not null default 0,
+            variant_count integer not null default 0,
+            ingredient_names_text text not null default '',
+            ingredient_targets_text text not null default '',
+            used_in_titles_text text not null default '',
+            ingredient_summary_json text not null default '[]',
+            used_in_summary_json text not null default '[]',
+            has_recipe integer not null default 0,
+            has_resolved_ingredients integer not null default 0,
+            is_ingredient integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_recipe_profiles_kind
+            on entity_recipe_profiles(kind);
+        create index if not exists idx_entity_recipe_profiles_recipe
+            on entity_recipe_profiles(has_recipe, ingredient_count);
+        create index if not exists idx_entity_recipe_profiles_ingredient
+            on entity_recipe_profiles(is_ingredient, used_in_count);
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

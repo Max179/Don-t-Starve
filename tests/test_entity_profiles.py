@@ -324,6 +324,26 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id,),
     )
+    conn.execute(
+        """
+        insert into entity_recipe_profiles (
+            entity_id, slug, canonical_title, kind,
+            recipe_count, ingredient_count, resolved_ingredient_count,
+            unresolved_ingredient_count, used_in_count, source_count,
+            variant_count, ingredient_names_text, ingredient_targets_text,
+            used_in_titles_text, ingredient_summary_json,
+            used_in_summary_json, has_recipe, has_resolved_ingredients,
+            is_ingredient
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                1, 1, 1, 0, 1, 1, 0, 'Rot', 'Rot',
+                'Compost Wrap',
+                '[{"name":"Rot","quantity_number":1.0,"quantity_text":"1","slot":1,"slug":"rot","variant_key":""}]',
+                '[{"entity_id":999,"kind":"item","quantity_number":1.0,"quantity_text":"1","slug":"compost-wrap","title":"Compost Wrap","variant_key":"","confidence":1.0}]',
+                1, 1, 1)
+        """,
+        (entity_id,),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
@@ -399,6 +419,9 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["creature_profile"]["spawn_code_text"] == "berrybush"
     assert profile["creature_profile"]["damage"]["max"] == 5.0
     assert profile["creature_profile"]["relationships"]["drop_edge_count"] == 1
+    assert profile["recipe_profile"]["counts"]["ingredients"] == 1
+    assert profile["recipe_profile"]["ingredients"][0]["name"] == "Rot"
+    assert profile["recipe_profile"]["used_in"][0]["title"] == "Compost Wrap"
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):

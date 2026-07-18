@@ -104,6 +104,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     world_profile = _world_profile(conn, entity_id)
     character_profile = _character_profile(conn, entity_id)
     creature_profile = _creature_profile(conn, entity_id)
+    recipe_profile = _recipe_profile(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -141,6 +142,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "world_profile": world_profile,
         "character_profile": character_profile,
         "creature_profile": creature_profile,
+        "recipe_profile": recipe_profile,
     }
 
 
@@ -1049,6 +1051,55 @@ def _creature_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any
             "has_sanity_effects": bool(row["has_sanity_effects"]),
             "has_drop_data": bool(row["has_drop_data"]),
             "has_spawn_data": bool(row["has_spawn_data"]),
+        },
+    }
+
+
+def _recipe_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            recipe_count,
+            ingredient_count,
+            resolved_ingredient_count,
+            unresolved_ingredient_count,
+            used_in_count,
+            source_count,
+            variant_count,
+            ingredient_names_text,
+            ingredient_targets_text,
+            used_in_titles_text,
+            ingredient_summary_json,
+            used_in_summary_json,
+            has_recipe,
+            has_resolved_ingredients,
+            is_ingredient
+        from entity_recipe_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "ingredient_names_text": str(row["ingredient_names_text"] or ""),
+        "ingredient_targets_text": str(row["ingredient_targets_text"] or ""),
+        "used_in_titles_text": str(row["used_in_titles_text"] or ""),
+        "ingredients": json.loads(str(row["ingredient_summary_json"] or "[]")),
+        "used_in": json.loads(str(row["used_in_summary_json"] or "[]")),
+        "counts": {
+            "recipes": int(row["recipe_count"]),
+            "ingredients": int(row["ingredient_count"]),
+            "resolved_ingredients": int(row["resolved_ingredient_count"]),
+            "unresolved_ingredients": int(row["unresolved_ingredient_count"]),
+            "used_in": int(row["used_in_count"]),
+            "sources": int(row["source_count"]),
+            "variants": int(row["variant_count"]),
+        },
+        "flags": {
+            "has_recipe": bool(row["has_recipe"]),
+            "has_resolved_ingredients": bool(row["has_resolved_ingredients"]),
+            "is_ingredient": bool(row["is_ingredient"]),
         },
     }
 

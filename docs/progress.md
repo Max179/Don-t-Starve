@@ -817,6 +817,33 @@ Example creature profiles:
 
 Each compressed entity profile now includes a nullable `creature_profile` object so mob and boss pages can expose combat, movement, sanity, drop, spawn, and ecology data without joining raw stat, attribute, and relationship tables.
 
+## Entity Recipe Profiles
+
+The database now includes `entity_recipe_profiles`, a one-row crafting and cooking summary table built from `recipe_ingredients`, `recipe_ingredient_targets`, and inverse recipe relationship edges. It preserves original ingredient slots and quantities while also exposing resolved ingredient targets and reverse "used in" links.
+
+This pass generated 783 recipe profile rows:
+
+- `item`: 510
+- `structure`: 139
+- `boss`: 73
+- `mob`: 26
+- `food`: 25
+- `character`: 6
+- `plant`: 3
+- `page`: 1
+
+Each row stores recipe count, ingredient count, resolved/unresolved ingredient counts, used-in count, source/variant counts, joined text summaries, and JSON arrays for ingredient details and used-in details.
+
+Example recipe profiles:
+
+- `Spear`: 1 recipe, 3 ingredients (`Twigs | Rope | Flint`), 3 resolved ingredient targets, used in 8 other recipes
+- `Crock Pot`: 1 recipe, 3 ingredients (`Cut Stone | Charcoal | Twigs`)
+- `Alchemy Engine`: 1 recipe, 3 ingredients (`Boards | Cut Stone | Gold Nugget`)
+- `Twigs`: 1 recipe from `Log`, and used in 88 other recipes
+- `Cut Stone`: 1 recipe from `Rocks`, and used in 46 other recipes
+
+Each compressed entity profile now includes a nullable `recipe_profile` object so item, food, structure, and ingredient pages can render crafting cards and reverse ingredient usage without joining recipe tables.
+
 ## Media Download Manifest
 
 The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.
