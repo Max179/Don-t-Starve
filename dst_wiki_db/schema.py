@@ -909,6 +909,72 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_character_profiles_damage
             on entity_character_profiles(damage_max);
 
+        create table if not exists entity_creature_profiles (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            biome_text text not null default '',
+            spawn_code_text text not null default '',
+            special_ability_text text not null default '',
+            perk_text text not null default '',
+            drops_text text not null default '',
+            dropped_by_text text not null default '',
+            spawn_from_text text not null default '',
+            spawns_text text not null default '',
+            health_min real,
+            health_max real,
+            health_text text not null default '',
+            damage_min real,
+            damage_max real,
+            damage_text text not null default '',
+            attack_range_min real,
+            attack_range_max real,
+            attack_range_text text not null default '',
+            attack_period_min real,
+            attack_period_max real,
+            attack_period_text text not null default '',
+            walk_speed_min real,
+            walk_speed_max real,
+            walk_speed_text text not null default '',
+            run_speed_min real,
+            run_speed_max real,
+            run_speed_text text not null default '',
+            sanityaura_min real,
+            sanityaura_max real,
+            sanityaura_text text not null default '',
+            sanitydrain_min real,
+            sanitydrain_max real,
+            sanitydrain_text text not null default '',
+            drop_edge_count integer not null default 0,
+            dropped_by_edge_count integer not null default 0,
+            spawns_edge_count integer not null default 0,
+            spawned_from_edge_count integer not null default 0,
+            drop_related_titles text not null default '',
+            spawn_related_titles text not null default '',
+            attribute_count integer not null default 0,
+            stat_count integer not null default 0,
+            source_count integer not null default 0,
+            variant_count integer not null default 0,
+            is_boss integer not null default 0,
+            has_combat_stats integer not null default 0,
+            has_movement_stats integer not null default 0,
+            has_sanity_effects integer not null default 0,
+            has_drop_data integer not null default 0,
+            has_spawn_data integer not null default 0,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_creature_profiles_kind
+            on entity_creature_profiles(kind);
+        create index if not exists idx_entity_creature_profiles_health
+            on entity_creature_profiles(health_max);
+        create index if not exists idx_entity_creature_profiles_damage
+            on entity_creature_profiles(damage_max);
+        create index if not exists idx_entity_creature_profiles_flags
+            on entity_creature_profiles(is_boss, has_drop_data, has_spawn_data);
+
         create table if not exists entity_variants (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

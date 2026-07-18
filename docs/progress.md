@@ -797,6 +797,26 @@ Example character profiles:
 
 Each compressed entity profile now includes a nullable `character_profile` object so character pages can expose survivability, lore/flavor fields, prefab/spawn-code details, perks, starting items, and core stats without joining raw attributes.
 
+## Entity Creature Profiles
+
+The database now includes `entity_creature_profiles`, a one-row summary table for mob and boss entries. It combines creature infobox fields (`biome`, `spawn_code`, `special_ability`, `perk`, `drops`, `dropped_by`, `spawn_from`, and `spawns`) with normalized rollup stats for health, damage, attack range, attack period, walk speed, run speed, sanity aura, and sanity drain. It also brings in typed gameplay relationship counts for drops and spawn links.
+
+This pass generated 412 creature profile rows:
+
+- `mob`: 267
+- `boss`: 145
+
+Each row stores raw text evidence, min/max/text stat values, drop/spawn relationship counts, related title summaries, source/variant counts, and flags for boss status, combat stats, movement stats, sanity effects, drop data, and spawn data.
+
+Example creature profiles:
+
+- `Bee Queen`: health 22,500, damage 120, attack range 4, boss flag enabled
+- `Deerclops`: health 2,000-4,000, damage 150, attack range up to 68, spawn code `deerclops`
+- `Dragonfly`: health up to 27,500, damage up to 225, attack range 6, drop/spawn relationship data present
+- `Spider`: health 100, damage 20, attack range 3, sanity aura -25/min, spawn relationship data present
+
+Each compressed entity profile now includes a nullable `creature_profile` object so mob and boss pages can expose combat, movement, sanity, drop, spawn, and ecology data without joining raw stat, attribute, and relationship tables.
+
 ## Media Download Manifest
 
 The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.

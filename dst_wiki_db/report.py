@@ -44,6 +44,7 @@ COUNT_TABLES = [
     "entity_item_profiles",
     "entity_world_profiles",
     "entity_character_profiles",
+    "entity_creature_profiles",
     "entity_variants",
     "entity_variant_summary",
     "entity_categories",

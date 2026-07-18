@@ -305,6 +305,25 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
         """,
         (entity_id,),
     )
+    conn.execute(
+        """
+        insert into entity_creature_profiles (
+            entity_id, slug, canonical_title, kind,
+            biome_text, spawn_code_text, special_ability_text, drops_text,
+            health_min, health_max, health_text, damage_min, damage_max,
+            damage_text, attack_range_min, attack_range_max, attack_range_text,
+            drop_edge_count, drop_related_titles, attribute_count,
+            stat_count, source_count, variant_count, is_boss,
+            has_combat_stats, has_movement_stats, has_sanity_effects,
+            has_drop_data, has_spawn_data
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                'Forest', 'berrybush', 'Rustles ominously', 'Berries',
+                10, 20, '10 / 20', 3, 5, '3 / 5', 2, 4, '2 / 4',
+                1, 'Berries', 4, 3, 1, 0, 0, 1, 0, 0, 1, 0)
+        """,
+        (entity_id,),
+    )
 
     result = rebuild_entity_profile_json(conn)
 
@@ -377,6 +396,9 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["character_profile"]["nick_text"] == "The Bush"
     assert profile["character_profile"]["health"]["max"] == 20.0
     assert profile["character_profile"]["flags"]["has_perks"] is True
+    assert profile["creature_profile"]["spawn_code_text"] == "berrybush"
+    assert profile["creature_profile"]["damage"]["max"] == 5.0
+    assert profile["creature_profile"]["relationships"]["drop_edge_count"] == 1
 
 
 def test_rebuild_entity_profile_json_is_idempotent(tmp_path):

@@ -103,6 +103,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     item_profile = _item_profile(conn, entity_id)
     world_profile = _world_profile(conn, entity_id)
     character_profile = _character_profile(conn, entity_id)
+    creature_profile = _creature_profile(conn, entity_id)
     return {
         "identity": {
             "id": entity_id,
@@ -139,6 +140,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "item_profile": item_profile,
         "world_profile": world_profile,
         "character_profile": character_profile,
+        "creature_profile": creature_profile,
     }
 
 
@@ -946,6 +948,107 @@ def _character_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, An
             "has_perks": bool(row["has_perks"]),
             "has_start_items": bool(row["has_start_items"]),
             "has_bio": bool(row["has_bio"]),
+        },
+    }
+
+
+def _creature_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        select
+            biome_text,
+            spawn_code_text,
+            special_ability_text,
+            perk_text,
+            drops_text,
+            dropped_by_text,
+            spawn_from_text,
+            spawns_text,
+            health_min,
+            health_max,
+            health_text,
+            damage_min,
+            damage_max,
+            damage_text,
+            attack_range_min,
+            attack_range_max,
+            attack_range_text,
+            attack_period_min,
+            attack_period_max,
+            attack_period_text,
+            walk_speed_min,
+            walk_speed_max,
+            walk_speed_text,
+            run_speed_min,
+            run_speed_max,
+            run_speed_text,
+            sanityaura_min,
+            sanityaura_max,
+            sanityaura_text,
+            sanitydrain_min,
+            sanitydrain_max,
+            sanitydrain_text,
+            drop_edge_count,
+            dropped_by_edge_count,
+            spawns_edge_count,
+            spawned_from_edge_count,
+            drop_related_titles,
+            spawn_related_titles,
+            attribute_count,
+            stat_count,
+            source_count,
+            variant_count,
+            is_boss,
+            has_combat_stats,
+            has_movement_stats,
+            has_sanity_effects,
+            has_drop_data,
+            has_spawn_data
+        from entity_creature_profiles
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "biome_text": str(row["biome_text"] or ""),
+        "spawn_code_text": str(row["spawn_code_text"] or ""),
+        "special_ability_text": str(row["special_ability_text"] or ""),
+        "perk_text": str(row["perk_text"] or ""),
+        "drops_text": str(row["drops_text"] or ""),
+        "dropped_by_text": str(row["dropped_by_text"] or ""),
+        "spawn_from_text": str(row["spawn_from_text"] or ""),
+        "spawns_text": str(row["spawns_text"] or ""),
+        "health": _profile_min_max_text(row, "health"),
+        "damage": _profile_min_max_text(row, "damage"),
+        "attack_range": _profile_min_max_text(row, "attack_range"),
+        "attack_period": _profile_min_max_text(row, "attack_period"),
+        "walk_speed": _profile_min_max_text(row, "walk_speed"),
+        "run_speed": _profile_min_max_text(row, "run_speed"),
+        "sanityaura": _profile_min_max_text(row, "sanityaura"),
+        "sanitydrain": _profile_min_max_text(row, "sanitydrain"),
+        "relationships": {
+            "drop_edge_count": int(row["drop_edge_count"]),
+            "dropped_by_edge_count": int(row["dropped_by_edge_count"]),
+            "spawns_edge_count": int(row["spawns_edge_count"]),
+            "spawned_from_edge_count": int(row["spawned_from_edge_count"]),
+            "drop_related_titles": str(row["drop_related_titles"] or ""),
+            "spawn_related_titles": str(row["spawn_related_titles"] or ""),
+        },
+        "counts": {
+            "attributes": int(row["attribute_count"]),
+            "stats": int(row["stat_count"]),
+            "sources": int(row["source_count"]),
+            "variants": int(row["variant_count"]),
+        },
+        "flags": {
+            "is_boss": bool(row["is_boss"]),
+            "has_combat_stats": bool(row["has_combat_stats"]),
+            "has_movement_stats": bool(row["has_movement_stats"]),
+            "has_sanity_effects": bool(row["has_sanity_effects"]),
+            "has_drop_data": bool(row["has_drop_data"]),
+            "has_spawn_data": bool(row["has_spawn_data"]),
         },
     }
 
