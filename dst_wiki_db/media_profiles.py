@@ -132,6 +132,7 @@ def _rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
             e.slug,
             e.canonical_title,
             e.kind,
+            s.key as source_key,
             ema.asset_source,
             ema.image_name,
             ema.image_slug,
@@ -152,11 +153,11 @@ def _rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
             emd.file_page_url,
             emd.url_status,
             emd.download_status,
-            emd.target_path,
             emd.local_path as download_local_path,
             emd.content_length
         from entity_media_assets ema
         join entities e on e.id = ema.entity_id
+        join sources s on s.id = ema.source_id
         left join entity_media_downloads emd
           on emd.entity_media_asset_id = ema.id
         order by e.slug, ema.is_primary desc, ema.is_variant desc, ema.id
@@ -172,7 +173,7 @@ def _asset_summary(row: sqlite3.Row) -> dict[str, Any]:
         "role": str(row["role"]),
         "download_url": row["download_url"] or row["original_url"],
         "file_page_url": row["file_page_url"] or row["description_url"],
-        "target_path": row["target_path"],
+        "target_path": _target_path(row),
         "local_path": row["download_local_path"] or row["asset_local_path"],
         "width": _optional_int(row["width"]),
         "height": _optional_int(row["height"]),
@@ -195,3 +196,14 @@ def _optional_int(value: Any) -> int | None:
 
 def _optional_float(value: Any) -> float | None:
     return None if value is None else float(value)
+
+
+def _target_path(row: sqlite3.Row) -> str:
+    return "/".join(
+        (
+            "data/images",
+            str(row["source_key"]),
+            str(row["slug"]),
+            str(row["image_slug"]),
+        )
+    )

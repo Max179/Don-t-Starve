@@ -36,6 +36,8 @@ COUNT_TABLES = [
     "source_audits",
     "source_catalog",
     "source_catalog_evidence",
+    "source_page_index",
+    "source_page_entity_matches",
     "community_guide_sources",
     "community_guide_topics",
     "community_guide_topic_index",

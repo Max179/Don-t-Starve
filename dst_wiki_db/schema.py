@@ -253,31 +253,16 @@ def init_db(conn: sqlite3.Connection) -> None:
             entity_media_asset_id integer not null unique references entity_media_assets(id) on delete cascade,
             entity_id integer not null references entities(id) on delete cascade,
             source_id integer not null references sources(id) on delete cascade,
-            source_key text not null,
-            slug text not null,
-            canonical_title text not null,
-            kind text not null,
-            image_name text not null,
-            image_slug text not null,
-            role text not null,
-            asset_source text not null,
             download_url text,
             file_page_url text,
             url_status text not null,
-            target_path text not null,
             download_status text not null default 'pending',
             local_path text,
             content_length integer,
             downloaded_at text,
             error_text text not null default '',
             priority integer not null,
-            queue_reason text not null,
-            variant_key text not null default '',
-            variant_type text not null default '',
-            variant_label text not null default '',
-            is_primary integer not null default 0,
-            is_variant integer not null default 0,
-            confidence real not null default 1.0
+            queue_reason text not null
         );
 
         create index if not exists idx_entity_media_downloads_entity
@@ -286,6 +271,43 @@ def init_db(conn: sqlite3.Connection) -> None:
             on entity_media_downloads(download_status, priority);
         create index if not exists idx_entity_media_downloads_url_status
             on entity_media_downloads(url_status);
+
+        drop view if exists entity_media_download_manifest;
+        create view entity_media_download_manifest as
+        select
+            emd.id,
+            emd.entity_media_asset_id,
+            emd.entity_id,
+            emd.source_id,
+            s.key as source_key,
+            e.slug,
+            e.canonical_title,
+            e.kind,
+            ema.image_name,
+            ema.image_slug,
+            ema.role,
+            ema.asset_source,
+            emd.download_url,
+            emd.file_page_url,
+            emd.url_status,
+            'data/images/' || s.key || '/' || e.slug || '/' || ema.image_slug as target_path,
+            emd.download_status,
+            emd.local_path,
+            emd.content_length,
+            emd.downloaded_at,
+            emd.error_text,
+            emd.priority,
+            emd.queue_reason,
+            ema.variant_key,
+            ema.variant_type,
+            ema.variant_label,
+            ema.is_primary,
+            ema.is_variant,
+            ema.confidence
+        from entity_media_downloads emd
+        join entity_media_assets ema on ema.id = emd.entity_media_asset_id
+        join entities e on e.id = emd.entity_id
+        join sources s on s.id = emd.source_id;
 
         create table if not exists entity_media_profiles (
             id integer primary key,
@@ -687,6 +709,46 @@ def init_db(conn: sqlite3.Connection) -> None:
 
         create index if not exists idx_source_catalog_evidence_source
             on source_catalog_evidence(source_catalog_id);
+
+        create table if not exists source_page_index (
+            id integer primary key,
+            source_id integer references sources(id) on delete set null,
+            source_key text not null,
+            source_pageid integer not null,
+            ns integer not null default 0,
+            title text not null,
+            title_slug text not null,
+            page_url text not null,
+            index_status text not null default 'listed',
+            fetched_at text not null default current_timestamp,
+            unique (source_key, source_pageid)
+        );
+
+        create index if not exists idx_source_page_index_key
+            on source_page_index(source_key, title_slug);
+        create index if not exists idx_source_page_index_status
+            on source_page_index(source_key, index_status);
+
+        create table if not exists source_page_entity_matches (
+            id integer primary key,
+            source_page_index_id integer not null unique references source_page_index(id) on delete cascade,
+            source_key text not null,
+            source_pageid integer not null,
+            source_title text not null,
+            source_title_slug text not null,
+            entity_id integer not null references entities(id) on delete cascade,
+            entity_slug text not null,
+            entity_title text not null,
+            entity_kind text not null,
+            match_method text not null,
+            confidence real not null default 0.8,
+            matched_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_source_page_entity_matches_source
+            on source_page_entity_matches(source_key, match_method);
+        create index if not exists idx_source_page_entity_matches_entity
+            on source_page_entity_matches(entity_id);
 
         create table if not exists entity_coverage (
             id integer primary key,

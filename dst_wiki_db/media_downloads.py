@@ -50,44 +50,25 @@ def rebuild_entity_media_downloads(conn: sqlite3.Connection) -> int:
         cursor = conn.execute(
             """
             insert or ignore into entity_media_downloads (
-                entity_media_asset_id, entity_id, source_id, source_key, slug,
-                canonical_title, kind, image_name, image_slug, role,
-                asset_source, download_url, file_page_url, url_status,
-                target_path, download_status, priority, queue_reason,
-                variant_key, variant_type, variant_label, is_primary,
-                is_variant, confidence
+                entity_media_asset_id, entity_id, source_id, download_url,
+                file_page_url, url_status, download_status, priority,
+                queue_reason
             )
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending',
-                    ?, ?, ?, ?, ?, ?, ?, ?)
+            values (?, ?, ?, ?, ?, ?, 'pending', ?, ?)
             """,
             (
                 int(row["entity_media_asset_id"]),
                 int(row["entity_id"]),
                 int(row["source_id"]),
-                str(row["source_key"]),
-                str(row["slug"]),
-                str(row["canonical_title"]),
-                str(row["kind"]),
-                str(row["image_name"]),
-                str(row["image_slug"]),
-                str(row["role"]),
-                str(row["asset_source"]),
                 row["original_url"],
                 row["description_url"],
                 url_status,
-                _target_path(row),
                 priority,
                 _queue_reason(
                     is_primary=bool(row["is_primary"]),
                     is_variant=bool(row["is_variant"]),
                     url_status=url_status,
                 ),
-                str(row["variant_key"] or ""),
-                str(row["variant_type"] or ""),
-                str(row["variant_label"] or ""),
-                int(row["is_primary"]),
-                int(row["is_variant"]),
-                float(row["confidence"]),
             ),
         )
         count += 1 if cursor.rowcount == 1 else 0
@@ -265,7 +246,7 @@ def _pending_direct_downloads(
     return conn.execute(
         f"""
         select id, download_url, target_path
-        from entity_media_downloads
+        from entity_media_download_manifest
         where download_status = 'pending'
           and url_status = 'direct_url'
           and download_url is not null
@@ -288,7 +269,7 @@ def _file_page_only_rows(
     ]
     params: list[object] = []
     if source_key:
-        filters.append("emd.source_key = ?")
+        filters.append("s.key = ?")
         params.append(source_key)
     limit_clause = ""
     if limit is not None:
@@ -299,12 +280,13 @@ def _file_page_only_rows(
         select
             emd.id,
             emd.entity_media_asset_id,
-            emd.source_key,
-            emd.image_name,
-            emd.is_primary,
-            emd.is_variant,
+            s.key as source_key,
+            ema.image_name,
+            ema.is_primary,
+            ema.is_variant,
             s.api_url
         from entity_media_downloads emd
+        join entity_media_assets ema on ema.id = emd.entity_media_asset_id
         join sources s on s.id = emd.source_id
         where {" and ".join(filters)}
         order by emd.priority, emd.id
@@ -378,14 +360,3 @@ def _queue_reason(*, is_primary: bool, is_variant: bool, url_status: str) -> str
         reasons.append("page_reference")
     reasons.append(url_status)
     return "|".join(reasons)
-
-
-def _target_path(row: sqlite3.Row) -> str:
-    return "/".join(
-        (
-            "data/images",
-            str(row["source_key"]),
-            str(row["slug"]),
-            str(row["image_slug"]),
-        )
-    )

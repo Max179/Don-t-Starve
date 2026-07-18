@@ -219,34 +219,21 @@ def _download(
     conn.execute(
         """
         insert into entity_media_downloads (
-            entity_media_asset_id, entity_id, source_id, source_key, slug,
-            canonical_title, kind, image_name, image_slug, role, asset_source,
-            download_url, file_page_url, url_status, target_path,
-            download_status, local_path, content_length, priority,
-            queue_reason, variant_key, variant_type, variant_label,
-            is_primary, is_variant, confidence
+            entity_media_asset_id, entity_id, source_id, download_url,
+            file_page_url, url_status, download_status, local_path,
+            content_length, priority, queue_reason
         )
-        values (?, ?, ?, 'fandom', 'berry-bush', 'Berry Bush', 'plant',
-                ?, ?, 'image', 'infobox', ?, ?, ?,
-                'data/images/fandom/berry-bush/image.png', ?, ?, ?, 1,
-                'test', ?, ?, ?, ?, ?, 1.0)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'test')
         """,
         (
             asset_id,
             entity_id,
             source_id,
-            image_name,
-            image_slug,
             download_url,
             file_page_url,
             url_status,
             download_status,
             local_path,
             content_length,
-            variant_key,
-            variant_type,
-            variant_label,
-            is_primary,
-            is_variant,
         ),
     )

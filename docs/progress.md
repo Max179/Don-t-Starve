@@ -55,6 +55,8 @@ Coverage:
 - Official-record entity mentions: 678
 - Ranked source catalog rows: 8
 - Source catalog evidence rows: 26
+- External source page index rows: 3,231
+- External source page/entity matches: 2,769
 - Structured recipe ingredients: 1,954
 - Resolved recipe ingredient targets: 1,816
 - Structured drop/source/sold/spawn facts: 1,246
@@ -73,6 +75,13 @@ English-first search keys from canonical titles, source page titles, source
 slugs, spawn/prefab codes, and readable image-name stems. Full alias rows stay
 queryable in `entity_aliases`; the per-entity profile stores counts, flags,
 source-key coverage, capped display aliases, and capped search keys.
+
+The database now includes `source_page_index` and
+`source_page_entity_matches` for canonical wiki title alignment. The current
+wiki.gg title-index pass stores 3,231 main-namespace page titles and maps 2,769
+of them to local entities. Matching uses the alias/search-key layer, including
+safe `/DS` and `/DST` game-version suffix fallbacks such as `Axe/DST` -> `Axe`
+and `Alchemy Engine/DST` -> `Alchemy Engine`.
 
 Entity kind distribution:
 
@@ -927,7 +936,7 @@ Each compressed entity profile now includes a nullable `media_profile` object wi
 
 ## Media Download Manifest
 
-The database now includes an `entity_media_downloads` table with one pending download manifest row per unified media asset. This pass generated 46,311 manifest rows, matching `entity_media_assets`.
+The database now includes an `entity_media_downloads` table with one pending download state row per unified media asset. This pass generated 46,311 rows, matching `entity_media_assets`.
 
 URL readiness after resolving a first 250-row file-page batch:
 
@@ -945,7 +954,7 @@ Queue reasons:
 - `variant|missing_url`: 5
 - `page_reference|direct_url`: 1
 
-Each row stores source key, entity slug/title/kind, image name/slug, direct download URL when available, file-page URL, deterministic `data/images/{source_key}/{entity_slug}/{image_slug}` target path, download status, priority, queue reason, and variant metadata. Downloader state columns now record local path, content length, downloaded timestamp, and error text.
+The compact table stores only IDs, URL readiness, download status, priority, queue reason, and downloader state. The `entity_media_download_manifest` view joins back to entities, sources, and media assets to expose source key, entity slug/title/kind, image name/slug, variant metadata, and deterministic `data/images/{source_key}/{entity_slug}/{image_slug}` target paths without duplicating that text across 46,311 rows.
 
 File-page rows are resolvable through MediaWiki imageinfo without downloading binaries:
 

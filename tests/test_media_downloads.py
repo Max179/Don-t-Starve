@@ -90,7 +90,7 @@ def test_rebuild_entity_media_downloads_prioritizes_primary_and_variant_assets(t
             is_primary,
             is_variant,
             variant_key
-        from entity_media_downloads
+        from entity_media_download_manifest
         order by priority, id
         """
     ).fetchall()
@@ -343,17 +343,12 @@ def _seed_pending_direct_download(conn):
     conn.execute(
         """
         insert into entity_media_downloads (
-            entity_media_asset_id, entity_id, source_id, source_key, slug,
-            canonical_title, kind, image_name, image_slug, role,
-            asset_source, download_url, file_page_url, url_status,
-            target_path, download_status, priority, queue_reason,
-            is_primary, is_variant, confidence
+            entity_media_asset_id, entity_id, source_id, download_url,
+            file_page_url, url_status, download_status, priority, queue_reason
         )
-        values (?, ?, ?, 'fandom', 'bee', 'Bee', 'mob', 'Bee.png',
-                'bee-png', 'image', 'infobox', 'https://img.test/Bee.png',
+        values (?, ?, ?, 'https://img.test/Bee.png',
                 'https://example.test/File:Bee.png', 'direct_url',
-                'data/images/fandom/bee/bee-png', 'pending', 10,
-                'primary|direct_url', 1, 0, 1.0)
+                'pending', 10, 'primary|direct_url')
         """,
         (media_asset_id, entity_id, source_id),
     )
@@ -411,19 +406,12 @@ def _seed_file_page_only_download(conn):
     conn.execute(
         """
         insert into entity_media_downloads (
-            entity_media_asset_id, entity_id, source_id, source_key, slug,
-            canonical_title, kind, image_name, image_slug, role,
-            asset_source, download_url, file_page_url, url_status,
-            target_path, download_status, priority, queue_reason,
-            variant_key, variant_type, variant_label, is_primary,
-            is_variant, confidence
+            entity_media_asset_id, entity_id, source_id, download_url,
+            file_page_url, url_status, download_status, priority, queue_reason
         )
-        values (?, ?, ?, 'fandom', 'bee', 'Bee', 'mob', 'Bee Build.png',
-                'bee-build-png', 'page_reference', 'page_reference', null,
+        values (?, ?, ?, null,
                 'https://example.test/File:Bee_Build.png', 'file_page_only',
-                'data/images/fandom/bee/bee-build-png', 'pending', 35,
-                'variant|file_page_only', 'build', 'build_state',
-                'Build', 0, 1, 0.7)
+                'pending', 35, 'variant|file_page_only')
         """,
         (media_asset_id, entity_id, source_id),
     )
