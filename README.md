@@ -2,7 +2,7 @@
 
 This workspace builds an auditable SQLite database for English-first Don't Starve / Don't Starve Together wiki data.
 
-Current committed output: `data/dont_starve_wiki.sqlite` contains 2,593 English-first wiki entities, 3,231/3,231 matched wiki.gg page-index rows with zero remaining source-page gaps, 27,041 parsed attributes, 7,534 normalized stat rows, 21,254 unified media asset rows, 501 image-variant candidates, 62,839 wiki-link relation rows, 46,538 resolved wiki-link targets, 5,150 typed gameplay relationship edges, 25,916 taxonomy tags, 14,209 category links, 9,989 identity keys, 3,430 merged variant summaries, 2,315 structured recipe ingredients, 1,337 structured drop/source/sold/spawn facts, 163 official Steam/Klei verification records, 56 normalized official product records, 226 official product media URLs, 50 normalized official update events, 80 normalized official update sections, 397 official update section items, 726 official-record entity mentions, 8 ranked source catalog rows, 30 source catalog evidence rows, 21 curated community guide source rows, 77 community guide topic rows, 5 community guide topic-index rows, and 11 source-access audit records. The official layer includes appdetails for Don't Starve, Don't Starve Together, Don't Starve Elsewhere, and all 53 Steam-listed DLC ids, with official header, capsule, and description image URLs. See [docs/progress.md](docs/progress.md).
+Current committed output: `data/dont_starve_wiki.sqlite` contains 2,593 English-first wiki entities, 3,231/3,231 matched wiki.gg page-index rows with zero remaining source-page gaps, 27,041 parsed attributes, 7,534 normalized stat rows, 21,254 unified media asset rows, 501 image-variant candidates, 62,839 wiki-link relation rows, 46,538 resolved wiki-link targets, 5,150 typed gameplay relationship edges, 25,916 taxonomy tags, 14,209 category links, 9,989 identity keys, 3,430 merged variant summaries, 2,315 structured recipe ingredients, 1,337 structured drop/source/sold/spawn facts, 163 official Steam/Klei verification records, 56 normalized official product records, 226 official product media URLs, 50 normalized official update events, 80 normalized official update sections, 397 official update section items, 726 official-record entity mentions, 8 ranked source catalog rows, 30 source catalog evidence rows, 12 representative source topic probes, 21 curated community guide source rows, 77 community guide topic rows, 5 community guide topic-index rows, and 11 source-access audit records. The official layer includes appdetails for Don't Starve, Don't Starve Together, Don't Starve Elsewhere, and all 53 Steam-listed DLC ids, with official header, capsule, and description image URLs. See [docs/progress.md](docs/progress.md).
 
 The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 
@@ -48,6 +48,7 @@ The pipeline keeps raw MediaWiki page wikitext and parsed records side by side:
 - `source_audits`: robots, API, and official-source availability checks.
 - `source_catalog`: ranked wiki, official, competitor, and community-signal source candidates.
 - `source_catalog_evidence`: search, official, audit, and manual-review evidence for each ranked source.
+- `source_topic_probes`: representative topic URL probes across wiki.gg, Fandom, Fextralife, Klei, and Steam for source-coverage monitoring.
 - `community_guide_sources`: curated Chinese community guide metadata for Bilibili, Zhihu, Gamersky, TapTap, and Xiaohongshu discovery.
 - `community_guide_topics`: topic tags for guide sources.
 - `community_guide_topic_index`: recommended source ids and verification reminders for beginner, food, farming, caves, and boss guide themes.
@@ -119,6 +120,9 @@ Audit sources and inspect the output:
 python3 scripts/audit_sources.py \
   --db data/dont_starve_wiki.sqlite \
   --report reports/source_audits.json
+python3 scripts/probe_source_topics.py \
+  --db data/dont_starve_wiki.sqlite \
+  --report reports/source_topic_probes.json
 python3 scripts/inspect_database.py data/dont_starve_wiki.sqlite
 ```
 

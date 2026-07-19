@@ -58,6 +58,7 @@ Checked on 2026-07-19 Asia/Shanghai during this build session. The ranked source
 - Role: competitor/reference-only source.
 - Best use: spot-check coverage gaps, alternate naming, and broad guide-page coverage.
 - Constraint: not currently used for bulk ingestion; verify terms before reuse.
+- Current topic probe: representative Wilson, Crock Pot, and Ancient Fuelweaver page checks failed from this machine with TLS EOF errors. Keep as a competitor candidate, but treat live page access as unverified until a later probe succeeds.
 
 ## 6. Context And Discovery Signals
 
@@ -65,6 +66,13 @@ Checked on 2026-07-19 Asia/Shanghai during this build session. The ranked source
 - Reddit/r/dontstarve: https://www.reddit.com/r/dontstarve/ for source-discovery and community migration signals only.
 - PatchBot: https://patchbot.io/games/dont-starve-together for update-discovery signals only.
 - Constraint: these sources do not replace wiki.gg, Klei, Steam, or Fandom evidence for mechanics, stats, images, or entity records.
+
+Representative topic probes are stored in `source_topic_probes` and
+`reports/source_topic_probes.json`. The current pass confirms wiki.gg pages for
+Wilson, Crock Pot, and Ancient Fuelweaver returned HTTP 200; Klei and Steam
+official product pages for Don't Starve Elsewhere returned HTTP 200; Fandom
+article pages returned HTTP 403 Cloudflare pages during direct page probes even
+though Fandom API siteinfo remains available.
 
 ## 7. Chinese Community Guide Library
 

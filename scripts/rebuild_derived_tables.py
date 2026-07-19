@@ -34,6 +34,7 @@ from dst_wiki_db.prefab_profiles import rebuild_entity_prefab_profiles
 from dst_wiki_db.recipes import rebuild_recipe_ingredients
 from dst_wiki_db.recipe_profiles import rebuild_entity_recipe_profiles
 from dst_wiki_db.source_catalog import rebuild_source_catalog
+from dst_wiki_db.source_topic_probes import relink_source_topic_probes
 from dst_wiki_db.source_page_gaps import rebuild_source_page_gaps
 from dst_wiki_db.source_page_index import rebuild_source_page_entity_matches
 from dst_wiki_db.source_profiles import rebuild_entity_source_profiles
@@ -74,6 +75,7 @@ def main(argv=None):
     official_update_counts = rebuild_official_update_events(conn)
     official_update_section_counts = rebuild_official_update_sections(conn)
     source_catalog_counts = rebuild_source_catalog(conn)
+    source_topic_probe_count = relink_source_topic_probes(conn)
     identity_count = rebuild_identity_keys(conn)
     target_counts = rebuild_entity_targets(conn)
     link_profile_count = rebuild_entity_link_profiles(conn)
@@ -133,6 +135,7 @@ def main(argv=None):
         "source_catalog_evidence": source_catalog_counts[
             "source_catalog_evidence"
         ],
+        "source_topic_probes": source_topic_probe_count,
         "entity_identity_keys": identity_count,
         "entity_link_profiles": link_profile_count,
         "entity_prefab_profiles": prefab_profile_count,

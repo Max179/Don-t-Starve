@@ -710,6 +710,32 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_source_catalog_evidence_source
             on source_catalog_evidence(source_catalog_id);
 
+        create table if not exists source_topic_probes (
+            id integer primary key,
+            source_catalog_id integer references source_catalog(id) on delete set null,
+            source_key text not null,
+            probe_group text not null,
+            probe_title text not null,
+            entity_slug text not null default '',
+            entity_title text not null default '',
+            url text not null,
+            expected_use text not null,
+            status text not null,
+            status_code integer,
+            method text not null,
+            final_url text not null default '',
+            page_title text not null default '',
+            summary text not null default '',
+            payload_json text not null default '{}',
+            checked_at text not null default current_timestamp,
+            unique (source_key, probe_group, probe_title, url)
+        );
+
+        create index if not exists idx_source_topic_probes_source
+            on source_topic_probes(source_key, status);
+        create index if not exists idx_source_topic_probes_group
+            on source_topic_probes(probe_group, probe_title);
+
         create table if not exists source_page_index (
             id integer primary key,
             source_id integer references sources(id) on delete set null,

@@ -1,0 +1,178 @@
+{
+  "by_group": {
+    "boss": 3,
+    "core_entity": 6,
+    "official_product": 3
+  },
+  "by_source": {
+    "fandom": 3,
+    "fextralife": 3,
+    "klei": 2,
+    "steam": 1,
+    "wiki.gg": 3
+  },
+  "by_status": {
+    "failed": 6,
+    "ok": 6
+  },
+  "records": [
+    {
+      "entity_slug": "wilson",
+      "expected_use": "canonical article coverage",
+      "final_url": "https://dontstarve.wiki.gg/wiki/Wilson",
+      "page_title": "Wilson - Don't Starve Wiki",
+      "probe_group": "core_entity",
+      "probe_title": "Wilson",
+      "source_key": "wiki.gg",
+      "status": "ok",
+      "status_code": 200,
+      "summary": "HTTP 200; Wilson - Don't Starve Wiki",
+      "url": "https://dontstarve.wiki.gg/wiki/Wilson"
+    },
+    {
+      "entity_slug": "crock-pot",
+      "expected_use": "canonical item/structure mechanics",
+      "final_url": "https://dontstarve.wiki.gg/wiki/Crock_Pot",
+      "page_title": "Crock Pot - Don't Starve Wiki",
+      "probe_group": "core_entity",
+      "probe_title": "Crock Pot",
+      "source_key": "wiki.gg",
+      "status": "ok",
+      "status_code": 200,
+      "summary": "HTTP 200; Crock Pot - Don't Starve Wiki",
+      "url": "https://dontstarve.wiki.gg/wiki/Crock_Pot"
+    },
+    {
+      "entity_slug": "ancient-fuelweaver",
+      "expected_use": "canonical boss mechanics",
+      "final_url": "https://dontstarve.wiki.gg/wiki/Ancient_Fuelweaver",
+      "page_title": "Ancient Fuelweaver - Don't Starve Wiki",
+      "probe_group": "boss",
+      "probe_title": "Ancient Fuelweaver",
+      "source_key": "wiki.gg",
+      "status": "ok",
+      "status_code": 200,
+      "summary": "HTTP 200; Ancient Fuelweaver - Don't Starve Wiki",
+      "url": "https://dontstarve.wiki.gg/wiki/Ancient_Fuelweaver"
+    },
+    {
+      "entity_slug": "wilson",
+      "expected_use": "historical comparison article coverage",
+      "final_url": "https://dontstarve.fandom.com/wiki/Wilson",
+      "page_title": "Just a moment...",
+      "probe_group": "core_entity",
+      "probe_title": "Wilson",
+      "source_key": "fandom",
+      "status": "failed",
+      "status_code": 403,
+      "summary": "HTTP 403; Just a moment...",
+      "url": "https://dontstarve.fandom.com/wiki/Wilson"
+    },
+    {
+      "entity_slug": "crock-pot",
+      "expected_use": "historical comparison item/structure mechanics",
+      "final_url": "https://dontstarve.fandom.com/wiki/Crock_Pot",
+      "page_title": "Just a moment...",
+      "probe_group": "core_entity",
+      "probe_title": "Crock Pot",
+      "source_key": "fandom",
+      "status": "failed",
+      "status_code": 403,
+      "summary": "HTTP 403; Just a moment...",
+      "url": "https://dontstarve.fandom.com/wiki/Crock_Pot"
+    },
+    {
+      "entity_slug": "ancient-fuelweaver",
+      "expected_use": "historical comparison boss mechanics",
+      "final_url": "https://dontstarve.fandom.com/wiki/Ancient_Fuelweaver",
+      "page_title": "Just a moment...",
+      "probe_group": "boss",
+      "probe_title": "Ancient Fuelweaver",
+      "source_key": "fandom",
+      "status": "failed",
+      "status_code": 403,
+      "summary": "HTTP 403; Just a moment...",
+      "url": "https://dontstarve.fandom.com/wiki/Ancient_Fuelweaver"
+    },
+    {
+      "entity_slug": "wilson",
+      "expected_use": "competitor article coverage signal",
+      "final_url": "",
+      "page_title": "",
+      "probe_group": "core_entity",
+      "probe_title": "Wilson",
+      "source_key": "fextralife",
+      "status": "failed",
+      "status_code": null,
+      "summary": "HTTPSConnectionPool(host='dontstarve.wiki.fextralife.com', port=443): Max retries exceeded with url: /Wilson (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1129)')))",
+      "url": "https://dontstarve.wiki.fextralife.com/Wilson"
+    },
+    {
+      "entity_slug": "crock-pot",
+      "expected_use": "competitor item/structure coverage signal",
+      "final_url": "",
+      "page_title": "",
+      "probe_group": "core_entity",
+      "probe_title": "Crock Pot",
+      "source_key": "fextralife",
+      "status": "failed",
+      "status_code": null,
+      "summary": "HTTPSConnectionPool(host='dontstarve.wiki.fextralife.com', port=443): Max retries exceeded with url: /Crock+Pot (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1129)')))",
+      "url": "https://dontstarve.wiki.fextralife.com/Crock+Pot"
+    },
+    {
+      "entity_slug": "ancient-fuelweaver",
+      "expected_use": "competitor boss coverage signal",
+      "final_url": "",
+      "page_title": "",
+      "probe_group": "boss",
+      "probe_title": "Ancient Fuelweaver",
+      "source_key": "fextralife",
+      "status": "failed",
+      "status_code": null,
+      "summary": "HTTPSConnectionPool(host='dontstarve.wiki.fextralife.com', port=443): Max retries exceeded with url: /Ancient+Fuelweaver (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1129)')))",
+      "url": "https://dontstarve.wiki.fextralife.com/Ancient+Fuelweaver"
+    },
+    {
+      "entity_slug": "dont-starve-together",
+      "expected_use": "official product verification",
+      "final_url": "https://www.klei.com/games/dont-starve-together",
+      "page_title": "Don't Starve Together | Klei Entertainment",
+      "probe_group": "official_product",
+      "probe_title": "Don't Starve Together",
+      "source_key": "klei",
+      "status": "ok",
+      "status_code": 200,
+      "summary": "HTTP 200; Don't Starve Together | Klei Entertainment",
+      "url": "https://www.klei.com/games/dont-starve-together"
+    },
+    {
+      "entity_slug": "dont-starve-elsewhere",
+      "expected_use": "official product verification",
+      "final_url": "https://www.klei.com/games/dont-starve-elsewhere",
+      "page_title": "Don't Starve Elsewhere | Klei Entertainment",
+      "probe_group": "official_product",
+      "probe_title": "Don't Starve Elsewhere",
+      "source_key": "klei",
+      "status": "ok",
+      "status_code": 200,
+      "summary": "HTTP 200; Don't Starve Elsewhere | Klei Entertainment",
+      "url": "https://www.klei.com/games/dont-starve-elsewhere"
+    },
+    {
+      "entity_slug": "dont-starve-elsewhere",
+      "expected_use": "official store verification",
+      "final_url": "https://store.steampowered.com/app/2239770/Dont_Starve_Elsewhere/",
+      "page_title": "Don't Starve Elsewhere on Steam",
+      "probe_group": "official_product",
+      "probe_title": "Don't Starve Elsewhere",
+      "source_key": "steam",
+      "status": "ok",
+      "status_code": 200,
+      "summary": "HTTP 200; Don't Starve Elsewhere on Steam",
+      "url": "https://store.steampowered.com/app/2239770/Dont_Starve_Elsewhere/"
+    }
+  ],
+  "records_seen": 12,
+  "records_written": 12
+}

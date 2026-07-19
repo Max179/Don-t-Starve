@@ -55,6 +55,7 @@ Coverage:
 - Official-record entity mentions: 726
 - Ranked source catalog rows: 8
 - Source catalog evidence rows: 30
+- Representative source topic probes: 12
 - External source page index rows: 3,231
 - External source page/entity matches: 3,231
 - Entity source profile rows: 2,541
@@ -632,6 +633,21 @@ Latest audit observations:
 - Klei product pages for Don't Starve, Don't Starve Together, and Don't Starve Elsewhere returned HTTP 200; the Klei DST update forum returned HTTP 403 during this audit.
 - Steam appdetails probes for app ids `322330`, `219740`, and `2239770` returned HTTP 200.
 
+The database also includes `source_topic_probes`, a representative coverage
+matrix for checking important topics across canonical, comparison, competitor,
+and official sources without importing competitor content as facts. The current
+probe pass wrote 12 rows:
+
+- `wiki.gg`: 3 ok probes for `Wilson`, `Crock Pot`, and `Ancient Fuelweaver`.
+- `fandom`: 3 failed article-page probes returning HTTP 403 Cloudflare pages.
+- `fextralife`: 3 failed competitor probes with TLS EOF errors from this machine.
+- `klei`: 2 ok official product probes.
+- `steam`: 1 ok official store probe for `Don't Starve Elsewhere`.
+
+The probe report is stored in `reports/source_topic_probes.json`, and the
+database table keeps source key, probe group, entity slug/title, URL, status,
+status code, final URL, page title, and summary.
+
 ## Approved XML Dump Import Path
 
 The project now includes a MediaWiki XML dump importer for an approved canonical source dump:
@@ -665,7 +681,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 83,087,360 bytes, about 79 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 84,434,944 bytes, about 81 MiB.
 
 Each profile aggregates:
 
@@ -703,7 +719,7 @@ Each compressed entity profile now includes a nullable `link_profile` object wit
 
 ## Raw Wikitext Compression
 
-The committed database now stores all 2,593 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 341 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, the current database is 83,087,360 bytes.
+The committed database now stores all 2,593 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 341 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, the current database is 84,434,944 bytes.
 
 Use `dst_wiki_db.raw_pages.decode_wikitext(value, encoding)` to read the stored page text. New API ingests write gzip-encoded raw wikitext through `dst_wiki_db.raw_pages.encode_wikitext`, while tests and direct fixtures can still insert plain text because the schema defaults `wikitext_encoding` to `text`.
 
