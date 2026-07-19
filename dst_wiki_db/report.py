@@ -19,6 +19,8 @@ COUNT_TABLES = [
     "entity_media_assets",
     "entity_media_downloads",
     "entity_media_profiles",
+    "entity_media_coverage",
+    "entity_media_gap_queue",
     "entity_relations",
     "entity_link_profiles",
     "entity_prefab_profiles",

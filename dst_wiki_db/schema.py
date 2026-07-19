@@ -352,6 +352,70 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_media_profiles_direct
             on entity_media_profiles(has_direct_url, direct_url_count);
 
+        create table if not exists entity_media_coverage (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            media_count integer not null default 0,
+            primary_count integer not null default 0,
+            variant_count integer not null default 0,
+            direct_url_count integer not null default 0,
+            file_page_only_count integer not null default 0,
+            missing_url_count integer not null default 0,
+            pending_download_count integer not null default 0,
+            downloaded_count integer not null default 0,
+            failed_download_count integer not null default 0,
+            variant_type_count integer not null default 0,
+            has_media_profile integer not null default 0,
+            has_primary_image integer not null default 0,
+            has_direct_url integer not null default 0,
+            has_variants integer not null default 0,
+            has_downloaded_media integer not null default 0,
+            media_status text not null default 'no_media',
+            gap_reasons_json text not null default '[]',
+            priority integer not null default 50,
+            primary_image_name text not null default '',
+            primary_download_url text,
+            primary_file_page_url text,
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_media_coverage_status
+            on entity_media_coverage(media_status, kind);
+        create index if not exists idx_entity_media_coverage_priority
+            on entity_media_coverage(priority, kind);
+
+        create table if not exists entity_media_gap_queue (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            gap_reason text not null,
+            media_status text not null,
+            priority integer not null default 50,
+            media_count integer not null default 0,
+            primary_count integer not null default 0,
+            variant_count integer not null default 0,
+            direct_url_count integer not null default 0,
+            file_page_only_count integer not null default 0,
+            missing_url_count integer not null default 0,
+            pending_download_count integer not null default 0,
+            failed_download_count integer not null default 0,
+            primary_image_name text not null default '',
+            primary_download_url text,
+            primary_file_page_url text,
+            detected_at text not null default current_timestamp,
+            unique (entity_id, gap_reason)
+        );
+
+        create index if not exists idx_entity_media_gap_queue_priority
+            on entity_media_gap_queue(priority, gap_reason, kind);
+        create index if not exists idx_entity_media_gap_queue_reason
+            on entity_media_gap_queue(gap_reason, media_status);
+
         create table if not exists entity_relations (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,

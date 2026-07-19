@@ -135,6 +135,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     source_coverage = _source_coverage(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
     media_profile = _media_profile(conn, entity_id)
+    media_coverage = _media_coverage(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
     food_profile = _food_profile(conn, entity_id)
     item_profile = _item_profile(conn, entity_id)
@@ -185,6 +186,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "source_coverage": source_coverage,
         "taxonomy": taxonomy,
         "media_profile": media_profile,
+        "media_coverage": media_coverage,
         "combat_profile": combat_profile,
         "food_profile": food_profile,
         "item_profile": item_profile,
@@ -449,6 +451,76 @@ def _media_profile(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any] |
             "has_direct_url": bool(row["has_direct_url"]),
             "has_variants": bool(row["has_variants"]),
             "has_downloaded_media": bool(row["has_downloaded_media"]),
+        },
+    }
+
+
+def _media_coverage(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any]:
+    row = conn.execute(
+        """
+        select
+            media_count,
+            primary_count,
+            variant_count,
+            direct_url_count,
+            file_page_only_count,
+            missing_url_count,
+            pending_download_count,
+            downloaded_count,
+            failed_download_count,
+            variant_type_count,
+            has_media_profile,
+            has_primary_image,
+            has_direct_url,
+            has_variants,
+            has_downloaded_media,
+            media_status,
+            gap_reasons_json,
+            priority,
+            primary_image_name,
+            primary_download_url,
+            primary_file_page_url
+        from entity_media_coverage
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return {
+            "media_status": "missing_media_coverage",
+            "gap_reasons": [],
+            "priority": 99,
+            "counts": {},
+            "flags": {},
+            "primary": {"image_name": "", "download_url": None, "file_page_url": None},
+        }
+    return {
+        "media_status": str(row["media_status"]),
+        "gap_reasons": json.loads(str(row["gap_reasons_json"] or "[]")),
+        "priority": int(row["priority"]),
+        "counts": {
+            "media": int(row["media_count"]),
+            "primary": int(row["primary_count"]),
+            "variants": int(row["variant_count"]),
+            "direct_url": int(row["direct_url_count"]),
+            "file_page_only": int(row["file_page_only_count"]),
+            "missing_url": int(row["missing_url_count"]),
+            "pending_download": int(row["pending_download_count"]),
+            "downloaded": int(row["downloaded_count"]),
+            "failed_download": int(row["failed_download_count"]),
+            "variant_types": int(row["variant_type_count"]),
+        },
+        "flags": {
+            "has_media_profile": bool(row["has_media_profile"]),
+            "has_primary_image": bool(row["has_primary_image"]),
+            "has_direct_url": bool(row["has_direct_url"]),
+            "has_variants": bool(row["has_variants"]),
+            "has_downloaded_media": bool(row["has_downloaded_media"]),
+        },
+        "primary": {
+            "image_name": str(row["primary_image_name"] or ""),
+            "download_url": row["primary_download_url"],
+            "file_page_url": row["primary_file_page_url"],
         },
     }
 

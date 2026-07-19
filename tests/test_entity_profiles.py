@@ -110,6 +110,25 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     )
     conn.execute(
         """
+        insert into entity_media_coverage (
+            entity_id, slug, canonical_title, kind,
+            media_count, primary_count, variant_count, direct_url_count,
+            pending_download_count, variant_type_count,
+            has_media_profile, has_primary_image, has_direct_url,
+            has_variants, media_status, gap_reasons_json, priority,
+            primary_image_name, primary_download_url, primary_file_page_url
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 'download_pending',
+                '["pending_download"]', 50,
+                'Berry Bush.png', 'https://img.test/berry.png',
+                'https://example.test/File:Berry_Bush.png')
+        """,
+        (entity_id,),
+    )
+    conn.execute(
+        """
         insert into entity_attributes (
             entity_id, source_id, raw_page_id, template_index, template_name,
             raw_name, canonical_name, value_text, value_number, unit,
@@ -536,6 +555,9 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["media_profile"]["primary"]["image_name"] == "Berry Bush.png"
     assert profile["media_profile"]["counts"]["direct_url"] == 1
     assert profile["media_profile"]["variant_assets"][0]["variant_key"] == "picked"
+    assert profile["media_coverage"]["media_status"] == "download_pending"
+    assert profile["media_coverage"]["gap_reasons"] == ["pending_download"]
+    assert profile["media_coverage"]["primary"]["image_name"] == "Berry Bush.png"
     assert profile["stats"][0]["stat_name"] == "regrowth_time"
     assert profile["stat_rollups"][0]["stat_name"] == "regrowth_time"
     assert profile["stat_rollups"][0]["value_range"] == {"min": 3.0, "max": 5.0}

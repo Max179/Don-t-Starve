@@ -14,6 +14,8 @@
     "entity_media_assets": 21254,
     "entity_media_downloads": 21254,
     "entity_media_profiles": 1457,
+    "entity_media_coverage": 2593,
+    "entity_media_gap_queue": 3988,
     "entity_relations": 62839,
     "entity_link_profiles": 2520,
     "entity_prefab_profiles": 1903,

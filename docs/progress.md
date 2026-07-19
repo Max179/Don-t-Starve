@@ -702,7 +702,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 86,151,168 bytes, about 82 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 88,166,400 bytes, about 84 MiB.
 
 Each profile aggregates:
 
@@ -711,6 +711,7 @@ Each profile aggregates:
 - attributes: raw and normalized infobox fields with source id/key, raw page id, template name/index, raw name, canonical name, value text, parsed number, unit, and variant key
 - media: unified infobox/page media assets with primary flags, URLs, dimensions, local paths, and variant metadata
 - media_profile: query-ready primary image, variant image, URL-readiness, and download-state summary
+- media_coverage: per-entity image coverage status, missing image/URL/download reasons, primary image pointer, and follow-up priority
 - stats: normalized stat rows with raw field names, numeric values when available, units, and variant keys
 - variants: merged variant evidence from data, recipes, facts, explicit variants, and media
 - categories, taxonomy tags, facts, recipe ingredients, typed gameplay relationships, wiki-link profile, prefab profile, source profiles, and official Steam/Klei mentions
@@ -992,7 +993,31 @@ Each compressed entity profile now includes a nullable `recipe_profile` object s
 
 The database now includes `entity_media_profiles`, a one-row media summary table for entities with image evidence. It is built from `entity_media_assets` and `entity_media_downloads`, so list/detail APIs can read primary images, variant-image summaries, URL readiness, and download status without scanning the full 21,254-row manifest.
 
-This pass generated 1,440 media profile rows.
+This pass generated 1,457 media profile rows.
+
+The database also includes an `entity_media_coverage` table with one row for
+every entity and an `entity_media_gap_queue` table with one row per media gap
+reason. Current media coverage status across all 2,593 entities:
+
+- `no_media`: 1,136 entities
+- `download_pending`: 816 entities
+- `missing_primary_image`: 293 entities
+- `missing_direct_url`: 256 entities
+- `partial_url_coverage`: 92 entities
+
+The media gap queue currently has 3,988 rows:
+
+- `pending_download`: 1,457
+- `missing_media`: 1,136
+- `missing_direct_url`: 468
+- `file_page_resolution_pending`: 350
+- `missing_primary_image`: 293
+- `missing_media_url`: 284
+
+High-priority rows favor bosses, characters, mobs, plants, foods, items, and
+structures ahead of generic pages. This makes the next image-collection pass
+queryable by entity, reason, URL readiness, primary image presence, and variant
+media state instead of requiring scans of the full media manifest.
 
 URL readiness across the underlying media manifest:
 
@@ -1007,7 +1032,7 @@ Example media profiles:
 - `Deerclops`: direct URLs and variant media are preserved while generic page references stay capped.
 - `Wilson`: 50 media rows, 3 variant rows, 1 direct URL.
 
-Each compressed entity profile now includes a nullable `media_profile` object with query-ready counts, flags, primary image metadata, and compact primary/variant asset arrays. The file-page resolver refreshes both `entity_media_profiles` and `entity_profile_json` after non-dry-run URL resolution so profile payloads keep the same direct/file-page/missing counts as `entity_media_downloads`.
+Each compressed entity profile now includes a nullable `media_profile` object with query-ready counts, flags, primary image metadata, and compact primary/variant asset arrays, plus a `media_coverage` object with image gap reasons and follow-up priority. The file-page resolver refreshes both `entity_media_profiles` and `entity_profile_json` after non-dry-run URL resolution so profile payloads keep the same direct/file-page/missing counts as `entity_media_downloads`.
 
 ## Media Download Manifest
 
