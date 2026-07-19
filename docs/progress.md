@@ -26,18 +26,18 @@ Coverage:
 - Entity coverage rows: 2,362
 - Entity JSON profiles: 2,362
 - Source mappings: 2,362
-- Parsed attributes: 24,200
-- Embedded profile attribute rows: 24,200
+- Parsed attributes: 24,157
+- Embedded profile attribute rows: 24,157
 - Normalized stat rows: 7,063
 - Parsed stat value rows: 7,038
 - Registered infobox images: 1,985
 - Registered images with fetched URL metadata: 1,785
-- Page-level image references: 52,430
-- Unified entity media assets: 54,415
+- Page-level image references: 15,365
+- Unified entity media assets: 17,350
 - Entity media profile rows: 1,299
 - Entities with page-level image references: 302
 - Image-variant candidates: 478
-- Wiki-link relations: 60,362
+- Wiki-link relations: 60,366
 - Resolved wiki-link targets: 44,706
 - Entity link profile rows: 2,304
 - Entity prefab profile rows: 1,735
@@ -465,7 +465,14 @@ Examples verified in the current database:
 
 The database now includes a `page_images` table derived from each raw MediaWiki page's `images_json`. This table is separate from `entity_images`: `entity_images` keeps infobox image roles and fetched image metadata, while `page_images` records broader page-level file references from article content, galleries, navboxes, and transcluded templates.
 
-This pass generated 52,430 page-level image references across 302 entities.
+This pass generated 15,365 page-level image references across 302 entities.
+
+Page-image rebuilding now preserves title-matched filenames such as entity
+base images, state images, build images, and growth-stage variants while
+capping generic page-reference images at 80 per raw page. This keeps
+article-specific media and variant candidates queryable, but removes thousands
+of repeated navbox/template references that previously expanded some pages to
+about 500 unrelated image rows.
 
 Examples verified in the current database:
 
@@ -501,10 +508,10 @@ Examples verified in the current database:
 
 The database now includes an `entity_media_assets` table derived from `entity_images`, `page_images`, and `image_variants`. It provides one query surface for infobox images, page-reference images, primary image flags, file-page URLs, source URLs, local paths, and image variant metadata.
 
-This pass generated 54,415 media asset rows:
+This pass generated 17,350 media asset rows:
 
 - `infobox`: 1,985
-- `page_reference`: 52,430
+- `page_reference`: 15,365
 - Primary asset rows: 1,774
 - Variant asset rows: 688
 
@@ -657,7 +664,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,362 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 110 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 98,721,792 bytes, about 94 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 110 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 75,423,744 bytes, about 72 MiB.
 
 Each profile aggregates:
 
@@ -674,13 +681,13 @@ The table also stores queryable top-level counts such as `attribute_count`, `med
 
 ## Entity Link Profiles
 
-The database now includes `entity_link_profiles`, a one-row navigation and cross-reference summary built from the full `entity_relations` table. It keeps the 60,362 raw wiki-link rows intact while exposing compact per-entry counts and top targets for API/list/detail use.
+The database now includes `entity_link_profiles`, a one-row navigation and cross-reference summary built from the full `entity_relations` table. It keeps the 60,366 raw wiki-link rows intact while exposing compact per-entry counts and top targets for API/list/detail use.
 
 This pass generated 2,304 link profile rows:
 
-- Source wiki-link rows summarized: 60,362
+- Source wiki-link rows summarized: 60,366
 - Resolved links to known entities: 44,706
-- Unresolved links kept as unresolved target summaries: 15,656
+- Unresolved links kept as unresolved target summaries: 15,660
 
 Example link profiles:
 
@@ -695,7 +702,7 @@ Each compressed entity profile now includes a nullable `link_profile` object wit
 
 ## Raw Wikitext Compression
 
-The committed database now stores all 2,362 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 110 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, and `VACUUM`, the current database is 98,721,792 bytes.
+The committed database now stores all 2,362 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 110 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, the current database is 75,423,744 bytes.
 
 Use `dst_wiki_db.raw_pages.decode_wikitext(value, encoding)` to read the stored page text. New API ingests write gzip-encoded raw wikitext through `dst_wiki_db.raw_pages.encode_wikitext`, while tests and direct fixtures can still insert plain text because the schema defaults `wikitext_encoding` to `text`.
 
@@ -945,14 +952,14 @@ Each compressed entity profile now includes a nullable `recipe_profile` object s
 
 ## Entity Media Profiles
 
-The database now includes `entity_media_profiles`, a one-row media summary table for entities with image evidence. It is built from `entity_media_assets` and `entity_media_downloads`, so list/detail APIs can read primary images, variant-image summaries, URL readiness, and download status without scanning the full 54,415-row manifest.
+The database now includes `entity_media_profiles`, a one-row media summary table for entities with image evidence. It is built from `entity_media_assets` and `entity_media_downloads`, so list/detail APIs can read primary images, variant-image summaries, URL readiness, and download status without scanning the full 17,350-row manifest.
 
 This pass generated 1,299 media profile rows.
 
 URL readiness across the underlying media manifest:
 
 - `direct_url`: 2,034 rows
-- `file_page_only`: 52,181 rows
+- `file_page_only`: 15,116 rows
 - `missing_url`: 200 rows
 
 Example media profiles:
@@ -966,17 +973,17 @@ Each compressed entity profile now includes a nullable `media_profile` object wi
 
 ## Media Download Manifest
 
-The database now includes an `entity_media_downloads` table with one pending download state row per unified media asset. This pass generated 54,415 rows, matching `entity_media_assets`.
+The database now includes an `entity_media_downloads` table with one pending download state row per unified media asset. This pass generated 17,350 rows, matching `entity_media_assets`.
 
 URL readiness after resolving a first 250-row file-page batch:
 
 - `direct_url`: 2,034 rows
-- `file_page_only`: 52,181 rows
+- `file_page_only`: 15,116 rows
 - `missing_url`: 200 rows
 
 Queue reasons:
 
-- `page_reference|file_page_only`: 51,952
+- `page_reference|file_page_only`: 14,887
 - `primary|direct_url`: 1,579
 - `variant|direct_url`: 454
 - `variant|file_page_only`: 229
@@ -984,7 +991,7 @@ Queue reasons:
 - `variant|missing_url`: 5
 - `page_reference|direct_url`: 1
 
-The compact table stores only IDs, URL readiness, download status, priority, queue reason, and downloader state. Download and file-page URLs are read through `entity_media_download_manifest` from `entity_media_assets`, so the same URL strings are not duplicated across 54,415 download queue rows.
+The compact table stores only IDs, URL readiness, download status, priority, queue reason, and downloader state. Download and file-page URLs are read through `entity_media_download_manifest` from `entity_media_assets`, so the same URL strings are not duplicated across 17,350 download queue rows.
 
 File-page rows are resolvable through MediaWiki imageinfo without downloading binaries:
 

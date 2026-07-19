@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from typing import Iterable, Mapping
 from urllib.parse import quote
@@ -9,6 +10,7 @@ from dst_wiki_db.schema import slugify
 
 
 PAGE_IMAGE_ROLE = "page_reference"
+GENERIC_PAGE_IMAGE_LIMIT = 80
 
 
 def rebuild_page_images(conn: sqlite3.Connection) -> int:
@@ -19,9 +21,13 @@ def rebuild_page_images(conn: sqlite3.Connection) -> int:
             es.entity_id,
             es.source_id,
             es.raw_page_id,
+            e.canonical_title,
+            es.source_title,
+            rp.title as raw_title,
             rp.images_json,
             s.base_url
         from entity_sources es
+        join entities e on e.id = es.entity_id
         join raw_pages rp on rp.id = es.raw_page_id
         join sources s on s.id = es.source_id
         where rp.images_json is not null and rp.images_json != ''
@@ -35,7 +41,16 @@ def rebuild_page_images(conn: sqlite3.Connection) -> int:
         entity_id = int(row["entity_id"])
         source_id = int(row["source_id"])
         raw_page_id = int(row["raw_page_id"])
-        for image_title, image_name in _page_image_entries(row["images_json"]):
+        title_slugs = _title_slugs(
+            str(row["canonical_title"] or ""),
+            str(row["source_title"] or ""),
+            str(row["raw_title"] or ""),
+        )
+        entries = _selected_page_image_entries(
+            _page_image_entries(row["images_json"]),
+            title_slugs=title_slugs,
+        )
+        for image_title, image_name in entries:
             image_slug = slugify(image_name)
             if not image_slug:
                 continue
@@ -65,6 +80,21 @@ def rebuild_page_images(conn: sqlite3.Connection) -> int:
             count += 1
     conn.commit()
     return count
+
+
+def _selected_page_image_entries(
+    entries: Iterable[tuple[str, str]], *, title_slugs: set[str]
+) -> list[tuple[str, str]]:
+    selected: list[tuple[str, str]] = []
+    generic_count = 0
+    for image_title, image_name in entries:
+        if _is_title_matched_image(image_name, title_slugs):
+            selected.append((image_title, image_name))
+            continue
+        if generic_count < GENERIC_PAGE_IMAGE_LIMIT:
+            selected.append((image_title, image_name))
+            generic_count += 1
+    return selected
 
 
 def _page_image_entries(images_json: str) -> Iterable[tuple[str, str]]:
@@ -104,6 +134,45 @@ def _normalize_image_title(title: str) -> tuple[str, str]:
     else:
         image_name = title.strip()
     return f"File:{image_name}", image_name
+
+
+def _title_slugs(*titles: str) -> set[str]:
+    slugs: set[str] = set()
+    for title in titles:
+        for part in _title_parts(title):
+            slug = slugify(part)
+            if len(slug) >= 2:
+                slugs.add(slug)
+    return slugs
+
+
+def _title_parts(title: str) -> list[str]:
+    compact = " ".join(title.split()).strip()
+    if not compact:
+        return []
+    parts = [compact]
+    if "/" in compact:
+        pieces = [part.strip() for part in compact.split("/") if part.strip()]
+        parts.extend(pieces)
+        if pieces and pieces[-1].lower() in {"ds", "dst"}:
+            parts.append("/".join(pieces[:-1]))
+    return parts
+
+
+def _is_title_matched_image(image_name: str, title_slugs: set[str]) -> bool:
+    image_slug = slugify(_image_stem(image_name))
+    if not image_slug:
+        return False
+    return any(
+        image_slug == title_slug
+        or image_slug.startswith(f"{title_slug}-")
+        or title_slug.startswith(f"{image_slug}-")
+        for title_slug in title_slugs
+    )
+
+
+def _image_stem(image_name: str) -> str:
+    return re.sub(r"\.(?:png|jpe?g|gif|webp|avif)$", "", image_name, flags=re.I)
 
 
 def _has_file_prefix(title: str) -> bool:
