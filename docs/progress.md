@@ -56,9 +56,9 @@ Coverage:
 - Ranked source catalog rows: 8
 - Source catalog evidence rows: 30
 - Representative source topic probes: 12
-- External source page index rows: 3,231
-- External source page/entity matches: 3,231
-- Entity source profile rows: 2,541
+- External source page index rows: 5,483
+- External source page/entity matches: 5,483
+- Entity source profile rows: 4,793
 - External source page gap rows: 0
 - Structured recipe ingredients: 2,315
 - Resolved recipe ingredient targets: 2,110
@@ -80,24 +80,26 @@ queryable in `entity_aliases`; the per-entity profile stores counts, flags,
 source-key coverage, capped display aliases, and capped search keys.
 
 The database now includes `source_page_index` and
-`source_page_entity_matches` for canonical wiki title alignment. The current
-wiki.gg title-index pass stores 3,231 main-namespace page titles and maps all
-3,231 of them to local entities. Matching uses the alias/search-key layer, including
-safe `/DS` and `/DST` game-version suffix fallbacks such as `Axe/DST` -> `Axe`
-and `Alchemy Engine/DST` -> `Alchemy Engine`, plus parent-title matching for
-entity subpages such as `Wilson/Origin` and `Wendy/Quotes/Hamlet`.
+`source_page_entity_matches` for cross-source wiki title alignment. The current
+index passes store 3,231 wiki.gg main-namespace titles and 2,252 Fandom
+main-namespace titles, mapping all 5,483 indexed pages to local entities.
+Matching uses the alias/search-key layer, including safe `/DS` and `/DST`
+game-version suffix fallbacks such as `Axe/DST` -> `Axe` and `Alchemy
+Engine/DST` -> `Alchemy Engine`, plus parent-title matching for entity subpages
+such as `Wilson/Origin` and `Wendy/Quotes/Hamlet`.
 
-Those page matches are also summarized in `entity_source_profiles`: 2,541 local
-entities now have wiki.gg source profiles, covering 3,231 matched canonical
+Those page matches are also summarized in `entity_source_profiles`: 2,541
+entity-source rows cover wiki.gg and 2,252 cover Fandom, for 4,793 total source
+profiles embedded into entity JSON. wiki.gg contributes 3,231 matched canonical
 wiki pages, 522 DS/DST game-version pages, and 91 parent-matched entity
-subpages. Entity JSON profiles include these source summaries through
-`source_profiles` plus top-level
-`source_match_count`.
+subpages; Fandom contributes 2,252 matched comparison pages. Entity JSON
+profiles include these source summaries through `source_profiles` plus
+top-level `source_match_count`.
 
-Unmatched wiki.gg pages are tracked in `source_page_gaps` as a review and
-ingestion backlog. The current wiki.gg gap distribution is now empty: all
-3,231 indexed main-namespace wiki.gg pages are either imported as entities or
-matched to existing parent entities.
+Unmatched source pages are tracked in `source_page_gaps` as a review and
+ingestion backlog. The current gap distribution is empty for both indexed
+sources: all 3,231 wiki.gg pages and all 2,252 Fandom pages are either imported
+as entities or matched to existing parent entities.
 
 The gap table stores page id, title, URL, normalized slug, gap type, priority,
 suggested base title/slug for unmatched DS/DST subpages, and notes. This keeps
@@ -681,7 +683,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 84,434,944 bytes, about 81 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 85,053,440 bytes, about 81 MiB.
 
 Each profile aggregates:
 
@@ -719,7 +721,7 @@ Each compressed entity profile now includes a nullable `link_profile` object wit
 
 ## Raw Wikitext Compression
 
-The committed database now stores all 2,593 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 341 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, the current database is 84,434,944 bytes.
+The committed database now stores all 2,593 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 341 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, Fandom title-index profiles, and `VACUUM`, the current database is 85,053,440 bytes.
 
 Use `dst_wiki_db.raw_pages.decode_wikitext(value, encoding)` to read the stored page text. New API ingests write gzip-encoded raw wikitext through `dst_wiki_db.raw_pages.encode_wikitext`, while tests and direct fixtures can still insert plain text because the schema defaults `wikitext_encoding` to `text`.
 

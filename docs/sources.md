@@ -51,6 +51,7 @@ Checked on 2026-07-19 Asia/Shanghai during this build session. The ranked source
 - Best use: cross-source title matches, older page history, and difference checks against wiki.gg.
 - Constraint: Fandom pages include platform wrappers and may be sensitive to high-frequency requests. Use low request rates and cache raw pages.
 - Current source audit: `robots.txt` returned HTTP 403 through Cloudflare in the latest audit, while `api.php` siteinfo returned HTTP 200.
+- Current page-index coverage: Fandom API allpages returned 2,252 main-namespace pages, and all 2,252 are matched to local entities in `source_page_entity_matches` with zero Fandom source-page gaps.
 
 ## 5. Don't Starve Wiki on Fextralife
 
