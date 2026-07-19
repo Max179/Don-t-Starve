@@ -21,29 +21,29 @@ python3 scripts/build_database.py \
 
 Coverage:
 
-- Raw pages: 2,573
-- Entities: 2,573
-- Entity coverage rows: 2,573
-- Entity JSON profiles: 2,573
-- Source mappings: 2,573
-- Parsed attributes: 26,606
-- Embedded profile attribute rows: 26,606
-- Normalized stat rows: 7,484
-- Parsed stat value rows: 7,432
-- Registered infobox images: 2,221
+- Raw pages: 2,593
+- Entities: 2,593
+- Entity coverage rows: 2,593
+- Entity JSON profiles: 2,593
+- Source mappings: 2,593
+- Parsed attributes: 27,041
+- Embedded profile attribute rows: 27,041
+- Normalized stat rows: 7,534
+- Parsed stat value rows: 7,470
+- Registered infobox images: 2,267
 - Registered images with fetched URL metadata: 1,785
-- Page-level image references: 18,502
-- Unified entity media assets: 20,723
-- Entity media profile rows: 1,440
-- Entities with page-level image references: 343
-- Image-variant candidates: 500
-- Wiki-link relations: 62,599
-- Resolved wiki-link targets: 46,365
-- Entity link profile rows: 2,500
-- Entity prefab profile rows: 1,893
-- Entity alias/search-key rows: 18,016
-- Entity alias profile rows: 2,573
-- Source-presence verification checks: 2,573
+- Page-level image references: 18,987
+- Unified entity media assets: 21,254
+- Entity media profile rows: 1,457
+- Entities with page-level image references: 350
+- Image-variant candidates: 501
+- Wiki-link relations: 62,839
+- Resolved wiki-link targets: 46,538
+- Entity link profile rows: 2,520
+- Entity prefab profile rows: 1,903
+- Entity alias/search-key rows: 18,235
+- Entity alias profile rows: 2,593
+- Source-presence verification checks: 2,593
 - Official Steam/Klei verification records: 161
 - Steam DLC appdetails records: 53
 - Normalized official product records: 55
@@ -52,23 +52,23 @@ Coverage:
 - Normalized official update sections: 80
 - Official update section items: 397
 - Official update media URLs: 5
-- Official-record entity mentions: 716
+- Official-record entity mentions: 720
 - Ranked source catalog rows: 8
 - Source catalog evidence rows: 26
 - External source page index rows: 3,231
-- External source page/entity matches: 3,120
-- Entity source profile rows: 2,521
-- External source page gap rows: 111
-- Structured recipe ingredients: 2,258
-- Resolved recipe ingredient targets: 2,086
-- Structured drop/source/sold/spawn facts: 1,336
+- External source page/entity matches: 3,231
+- Entity source profile rows: 2,541
+- External source page gap rows: 0
+- Structured recipe ingredients: 2,315
+- Resolved recipe ingredient targets: 2,110
+- Structured drop/source/sold/spawn facts: 1,337
 - Resolved drop/source/sold/spawn fact targets: 465
-- Variant records: 1,452
-- Merged entity variant summary rows: 3,391
-- Entity category links: 14,132
+- Variant records: 1,479
+- Merged entity variant summary rows: 3,430
+- Entity category links: 14,209
 - Entities with category links: 2,506
 - Distinct category slugs: 304
-- Identity keys for source alignment: 9,876
+- Identity keys for source alignment: 9,989
 - Source-access audit records: 9
 
 The database also includes an `entity_aliases` lookup table and one-row
@@ -80,48 +80,46 @@ source-key coverage, capped display aliases, and capped search keys.
 
 The database now includes `source_page_index` and
 `source_page_entity_matches` for canonical wiki title alignment. The current
-wiki.gg title-index pass stores 3,231 main-namespace page titles and maps 3,120
-of them to local entities. Matching uses the alias/search-key layer, including
+wiki.gg title-index pass stores 3,231 main-namespace page titles and maps all
+3,231 of them to local entities. Matching uses the alias/search-key layer, including
 safe `/DS` and `/DST` game-version suffix fallbacks such as `Axe/DST` -> `Axe`
-and `Alchemy Engine/DST` -> `Alchemy Engine`.
+and `Alchemy Engine/DST` -> `Alchemy Engine`, plus parent-title matching for
+entity subpages such as `Wilson/Origin` and `Wendy/Quotes/Hamlet`.
 
-Those page matches are also summarized in `entity_source_profiles`: 2,521 local
-entities now have wiki.gg source profiles, covering 3,120 matched canonical
-wiki pages and 522 DS/DST game-version pages. Entity JSON profiles include
-these source summaries through `source_profiles` plus top-level
+Those page matches are also summarized in `entity_source_profiles`: 2,541 local
+entities now have wiki.gg source profiles, covering 3,231 matched canonical
+wiki pages, 522 DS/DST game-version pages, and 91 parent-matched entity
+subpages. Entity JSON profiles include these source summaries through
+`source_profiles` plus top-level
 `source_match_count`.
 
 Unmatched wiki.gg pages are tracked in `source_page_gaps` as a review and
-ingestion backlog. Current gap distribution:
-
-- `unmatched_subpage`: 84
-- `event_or_seasonal_page`: 15
-- `guide_or_reference_page`: 6
-- `cosmetic_or_curio_page`: 5
-- `unmatched_game_variant_page`: 1
+ingestion backlog. The current wiki.gg gap distribution is now empty: all
+3,231 indexed main-namespace wiki.gg pages are either imported as entities or
+matched to existing parent entities.
 
 The gap table stores page id, title, URL, normalized slug, gap type, priority,
 suggested base title/slug for unmatched DS/DST subpages, and notes. This keeps
-canonical wiki coverage holes queryable for the next ingestion pass.
+future canonical wiki coverage holes queryable for the next ingestion pass.
 
-Canonical gap imports have now pulled 321 priority wiki.gg pages into `raw_pages`,
+Canonical gap imports have now pulled 341 priority wiki.gg pages into `raw_pages`,
 `entity_sources`, parsed entities, attributes, images, categories, and wiki
 links. Imported examples include `Ammo Pouch`, `Ancient Fuelweaver`,
 `Ancient Guard Tower`, `Asparagus Fern`, `B.U.D.D.Y.`, `Boat Racer`,
-and newer entries from the latest 161-page batch, which cleared the
-`potential_new_entity` backlog. The latest batch is recorded in
-`reports/source_gap_import.json`.
+and newer entries from the latest 20-page final gap batch, which cleared the
+wiki.gg page-index backlog. The latest batch is summarized in
+`reports/source_gap_import_remaining.json`.
 
 Entity kind distribution:
 
-- `item`: 826
-- `page`: 764
+- `item`: 831
+- `page`: 777
 - `mob`: 291
-- `structure`: 206
+- `structure`: 207
 - `boss`: 163
 - `character`: 136
+- `food`: 64
 - `biome`: 64
-- `food`: 63
 - `plant`: 60
 
 ## Verified Parser Improvements
@@ -132,27 +130,27 @@ The database now includes an `entity_coverage` table with one row per entity. It
 
 Coverage score distribution:
 
-- 90: 14 entities
-- 80: 223 entities
-- 70: 512 entities
-- 60: 797 entities
-- 50: 431 entities
-- 40: 173 entities
-- 30: 361 entities
+- 90: 15 entities
+- 80: 225 entities
+- 70: 515 entities
+- 60: 804 entities
+- 50: 433 entities
+- 40: 175 entities
+- 30: 364 entities
 - 20: 48 entities
 - 10: 14 entities
 
 Average coverage score by entity kind:
 
-- `structure`: 66.60 across 206 entities
-- `item`: 62.45 across 826 entities
+- `structure`: 66.57 across 207 entities
+- `item`: 62.54 across 831 entities
 - `mob`: 62.10 across 291 entities
-- `food`: 61.90 across 63 entities
+- `food`: 62.03 across 64 entities
 - `plant`: 60.67 across 60 entities
 - `boss`: 60.00 across 163 entities
 - `character`: 51.32 across 136 entities
 - `biome`: 48.91 across 64 entities
-- `page`: 42.36 across 764 entities
+- `page`: 42.46 across 777 entities
 
 Current high-priority missing dimensions:
 
@@ -375,8 +373,8 @@ The table preserves the original value text and extracts targets, percentages, a
 
 The database now resolves parsed targets back to entity IDs where the normalized target title matches an existing entry:
 
-- `entity_relations.target_entity_id`: 46,365 wiki-link relation rows now point at target entities.
-- `recipe_ingredient_targets`: 2,086 recipe ingredient rows now point at ingredient entities.
+- `entity_relations.target_entity_id`: 46,538 wiki-link relation rows now point at target entities.
+- `recipe_ingredient_targets`: 2,110 recipe ingredient rows now point at ingredient entities.
 - `entity_fact_targets`: 465 parsed drops, dropped-by, sold-by, spawn-from, and spawns rows now have target entity bridges.
 
 Examples verified in the current database:
@@ -539,11 +537,11 @@ Examples verified in the current database:
 
 The database now includes an `entity_identity_keys` table and a `cross_source_matches` table. `entity_identity_keys` is populated from source-title slugs, spawn codes, image names, and image SHA1 hashes. It provides stable evidence for matching the same entity across wiki.gg, Fandom, and any future source imports.
 
-This pass generated 9,876 identity keys:
+This pass generated 9,989 identity keys:
 
-- `spawn_code`: 3,297
-- `title_slug`: 2,573
-- `image_name`: 2,221
+- `spawn_code`: 3,344
+- `title_slug`: 2,593
+- `image_name`: 2,267
 - `image_sha1`: 1,785
 
 Examples verified in the current database:
@@ -553,15 +551,15 @@ Examples verified in the current database:
 - `Abigail`: `spawn_code=abigail` and two image SHA1 keys
 - `Wilson`: `title_slug=wilson` and image SHA1 key
 
-`cross_source_matches` currently has 172 conservative cross-source links after the current wiki.gg gap imports. Further canonical ingestion will use shared title, prefab, image, infobox, and category evidence to expand cross-source matches.
+`cross_source_matches` currently has 192 conservative cross-source links after the current wiki.gg gap imports. Further canonical ingestion will use shared title, prefab, image, infobox, and category evidence to expand cross-source matches.
 
 ## Entity Prefab Profiles
 
 The database now includes `entity_prefab_profiles`, a one-row prefab/spawn-code summary table derived from `entity_identity_keys.key_type = 'spawn_code'`. It makes prefab lookup queryable without scanning all identity keys and records upgrade-like prefab categories from conservative code-pattern evidence.
 
-This pass generated 1,893 prefab profile rows:
+This pass generated 1,903 prefab profile rows:
 
-- Spawn-code/prefab values summarized: 3,297
+- Spawn-code/prefab values summarized: 3,344
 - Upgraded prefab codes: 14
 - Reskin prefab codes: 1
 - Mast-upgrade prefab codes: 4
@@ -662,9 +660,9 @@ Latest wiki.gg discovery probe:
 
 ## Entity JSON Profiles
 
-The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,573 rows, matching the `entities` table.
+The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 321 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 82,210,816 bytes, about 78 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 83,070,976 bytes, about 79 MiB.
 
 Each profile aggregates:
 
@@ -681,18 +679,18 @@ The table also stores queryable top-level counts such as `attribute_count`, `med
 
 ## Entity Link Profiles
 
-The database now includes `entity_link_profiles`, a one-row navigation and cross-reference summary built from the full `entity_relations` table. It keeps the 62,599 raw wiki-link rows intact while exposing compact per-entry counts and top targets for API/list/detail use.
+The database now includes `entity_link_profiles`, a one-row navigation and cross-reference summary built from the full `entity_relations` table. It keeps the 62,839 raw wiki-link rows intact while exposing compact per-entry counts and top targets for API/list/detail use.
 
-This pass generated 2,500 link profile rows:
+This pass generated 2,520 link profile rows:
 
-- Source wiki-link rows summarized: 62,599
-- Resolved links to known entities: 46,365
-- Unresolved links kept as unresolved target summaries: 16,234
+- Source wiki-link rows summarized: 62,839
+- Resolved links to known entities: 46,538
+- Unresolved links kept as unresolved target summaries: 16,301
 
 Example link profiles:
 
-- `Don't Starve Together`: 325 wiki links, 274 resolved, 51 unresolved, 9 target kinds.
-- `Crock Pot`: 122 wiki links, 97 resolved, 25 unresolved, 7 target kinds.
+- `Don't Starve Together`: 325 wiki links, 277 resolved, 48 unresolved, 9 target kinds.
+- `Crock Pot`: 122 wiki links, 98 resolved, 24 unresolved, 7 target kinds.
 - `Deerclops`: 76 wiki links, 57 resolved, 19 unresolved, 6 target kinds.
 - `Berry Bush`: 54 wiki links, 40 resolved, 14 unresolved, 8 target kinds.
 - `Wilson`: 54 wiki links, 28 resolved, 26 unresolved, 5 target kinds.
@@ -702,7 +700,7 @@ Each compressed entity profile now includes a nullable `link_profile` object wit
 
 ## Raw Wikitext Compression
 
-The committed database now stores all 2,573 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 321 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, the current database is 82,210,816 bytes.
+The committed database now stores all 2,593 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 341 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, the current database is 83,070,976 bytes.
 
 Use `dst_wiki_db.raw_pages.decode_wikitext(value, encoding)` to read the stored page text. New API ingests write gzip-encoded raw wikitext through `dst_wiki_db.raw_pages.encode_wikitext`, while tests and direct fixtures can still insert plain text because the schema defaults `wikitext_encoding` to `text`.
 
@@ -759,8 +757,8 @@ Each compressed entity profile now includes a `stat_rollups` array next to the r
 
 The database now includes an `entity_gameplay_edges` table that turns resolved recipe and fact targets into typed forward and inverse relationships. This pass generated 5,102 gameplay edges:
 
-- `uses_ingredient`: 2,086
-- `ingredient_for`: 2,086
+- `uses_ingredient`: 2,110
+- `ingredient_for`: 2,110
 - `drops`: 383
 - `dropped_by`: 383
 - `spawns`: 79
@@ -768,27 +766,27 @@ The database now includes an `entity_gameplay_edges` table that turns resolved r
 - `sold_by`: 3
 - `sells`: 3
 
-These edges are derived only from resolved target tables, so each row points from one known entity id to another known entity id and keeps source evidence such as source table, source row id, quantity, probability, variant key, and confidence. The `entity_profile_json` profiles now include a `relationships` array and `relationship_count`; 1,049 entity profiles currently have at least one typed gameplay relationship.
+These edges are derived only from resolved target tables, so each row points from one known entity id to another known entity id and keeps source evidence such as source table, source row id, quantity, probability, variant key, and confidence. The `entity_profile_json` profiles now include a `relationships` array and `relationship_count`; 1,055 entity profiles currently have at least one typed gameplay relationship.
 
 ## Entity Taxonomy Tags
 
-The database now includes an `entity_taxonomy` table for faceted browsing and filtering beyond the single `entities.kind` value. This pass generated 25,797 taxonomy rows across all 2,573 entities:
+The database now includes an `entity_taxonomy` table for faceted browsing and filtering beyond the single `entities.kind` value. This pass generated 25,916 taxonomy rows across all 2,593 entities:
 
-- `source_category`: 14,132
-- `data`: 3,594
-- `gameplay`: 3,396
-- `kind`: 2,573
+- `source_category`: 14,209
+- `data`: 3,614
+- `gameplay`: 3,398
+- `kind`: 2,593
 - `dlc`: 1,183
 - `game_mode`: 919
 
 Common taxonomy tags include:
 
-- `data:has_spawn_code`: 1,831 entities
-- `data:has_stats`: 1,763 entities
-- `source_category:items`: 986 entities
+- `data:has_spawn_code`: 1,841 entities
+- `data:has_stats`: 1,773 entities
+- `source_category:items`: 987 entities
 - `game_mode:dst`: 875 entities
 - `source_category:dont-starve-together`: 875 entities
-- `kind:item`: 826 entities
+- `kind:item`: 831 entities
 - `gameplay:craftable`: 626 entities
 - `kind:page`: 764 entities
 

@@ -157,6 +157,7 @@ def _best_match(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str, Any] | 
         suffix_slug = slugify(suffix)
         if base_title and suffix_slug in GAME_VARIANT_SUFFIXES:
             candidate_keys.append((slugify(base_title), "alias_game_variant_suffix", 0.88))
+        candidate_keys.extend(_subpage_parent_candidates(title))
 
     for alias_key, method_prefix, confidence_cap in candidate_keys:
         match = _best_alias_key_match(
@@ -169,6 +170,23 @@ def _best_match(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str, Any] | 
         if match is not None:
             return match
     return None
+
+
+def _subpage_parent_candidates(title: str) -> list[tuple[str, str, float]]:
+    parts = [part.strip() for part in title.split("/") if part.strip()]
+    if len(parts) < 2:
+        return []
+    candidates: list[tuple[str, str, float]] = []
+    seen: set[str] = set()
+    for end in range(len(parts) - 1, 0, -1):
+        parent_title = "/".join(parts[:end])
+        parent_slug = slugify(parent_title)
+        if parent_slug in seen:
+            continue
+        seen.add(parent_slug)
+        confidence = 0.78 if end == len(parts) - 1 else 0.72
+        candidates.append((parent_slug, "alias_subpage_parent", confidence))
+    return candidates
 
 
 def _best_alias_key_match(

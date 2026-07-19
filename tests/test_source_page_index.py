@@ -46,15 +46,17 @@ def test_fetch_source_page_index_matches_external_titles_with_aliases(tmp_path):
                 {"pageid": 10, "ns": 0, "title": "Berry Bush"},
                 {"pageid": 11, "ns": 0, "title": "berrybush"},
                 {"pageid": 12, "ns": 0, "title": "Berry Bush/DST"},
-                {"pageid": 13, "ns": 0, "title": "Unmatched Thing"},
+                {"pageid": 13, "ns": 0, "title": "Berry Bush/Gallery"},
+                {"pageid": 14, "ns": 0, "title": "Berry Bush/Quotes/Hamlet"},
+                {"pageid": 15, "ns": 0, "title": "Unmatched Thing"},
             ]
         ),
     )
 
     assert result == {
         "source_key": "wiki.gg",
-        "source_page_index": 4,
-        "source_page_entity_matches": 3,
+        "source_page_index": 6,
+        "source_page_entity_matches": 5,
     }
     rows = conn.execute(
         """
@@ -88,6 +90,20 @@ def test_fetch_source_page_index_matches_external_titles_with_aliases(tmp_path):
         {
             "source_key": "wiki.gg",
             "source_pageid": 13,
+            "title": "Berry Bush/Gallery",
+            "title_slug": "berry-bush-gallery",
+            "page_url": "https://dontstarve.wiki.gg/wiki/Berry_Bush/Gallery",
+        },
+        {
+            "source_key": "wiki.gg",
+            "source_pageid": 14,
+            "title": "Berry Bush/Quotes/Hamlet",
+            "title_slug": "berry-bush-quotes-hamlet",
+            "page_url": "https://dontstarve.wiki.gg/wiki/Berry_Bush/Quotes/Hamlet",
+        },
+        {
+            "source_key": "wiki.gg",
+            "source_pageid": 15,
             "title": "Unmatched Thing",
             "title_slug": "unmatched-thing",
             "page_url": "https://dontstarve.wiki.gg/wiki/Unmatched_Thing",
@@ -104,6 +120,13 @@ def test_fetch_source_page_index_matches_external_titles_with_aliases(tmp_path):
         ("Berry Bush", "Berry Bush", "alias:canonical_title", 1.0),
         ("berrybush", "Berry Bush", "alias:prefab_code", 0.98),
         ("Berry Bush/DST", "Berry Bush", "alias_game_variant_suffix:canonical_title", 0.88),
+        ("Berry Bush/Gallery", "Berry Bush", "alias_subpage_parent:canonical_title", 0.78),
+        (
+            "Berry Bush/Quotes/Hamlet",
+            "Berry Bush",
+            "alias_subpage_parent:canonical_title",
+            0.72,
+        ),
     ]
 
 
