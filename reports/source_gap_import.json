@@ -1,10 +1,10 @@
 {
   "source_key": "wiki.gg",
   "gap_type": "potential_new_entity",
-  "selected_gaps": 20,
-  "pages_seen": 20,
-  "pages_imported": 20,
-  "entities_written": 20,
-  "images_registered": 11,
-  "verification_checks": 20
+  "selected_gaps": 50,
+  "pages_seen": 50,
+  "pages_imported": 50,
+  "entities_written": 50,
+  "images_registered": 79,
+  "verification_checks": 50
 }
