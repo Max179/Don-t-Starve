@@ -52,6 +52,7 @@ Checked on 2026-07-19 Asia/Shanghai during this build session. The ranked source
 - Constraint: Fandom pages include platform wrappers and may be sensitive to high-frequency requests. Use low request rates and cache raw pages.
 - Current source audit: `robots.txt` returned HTTP 403 through Cloudflare in the latest audit, while `api.php` siteinfo returned HTTP 200.
 - Current page-index coverage: Fandom API allpages returned 2,252 main-namespace pages, and all 2,252 are matched to local entities in `source_page_entity_matches` with zero Fandom source-page gaps.
+- Current entity-source coverage: the combined wiki.gg + Fandom title indexes produce 2,593 `entity_source_coverage` rows: 2,200 entities have both source profiles, 341 have wiki.gg only, and 52 have Fandom only.
 
 ## 5. Don't Starve Wiki on Fextralife
 

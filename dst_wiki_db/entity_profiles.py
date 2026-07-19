@@ -132,6 +132,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     prefab_profile = _prefab_profile(conn, entity_id)
     alias_profile = _alias_profile(conn, entity_id)
     source_profiles = _source_profiles(conn, entity_id)
+    source_coverage = _source_coverage(conn, entity_id)
     taxonomy = _taxonomy(conn, entity_id)
     media_profile = _media_profile(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
@@ -181,6 +182,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "prefab_profile": prefab_profile,
         "alias_profile": alias_profile,
         "source_profiles": source_profiles,
+        "source_coverage": source_coverage,
         "taxonomy": taxonomy,
         "media_profile": media_profile,
         "combat_profile": combat_profile,
@@ -961,6 +963,80 @@ def _source_profiles(conn: sqlite3.Connection, entity_id: int) -> list[dict[str,
 
 def _source_match_count(source_profiles: list[dict[str, Any]]) -> int:
     return sum(int(profile["counts"]["matched_pages"]) for profile in source_profiles)
+
+
+def _source_coverage(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any]:
+    row = conn.execute(
+        """
+        select
+            source_profile_count,
+            matched_page_count,
+            wiki_gg_page_count,
+            fandom_page_count,
+            other_page_count,
+            exact_page_count,
+            game_variant_page_count,
+            prefab_page_count,
+            image_page_count,
+            method_count,
+            has_wiki_gg,
+            has_fandom,
+            has_both_core_wikis,
+            has_exact_page,
+            has_game_variant_pages,
+            has_prefab_page,
+            has_image_page,
+            source_keys_json,
+            missing_sources_json,
+            coverage_status,
+            best_source_key,
+            best_page_title,
+            best_page_url
+        from entity_source_coverage
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return {
+            "coverage_status": "missing_source_coverage",
+            "source_keys": [],
+            "missing_sources": [],
+            "counts": {},
+            "flags": {},
+            "best_page": {"source_key": "", "title": "", "url": ""},
+        }
+    return {
+        "coverage_status": str(row["coverage_status"]),
+        "source_keys": json.loads(str(row["source_keys_json"] or "[]")),
+        "missing_sources": json.loads(str(row["missing_sources_json"] or "[]")),
+        "counts": {
+            "source_profiles": int(row["source_profile_count"]),
+            "matched_pages": int(row["matched_page_count"]),
+            "wiki_gg_pages": int(row["wiki_gg_page_count"]),
+            "fandom_pages": int(row["fandom_page_count"]),
+            "other_pages": int(row["other_page_count"]),
+            "exact_pages": int(row["exact_page_count"]),
+            "game_variant_pages": int(row["game_variant_page_count"]),
+            "prefab_pages": int(row["prefab_page_count"]),
+            "image_pages": int(row["image_page_count"]),
+            "methods": int(row["method_count"]),
+        },
+        "flags": {
+            "has_wiki_gg": bool(row["has_wiki_gg"]),
+            "has_fandom": bool(row["has_fandom"]),
+            "has_both_core_wikis": bool(row["has_both_core_wikis"]),
+            "has_exact_page": bool(row["has_exact_page"]),
+            "has_game_variant_pages": bool(row["has_game_variant_pages"]),
+            "has_prefab_page": bool(row["has_prefab_page"]),
+            "has_image_page": bool(row["has_image_page"]),
+        },
+        "best_page": {
+            "source_key": str(row["best_source_key"] or ""),
+            "title": str(row["best_page_title"] or ""),
+            "url": str(row["best_page_url"] or ""),
+        },
+    }
 
 
 def _taxonomy(conn: sqlite3.Connection, entity_id: int) -> list[dict[str, Any]]:

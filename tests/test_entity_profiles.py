@@ -309,6 +309,28 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     )
     conn.execute(
         """
+        insert into entity_source_coverage (
+            entity_id, slug, canonical_title, kind,
+            source_profile_count, matched_page_count,
+            wiki_gg_page_count, fandom_page_count, other_page_count,
+            exact_page_count, game_variant_page_count, prefab_page_count,
+            image_page_count, method_count,
+            has_wiki_gg, has_fandom, has_both_core_wikis,
+            has_exact_page, has_game_variant_pages, has_prefab_page,
+            has_image_page, source_keys_json, missing_sources_json,
+            coverage_status, best_source_key, best_page_title, best_page_url
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant',
+                1, 2, 2, 0, 0, 1, 1, 0, 0, 2,
+                1, 0, 0, 1, 1, 0, 0,
+                '["wiki.gg"]', '["fandom"]', 'wiki.gg_only',
+                'wiki.gg', 'Berry Bush',
+                'https://dontstarve.wiki.gg/wiki/Berry_Bush')
+        """,
+        (entity_id,),
+    )
+    conn.execute(
+        """
         insert into entity_taxonomy (
             entity_id, slug, canonical_title, kind, taxonomy_type,
             taxonomy_key, label, confidence, evidence_source, evidence_count
@@ -543,6 +565,9 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["source_profiles"][0]["primary_page"]["title"] == "Berry Bush"
     assert profile["source_profiles"][0]["counts"]["matched_pages"] == 2
     assert profile["source_profiles"][0]["flags"]["has_game_variant_pages"] is True
+    assert profile["source_coverage"]["coverage_status"] == "wiki.gg_only"
+    assert profile["source_coverage"]["missing_sources"] == ["fandom"]
+    assert profile["source_coverage"]["best_page"]["source_key"] == "wiki.gg"
     assert profile["taxonomy"][0]["taxonomy_key"] == "plant"
     assert profile["combat_profile"]["health"]["max"] == 100.0
     assert profile["combat_profile"]["damage"]["text"] == "10 / 20"

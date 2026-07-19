@@ -96,6 +96,17 @@ subpages; Fandom contributes 2,252 matched comparison pages. Entity JSON
 profiles include these source summaries through `source_profiles` plus
 top-level `source_match_count`.
 
+The per-entity `entity_source_coverage` table now gives every one of the 2,593
+entities a source audit row for wiki.gg/Fandom correspondence. Current status
+counts are 2,200 `both_sources`, 341 `wiki.gg_only`, and 52 `fandom_only`, with
+no `missing_source_profiles` rows. By major kind: items have 767 dual-source
+entities, 44 wiki.gg-only, and 20 Fandom-only; pages have 503 dual-source, 257
+wiki.gg-only, and 17 Fandom-only; mobs have 280 dual-source, 5 wiki.gg-only,
+and 6 Fandom-only; plants have 46 dual-source and 14 wiki.gg-only. The table
+stores matched page counts, missing source keys, source flags, aggregate match
+method counts, and the best matched page for each entity. Entity JSON profiles
+embed this as `source_coverage` beside the full `source_profiles` arrays.
+
 Unmatched source pages are tracked in `source_page_gaps` as a review and
 ingestion backlog. The current gap distribution is empty for both indexed
 sources: all 3,231 wiki.gg pages and all 2,252 Fandom pages are either imported
@@ -683,7 +694,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 85,053,440 bytes, about 81 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 86,016,000 bytes, about 82 MiB.
 
 Each profile aggregates:
 

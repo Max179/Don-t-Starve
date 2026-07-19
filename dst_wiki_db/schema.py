@@ -806,6 +806,43 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_source_profiles_entity
             on entity_source_profiles(entity_id);
 
+        create table if not exists entity_source_coverage (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            source_profile_count integer not null default 0,
+            matched_page_count integer not null default 0,
+            wiki_gg_page_count integer not null default 0,
+            fandom_page_count integer not null default 0,
+            other_page_count integer not null default 0,
+            exact_page_count integer not null default 0,
+            game_variant_page_count integer not null default 0,
+            prefab_page_count integer not null default 0,
+            image_page_count integer not null default 0,
+            method_count integer not null default 0,
+            has_wiki_gg integer not null default 0,
+            has_fandom integer not null default 0,
+            has_both_core_wikis integer not null default 0,
+            has_exact_page integer not null default 0,
+            has_game_variant_pages integer not null default 0,
+            has_prefab_page integer not null default 0,
+            has_image_page integer not null default 0,
+            source_keys_json text not null default '[]',
+            missing_sources_json text not null default '[]',
+            coverage_status text not null default 'missing_source_profiles',
+            best_source_key text not null default '',
+            best_page_title text not null default '',
+            best_page_url text not null default '',
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_source_coverage_status
+            on entity_source_coverage(coverage_status, kind);
+        create index if not exists idx_entity_source_coverage_missing
+            on entity_source_coverage(has_wiki_gg, has_fandom);
+
         create table if not exists source_page_gaps (
             id integer primary key,
             source_page_index_id integer not null unique references source_page_index(id) on delete cascade,

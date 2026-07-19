@@ -40,6 +40,7 @@ COUNT_TABLES = [
     "source_page_index",
     "source_page_entity_matches",
     "entity_source_profiles",
+    "entity_source_coverage",
     "source_page_gaps",
     "community_guide_sources",
     "community_guide_topics",
