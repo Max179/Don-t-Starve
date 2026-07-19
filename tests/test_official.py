@@ -273,6 +273,7 @@ def test_fetch_official_sources_cli_can_skip_dlc_details(tmp_path, monkeypatch):
 
     assert result == 0
     assert captured["include_dlc_details"] is False
+    assert captured["appids"] == [322330, 219740, 2239770]
 
 
 def test_fetch_steam_records_stores_failure_record_when_endpoint_times_out():

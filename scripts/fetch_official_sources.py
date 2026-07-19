@@ -32,7 +32,7 @@ def main(argv=None):
     records = []
     records.extend(
         fetch_steam_records(
-            appids=[322330, 219740],
+            appids=[322330, 219740, 2239770],
             news_count=args.steam_news_count,
             timeout=args.timeout,
             include_dlc_details=not args.skip_steam_dlc_details,

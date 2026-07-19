@@ -275,6 +275,10 @@ def fetch_klei_records(*, timeout: int, session=None) -> List[OfficialRecord]:
             "https://www.klei.com/games/dont-starve",
         ),
         (
+            "klei_dse_page",
+            "https://www.klei.com/games/dont-starve-elsewhere",
+        ),
+        (
             "klei_dst_updates",
             "https://forums.kleientertainment.com/game-updates/dst/",
         ),

@@ -34,6 +34,12 @@ OFFICIAL_HTTP_TARGETS = [
     (
         "klei",
         "official_http_probe",
+        "https://www.klei.com/games/dont-starve-elsewhere",
+        "Klei Don't Starve Elsewhere product page",
+    ),
+    (
+        "klei",
+        "official_http_probe",
         "https://forums.kleientertainment.com/game-updates/dst/",
         "Klei DST update forum",
     ),
@@ -48,6 +54,12 @@ OFFICIAL_HTTP_TARGETS = [
         "official_http_probe",
         "https://store.steampowered.com/api/appdetails?appids=219740&filters=basic",
         "Steam appdetails 219740",
+    ),
+    (
+        "steam",
+        "official_http_probe",
+        "https://store.steampowered.com/api/appdetails?appids=2239770&filters=basic",
+        "Steam appdetails 2239770",
     ),
 ]
 

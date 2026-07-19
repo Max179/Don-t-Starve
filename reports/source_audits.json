@@ -1,18 +1,18 @@
 {
   "by_source": {
     "fandom": 2,
-    "klei": 3,
-    "steam": 2,
+    "klei": 4,
+    "steam": 3,
     "wiki.gg": 2
   },
   "by_status": {
     "failed": 2,
-    "ok": 6,
+    "ok": 8,
     "restricted_by_robots": 1
   },
   "by_type": {
     "mediawiki_siteinfo": 2,
-    "official_http_probe": 5,
+    "official_http_probe": 7,
     "robots_txt": 2
   },
   "records": [
@@ -406,7 +406,7 @@
           "wikiid": "dontstarvegame"
         },
         "statistics": {
-          "activeusers": 8,
+          "activeusers": 9,
           "articles": 2252,
           "edits": 533981,
           "images": 25319,
@@ -458,6 +458,23 @@
       "allowed": true,
       "check_type": "official_http_probe",
       "payload": {
+        "final_url": "https://www.klei.com/games/dont-starve-elsewhere",
+        "headers": {
+          "content-type": "text/html"
+        },
+        "method": "HEAD"
+      },
+      "source_key": "klei",
+      "status": "ok",
+      "status_code": 200,
+      "summary": "HTTP 200",
+      "title": "Klei Don't Starve Elsewhere product page",
+      "url": "https://www.klei.com/games/dont-starve-elsewhere"
+    },
+    {
+      "allowed": true,
+      "check_type": "official_http_probe",
+      "payload": {
         "final_url": "https://kleiforums.com:443/game-updates/dst/",
         "headers": {
           "content-type": "text/html; charset=UTF-8"
@@ -504,7 +521,24 @@
       "summary": "HTTP 200",
       "title": "Steam appdetails 219740",
       "url": "https://store.steampowered.com/api/appdetails?appids=219740&filters=basic"
+    },
+    {
+      "allowed": true,
+      "check_type": "official_http_probe",
+      "payload": {
+        "final_url": "https://store.steampowered.com/api/appdetails?appids=2239770&filters=basic",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "method": "HEAD"
+      },
+      "source_key": "steam",
+      "status": "ok",
+      "status_code": 200,
+      "summary": "HTTP 200",
+      "title": "Steam appdetails 2239770",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2239770&filters=basic"
     }
   ],
-  "records_written": 9
+  "records_written": 11
 }

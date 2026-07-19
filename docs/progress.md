@@ -44,17 +44,17 @@ Coverage:
 - Entity alias/search-key rows: 18,235
 - Entity alias profile rows: 2,593
 - Source-presence verification checks: 2,593
-- Official Steam/Klei verification records: 161
+- Official Steam/Klei verification records: 163
 - Steam DLC appdetails records: 53
-- Normalized official product records: 55
-- Official product media URLs: 223
+- Normalized official product records: 56
+- Official product media URLs: 226
 - Normalized official update events: 50
 - Normalized official update sections: 80
 - Official update section items: 397
 - Official update media URLs: 5
-- Official-record entity mentions: 720
+- Official-record entity mentions: 726
 - Ranked source catalog rows: 8
-- Source catalog evidence rows: 26
+- Source catalog evidence rows: 30
 - External source page index rows: 3,231
 - External source page/entity matches: 3,231
 - Entity source profile rows: 2,541
@@ -69,7 +69,7 @@ Coverage:
 - Entities with category links: 2,506
 - Distinct category slugs: 304
 - Identity keys for source alignment: 9,989
-- Source-access audit records: 9
+- Source-access audit records: 11
 
 The database also includes an `entity_aliases` lookup table and one-row
 `entity_alias_profiles` summaries. These map each canonical entity to compact
@@ -157,7 +157,7 @@ Current high-priority missing dimensions:
 - Entities missing image coverage: 1,133
 - Entities missing stat rows: 810
 - Entities missing variant rows: 2,052
-- Entities missing official mentions: 2,401
+- Entities missing official mentions: 2,418
 - Entities missing source mappings: 0
 
 Examples with 90/100 coverage include `Abigail's Flower`, `Battle Call Canister`, `Bundling Wrap`, `Deconstruction Staff`, `Ghost`, `Grave`, `Hound`, `Meat`, `Midsummer Cawnival`, and `Royal Tapestry`.
@@ -184,11 +184,11 @@ python3 scripts/fetch_official_sources.py \
 
 Official records currently include:
 
-- Steam appdetails: 2 records (`Don't Starve`, `Don't Starve Together`)
+- Steam appdetails: 3 records (`Don't Starve`, `Don't Starve Together`, `Don't Starve Elsewhere`)
 - Steam DLC ids: 53 records
 - Steam DLC appdetails: 53 records
 - Steam news/update records: 50 records
-- Klei official page probes: 3 records
+- Klei official page probes: 4 records
 
 All 53 Steam DLC appdetails requests succeeded. Each record preserves its parent appid and the official Steam data payload. All 53 records contain both `header_image` and `capsule_image` URLs. Examples include:
 
@@ -197,22 +197,23 @@ All 53 Steam DLC appdetails requests succeeded. Each record preserves its parent
 - `Don't Starve Together: Blooming Verdant Chest` (`2377640`)
 - `Don't Starve Together: Complete Roseate Chest` (`3155070`)
 
-The database now also includes `official_products` and `official_product_media` derived from Steam appdetails records. The product table generated 55 normalized rows:
+The database now also includes `official_products` and `official_product_media` derived from Steam appdetails records. The product table generated 56 normalized rows:
 
 - `dlc`: 52
-- `game`: 2
+- `game`: 3
 - `music`: 1
 
-The official media table generated 223 image URL rows:
+The official media table generated 226 image URL rows:
 
 - `description_image`: 58
-- `capsule_image`: 55
-- `capsule_imagev5`: 55
-- `header_image`: 55
+- `capsule_image`: 56
+- `capsule_imagev5`: 56
+- `header_image`: 56
 
 Examples verified in the current database:
 
 - `Don't Starve Together` (`322330`): official game product row with Steam short description and direct media URLs.
+- `Don't Starve Elsewhere` (`2239770`): official game product row with Steam header/capsule media and Klei product-page probe evidence.
 - `Don't Starve Together: Starter Pack 2026` (`4211520`): parent app `322330`, parent title `Don't Starve Together`, and 8 description images plus header/capsule media.
 - `Don't Starve Soundtrack` (`219750`): product type `music`, parent app `219740`, and soundtrack-specific description images.
 
@@ -250,26 +251,27 @@ Examples verified in the current database:
 
 The Steam clan image extractor only stores URLs ending in known image extensions, avoiding truncated or text-contaminated URLs such as placeholders ending in `...` or `pngThe`.
 
-The database also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase matching. With DLC titles and descriptions included, this pass generated 716 official-record entity mentions:
+The database also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase matching. With DLC titles, descriptions, Klei pages, Steam news, and Don't Starve Elsewhere official records included, this pass generated 726 official-record entity mentions:
 
-- `steam:dlc_appdetails`: 386
-- `steam:news`: 182
+- `steam:dlc_appdetails`: 388
+- `steam:news`: 216
 - `steam:steam_dlc_id`: 102
-- `steam:appdetails`: 9
-- `klei:http_probe`: 5
+- `steam:appdetails`: 12
+- `klei:http_probe`: 8
 
-Top entities mentioned by DLC appdetails include:
+Top entities mentioned across official records include:
 
-- `Don't Starve`: 53
-- `Don't Starve Together`: 49
-- `Wilson`: 18
-- `The Constant`: 17
+- `Don't Starve`: 129
+- `Don't Starve Together`: 104
+- `The Constant`: 25
+- `Wilson`: 23
+- `WX-78`: 20
+- `Klei Entertainment`: 16
+- `Willow`: 15
+- `Webber`: 15
+- `Wormwood`: 13
 - `Wendy`: 13
-- `Willow`: 13
-- `Webber`: 12
-- `WX-78`: 11
-- `Winona`: 11
-- `Wolfgang`: 11
+- `Winona`: 12
 - `Wortox`: 11
 
 The matcher skips generic single-word non-creature entries such as `Time`, `Things`, and `Farm`; those three currently have 0 official mentions after filtering.
@@ -278,7 +280,8 @@ Klei page probe statuses:
 
 - `https://www.klei.com/games/dont-starve`: `ok`
 - `https://www.klei.com/games/dont-starve-together`: `ok`
-- `https://forums.kleientertainment.com/game-updates/dst/`: `failed` during this run because the endpoint returned a Cloudflare 502 page. The failure is stored in `official_records` instead of being hidden.
+- `https://www.klei.com/games/dont-starve-elsewhere`: `ok`
+- `https://forums.kleientertainment.com/game-updates/dst/`: `failed` during this run because the endpoint returned HTTP 403. The failure is stored in `official_records` instead of being hidden.
 
 ## Derived Recipe Table
 
@@ -417,7 +420,7 @@ The database now also includes `entity_variant_summary`, which merges variant ke
 - `animation`: 27
 - `build_state`: 23
 - `map_icon`: 5
-- `state`: 21
+- `state`: 22
 - `oversized_form`: 4
 - `reference_asset`: 5
 - `phase`: 1
@@ -463,7 +466,7 @@ Examples verified in the current database:
 
 The database now includes a `page_images` table derived from each raw MediaWiki page's `images_json`. This table is separate from `entity_images`: `entity_images` keeps infobox image roles and fetched image metadata, while `page_images` records broader page-level file references from article content, galleries, navboxes, and transcluded templates.
 
-This pass generated 18,502 page-level image references across 343 entities.
+This pass generated 18,987 page-level image references across 350 entities.
 
 Page-image rebuilding now preserves title-matched filenames such as entity
 base images, state images, build images, and growth-stage variants while
@@ -482,14 +485,14 @@ Examples verified in the current database:
 
 The database now includes an `image_variants` table derived from `page_images`. It detects page images whose filenames start with the owning entity slug, excludes exact matches that are already separate entity titles, and stores the candidate's variant key, variant type, match method, and confidence.
 
-This pass generated 500 image-variant candidates:
+This pass generated 501 image-variant candidates:
 
 - `visual_variant`: 402
 - `animation`: 27
 - `build_state`: 23
 - `growth_stage`: 12
 - `map_icon`: 5
-- `state`: 21
+- `state`: 22
 - `oversized_form`: 4
 - `reference_asset`: 5
 - `phase`: 1
@@ -506,12 +509,12 @@ Examples verified in the current database:
 
 The database now includes an `entity_media_assets` table derived from `entity_images`, `page_images`, and `image_variants`. It provides one query surface for infobox images, page-reference images, primary image flags, file-page URLs, source URLs, local paths, and image variant metadata.
 
-This pass generated 20,723 media asset rows:
+This pass generated 21,254 media asset rows:
 
-- `infobox`: 2,221
-- `page_reference`: 18,502
-- Primary asset rows: 2,010
-- Variant asset rows: 710
+- `infobox`: 2,267
+- `page_reference`: 18,987
+- Primary asset rows: 2,056
+- Variant asset rows: 711
 
 Variant media asset distribution:
 
@@ -578,7 +581,7 @@ Each compressed entity profile now includes a nullable `prefab_profile` object w
 
 ## Source Access Audit
 
-The database now includes a `source_catalog` table and `source_catalog_evidence` table for ranked source discovery and verification planning. This pass generated 8 source catalog rows and 26 evidence rows:
+The database now includes a `source_catalog` table and `source_catalog_evidence` table for ranked source discovery and verification planning. This pass generated 8 source catalog rows and 30 evidence rows:
 
 - `wiki.gg`: rank 1, `primary`, canonical community wiki, `permission_required`
 - `klei`: rank 2, `official`, official verification, `active`
@@ -591,8 +594,8 @@ The database now includes a `source_catalog` table and `source_catalog_evidence`
 
 Evidence row counts by source:
 
-- `klei`: 6
-- `steam`: 5
+- `klei`: 8
+- `steam`: 7
 - `wiki.gg`: 5
 - `fandom`: 5
 - `fextralife`: 2
@@ -609,16 +612,16 @@ python3 scripts/audit_sources.py \
   --report reports/source_audits.json
 ```
 
-This pass generated 9 source-access records:
+This pass generated 11 source-access records:
 
 - `wiki.gg`: 2 records
 - `fandom`: 2 records
-- `klei`: 3 records
-- `steam`: 2 records
+- `klei`: 4 records
+- `steam`: 3 records
 
 Status distribution:
 
-- `ok`: 6
+- `ok`: 8
 - `restricted_by_robots`: 1
 - `failed`: 2
 
@@ -626,8 +629,8 @@ Latest audit observations:
 
 - wiki.gg `robots.txt` returned HTTP 200 and explicitly disallows `/api.php`; the audit records wiki.gg API siteinfo as `restricted_by_robots` and does not fetch it by default.
 - Fandom `api.php` siteinfo returned HTTP 200 with 2,252 articles and 25,319 images; Fandom `robots.txt` returned HTTP 403 through Cloudflare during this audit.
-- Klei product pages for Don't Starve and Don't Starve Together returned HTTP 200; the Klei DST update forum returned HTTP 403 during this audit.
-- Steam appdetails probes for app ids `322330` and `219740` returned HTTP 200.
+- Klei product pages for Don't Starve, Don't Starve Together, and Don't Starve Elsewhere returned HTTP 200; the Klei DST update forum returned HTTP 403 during this audit.
+- Steam appdetails probes for app ids `322330`, `219740`, and `2239770` returned HTTP 200.
 
 ## Approved XML Dump Import Path
 
@@ -662,7 +665,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 83,070,976 bytes, about 79 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg title-index profiles, entity source profiles, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 83,087,360 bytes, about 79 MiB.
 
 Each profile aggregates:
 
@@ -700,7 +703,7 @@ Each compressed entity profile now includes a nullable `link_profile` object wit
 
 ## Raw Wikitext Compression
 
-The committed database now stores all 2,593 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 341 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, the current database is 83,070,976 bytes.
+The committed database now stores all 2,593 `raw_pages.wikitext` payloads with `wikitext_encoding = 'gzip'`. This keeps the original MediaWiki evidence inside SQLite while keeping the repository below GitHub's 100 MiB single-file hard limit; after 341 wiki.gg gap pages, compact media download URLs, capped profile media arrays, capped link-profile target arrays, capped generic page-reference images, and `VACUUM`, the current database is 83,087,360 bytes.
 
 Use `dst_wiki_db.raw_pages.decode_wikitext(value, encoding)` to read the stored page text. New API ingests write gzip-encoded raw wikitext through `dst_wiki_db.raw_pages.encode_wikitext`, while tests and direct fixtures can still insert plain text because the schema defaults `wikitext_encoding` to `text`.
 
@@ -950,15 +953,15 @@ Each compressed entity profile now includes a nullable `recipe_profile` object s
 
 ## Entity Media Profiles
 
-The database now includes `entity_media_profiles`, a one-row media summary table for entities with image evidence. It is built from `entity_media_assets` and `entity_media_downloads`, so list/detail APIs can read primary images, variant-image summaries, URL readiness, and download status without scanning the full 20,723-row manifest.
+The database now includes `entity_media_profiles`, a one-row media summary table for entities with image evidence. It is built from `entity_media_assets` and `entity_media_downloads`, so list/detail APIs can read primary images, variant-image summaries, URL readiness, and download status without scanning the full 21,254-row manifest.
 
 This pass generated 1,440 media profile rows.
 
 URL readiness across the underlying media manifest:
 
-- `direct_url`: 2,034 rows
-- `file_page_only`: 18,253 rows
-- `missing_url`: 436 rows
+- `direct_url`: 1,785 rows
+- `file_page_only`: 18,987 rows
+- `missing_url`: 482 rows
 
 Example media profiles:
 
@@ -971,25 +974,25 @@ Each compressed entity profile now includes a nullable `media_profile` object wi
 
 ## Media Download Manifest
 
-The database now includes an `entity_media_downloads` table with one pending download state row per unified media asset. This pass generated 20,723 rows, matching `entity_media_assets`.
+The database now includes an `entity_media_downloads` table with one pending download state row per unified media asset. This pass generated 21,254 rows, matching `entity_media_assets`.
 
-URL readiness after resolving a first 250-row file-page batch:
+Current URL readiness:
 
-- `direct_url`: 2,034 rows
-- `file_page_only`: 18,253 rows
-- `missing_url`: 436 rows
+- `direct_url`: 1,785 rows
+- `file_page_only`: 18,987 rows
+- `missing_url`: 482 rows
 
 Queue reasons:
 
-- `page_reference|file_page_only`: 18,002
+- `page_reference|file_page_only`: 18,486
 - `primary|direct_url`: 1,579
-- `variant|direct_url`: 454
-- `primary|missing_url`: 431
-- `variant|file_page_only`: 251
+- `variant|file_page_only`: 501
+- `primary|missing_url`: 477
+- `variant|direct_url`: 205
 - `variant|missing_url`: 5
 - `page_reference|direct_url`: 1
 
-The compact table stores only IDs, URL readiness, download status, priority, queue reason, and downloader state. Download and file-page URLs are read through `entity_media_download_manifest` from `entity_media_assets`, so the same URL strings are not duplicated across 20,723 download queue rows.
+The compact table stores only IDs, URL readiness, download status, priority, queue reason, and downloader state. Download and file-page URLs are read through `entity_media_download_manifest` from `entity_media_assets`, so the same URL strings are not duplicated across 21,254 download queue rows.
 
 File-page rows are resolvable through MediaWiki imageinfo without downloading binaries:
 

@@ -38,7 +38,7 @@ def test_rebuild_source_catalog_records_ranked_sources_and_evidence(tmp_path):
 
     result = rebuild_source_catalog(conn)
 
-    assert result == {"source_catalog": 8, "source_catalog_evidence": 18}
+    assert result == {"source_catalog": 8, "source_catalog_evidence": 20}
     catalog_rows = conn.execute(
         """
         select source_key, rank, tier, source_type, role, ingestion_status, source_id
@@ -80,8 +80,8 @@ def test_rebuild_source_catalog_records_ranked_sources_and_evidence(tmp_path):
         )
     }
     assert evidence_counts["wiki.gg"] == 4
-    assert evidence_counts["klei"] == 3
-    assert evidence_counts["steam"] == 3
+    assert evidence_counts["klei"] == 4
+    assert evidence_counts["steam"] == 4
     assert evidence_counts["fandom"] == 3
     assert evidence_counts["fextralife"] == 2
 
@@ -93,6 +93,6 @@ def test_rebuild_source_catalog_is_idempotent(tmp_path):
     first = rebuild_source_catalog(conn)
     second = rebuild_source_catalog(conn)
 
-    assert first == second == {"source_catalog": 8, "source_catalog_evidence": 17}
+    assert first == second == {"source_catalog": 8, "source_catalog_evidence": 19}
     assert conn.execute("select count(*) from source_catalog").fetchone()[0] == 8
-    assert conn.execute("select count(*) from source_catalog_evidence").fetchone()[0] == 17
+    assert conn.execute("select count(*) from source_catalog_evidence").fetchone()[0] == 19

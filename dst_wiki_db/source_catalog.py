@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import sqlite3
 
 
-VERIFIED_DATE = "2026-07-17"
+VERIFIED_DATE = "2026-07-19"
 
 
 @dataclass(frozen=True)
@@ -103,6 +103,13 @@ CATALOG_ENTRIES = (
                 "Klei Don't Starve page",
                 "Official game page for Don't Starve.",
             ),
+            (
+                "official_page",
+                "klei",
+                "https://www.klei.com/games/dont-starve-elsewhere",
+                "Klei Don't Starve Elsewhere page",
+                "Official game page for Don't Starve Elsewhere.",
+            ),
         ),
     ),
     SourceCatalogEntry(
@@ -134,6 +141,13 @@ CATALOG_ENTRIES = (
                 "https://store.steampowered.com/api/appdetails?appids=219740&filters=basic",
                 "Steam appdetails 219740",
                 "Official Steam API metadata for Don't Starve.",
+            ),
+            (
+                "official_api",
+                "steam",
+                "https://store.steampowered.com/api/appdetails?appids=2239770&filters=basic",
+                "Steam appdetails 2239770",
+                "Official Steam API metadata for Don't Starve Elsewhere.",
             ),
             (
                 "official_news",

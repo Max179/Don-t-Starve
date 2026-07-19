@@ -1,6 +1,6 @@
 # Don't Starve Data Sources
 
-Checked on 2026-07-17 Asia/Shanghai during this build session. The ranked source plan is stored in `source_catalog`; supporting search, official, manual-review, and audit evidence is stored in `source_catalog_evidence`.
+Checked on 2026-07-19 Asia/Shanghai during this build session. The ranked source plan is stored in `source_catalog`; supporting search, official, manual-review, and audit evidence is stored in `source_catalog_evidence`.
 
 ## 1. Don't Starve Wiki on wiki.gg
 
@@ -21,21 +21,25 @@ Checked on 2026-07-17 Asia/Shanghai during this build session. The ranked source
 ## 2. Klei Official Site And Forums
 
 - Game page: https://www.klei.com/games/dont-starve-together
+- Don't Starve page: https://www.klei.com/games/dont-starve
+- Don't Starve Elsewhere page: https://www.klei.com/games/dont-starve-elsewhere
 - DST updates: https://forums.kleientertainment.com/game-updates/dst/
 - Role: official verification.
 - Best use: verify releases, update notes, official descriptions, and mechanic changes.
 - Constraint: official text and media are not a bulk reusable wiki license. Store facts, citations, URLs, and timestamps rather than copying long announcement bodies.
-- Current source audit: the two Klei game pages returned HTTP 200. The DST update forum returned HTTP 403 during the latest audit and is stored as a failed source-access record.
+- Current source audit: the three Klei game pages returned HTTP 200. The DST update forum returned HTTP 403 during the latest audit and is stored as a failed source-access record.
 
 ## 3. Steam Store / Steam Web API
 
 - DST Store: https://store.steampowered.com/app/322330/Dont_Starve_Together/
 - DS Store: https://store.steampowered.com/app/219740/Dont_Starve/
+- Don't Starve Elsewhere Store: https://store.steampowered.com/app/2239770/Dont_Starve_Elsewhere/
 - DST API: https://store.steampowered.com/api/appdetails?appids=322330&filters=basic
 - DS API: https://store.steampowered.com/api/appdetails?appids=219740&filters=basic
+- Don't Starve Elsewhere API: https://store.steampowered.com/api/appdetails?appids=2239770&filters=basic
 - Role: official product and DLC verification.
 - Best use: app ids, DLC ids, release metadata, supported platforms, store descriptions, and news pointers.
-- Current source audit: both appdetails probes returned HTTP 200.
+- Current source audit: all three appdetails probes returned HTTP 200.
 
 ## 4. Don't Starve Wiki on Fandom
 
