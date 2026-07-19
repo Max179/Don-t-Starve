@@ -40,6 +40,7 @@
   "source_page_entity_matches": 5483,
   "entity_source_profiles": 4793,
   "entity_source_coverage": 2593,
+  "entity_source_gap_queue": 393,
   "source_page_gaps": 0,
   "entity_variant_summary": 3430,
   "entity_coverage": 2593,

@@ -38,6 +38,7 @@ from dst_wiki_db.source_topic_probes import relink_source_topic_probes
 from dst_wiki_db.source_page_gaps import rebuild_source_page_gaps
 from dst_wiki_db.source_page_index import rebuild_source_page_entity_matches
 from dst_wiki_db.source_coverage import rebuild_entity_source_coverage
+from dst_wiki_db.source_gap_queue import rebuild_entity_source_gap_queue
 from dst_wiki_db.source_profiles import rebuild_entity_source_profiles
 from dst_wiki_db.stat_rollups import rebuild_entity_stat_rollups
 from dst_wiki_db.stats import rebuild_entity_stat_values, rebuild_entity_stats
@@ -85,6 +86,7 @@ def main(argv=None):
     source_page_match_count = rebuild_source_page_entity_matches(conn)
     entity_source_profile_count = rebuild_entity_source_profiles(conn)
     entity_source_coverage_count = rebuild_entity_source_coverage(conn)
+    entity_source_gap_queue_count = rebuild_entity_source_gap_queue(conn)
     source_page_gap_count = rebuild_source_page_gaps(conn)
     gameplay_edge_count = rebuild_entity_gameplay_edges(conn)
     combat_profile_count = rebuild_entity_combat_profiles(conn)
@@ -146,6 +148,7 @@ def main(argv=None):
         "source_page_entity_matches": source_page_match_count,
         "entity_source_profiles": entity_source_profile_count,
         "entity_source_coverage": entity_source_coverage_count,
+        "entity_source_gap_queue": entity_source_gap_queue_count,
         "source_page_gaps": source_page_gap_count,
         "entity_variant_summary": variant_summary_count,
         "entity_coverage": coverage_count,

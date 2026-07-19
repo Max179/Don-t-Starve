@@ -843,6 +843,31 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_source_coverage_missing
             on entity_source_coverage(has_wiki_gg, has_fandom);
 
+        create table if not exists entity_source_gap_queue (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            missing_source_key text not null,
+            coverage_status text not null,
+            priority integer not null default 50,
+            source_profile_count integer not null default 0,
+            matched_page_count integer not null default 0,
+            available_source_keys_json text not null default '[]',
+            best_available_source_key text not null default '',
+            best_available_page_title text not null default '',
+            best_available_page_url text not null default '',
+            gap_reason text not null default 'missing_core_source_profile',
+            detected_at text not null default current_timestamp,
+            unique (entity_id, missing_source_key)
+        );
+
+        create index if not exists idx_entity_source_gap_queue_priority
+            on entity_source_gap_queue(priority, missing_source_key, kind);
+        create index if not exists idx_entity_source_gap_queue_source
+            on entity_source_gap_queue(missing_source_key, coverage_status);
+
         create table if not exists source_page_gaps (
             id integer primary key,
             source_page_index_id integer not null unique references source_page_index(id) on delete cascade,

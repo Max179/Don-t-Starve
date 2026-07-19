@@ -107,6 +107,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "source_page_entity_matches",
         "entity_source_profiles",
         "entity_source_coverage",
+        "entity_source_gap_queue",
         "source_page_gaps",
         "community_guide_sources",
         "community_guide_topics",
