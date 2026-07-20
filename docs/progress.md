@@ -207,7 +207,7 @@ Most common missing requirements:
 
 - `official_mentions`: 2,412 entities
 - `variants`: 2,067 entities
-- `primary_direct_media`: 1,682 entities
+- `primary_direct_media`: 1,681 entities
 - `media`: 1,136 entities
 - `stats`: 820 entities
 - `attributes`: 555 entities
@@ -220,12 +220,12 @@ next pass can sort directly by concrete gaps such as official verification,
 variant extraction, image collection, stat parsing, or source alignment. Each
 compressed entity profile embeds this as `completeness_audit`.
 
-`entity_completeness_gap_queue` expands those missing requirements into 9,214
+`entity_completeness_gap_queue` expands those missing requirements into 9,213
 queryable rows. Current queue distribution:
 
 - `official_mentions`: 2,412 gaps
 - `variants`: 2,067 gaps
-- `primary_direct_media`: 1,682 gaps
+- `primary_direct_media`: 1,681 gaps
 - `media`: 1,136 gaps
 - `stats`: 820 gaps
 - `attributes`: 555 gaps
@@ -783,7 +783,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, entity completeness audit rows, compact action-only entity completeness gap queue rows, official verification queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, conservative official alias matching, 1,241 Fandom page-reference URL resolutions, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 94,507,008 bytes, about 90 MiB. This remains below GitHub's 100 MiB hard limit, but future database growth should continue prioritizing compression or splitting bulky derived queues into separately generated artifacts before adding large new embedded payloads.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, entity completeness audit rows, compact action-only entity completeness gap queue rows, official verification queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, conservative official alias matching, 4,231 Fandom page-reference URL resolutions, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 95,047,680 bytes, about 91 MiB. This remains below GitHub's 100 MiB hard limit, but future database growth should continue prioritizing compression or splitting bulky derived queues into separately generated artifacts before adding large new embedded payloads.
 
 Each profile aggregates:
 
@@ -1082,17 +1082,17 @@ every entity and an `entity_media_gap_queue` table with one row per media gap
 reason. Current media coverage status across all 2,593 entities:
 
 - `no_media`: 1,136 entities
-- `download_pending`: 820 entities
+- `download_pending`: 836 entities
 - `missing_primary_image`: 293 entities
-- `missing_direct_url`: 253 entities
-- `partial_url_coverage`: 91 entities
+- `missing_direct_url`: 252 entities
+- `partial_url_coverage`: 76 entities
 
-The media gap queue currently has 3,945 rows:
+The media gap queue currently has 3,883 rows:
 
 - `pending_download`: 1,457
 - `missing_media`: 1,136
-- `missing_direct_url`: 435
-- `file_page_resolution_pending`: 340
+- `missing_direct_url`: 416
+- `file_page_resolution_pending`: 297
 - `missing_primary_image`: 293
 - `missing_media_url`: 284
 
@@ -1103,8 +1103,8 @@ media state instead of requiring scans of the full media manifest.
 
 URL readiness across the underlying media manifest:
 
-- `direct_url`: 3,026 rows
-- `file_page_only`: 17,746 rows
+- `direct_url`: 6,016 rows
+- `file_page_only`: 14,756 rows
 - `missing_url`: 482 rows
 
 Example media profiles:
@@ -1122,15 +1122,15 @@ The database now includes an `entity_media_downloads` table with one pending dow
 
 Current URL readiness:
 
-- `direct_url`: 3,026 rows
-- `file_page_only`: 17,746 rows
+- `direct_url`: 6,016 rows
+- `file_page_only`: 14,756 rows
 - `missing_url`: 482 rows
 
 Queue reasons:
 
-- `page_reference|file_page_only`: 17,660
+- `page_reference|file_page_only`: 14,670
+- `page_reference|direct_url`: 3,817
 - `primary|direct_url`: 1,579
-- `page_reference|direct_url`: 827
 - `variant|direct_url`: 620
 - `primary|missing_url`: 477
 - `variant|file_page_only`: 86
@@ -1149,7 +1149,7 @@ python3 scripts/resolve_media_file_pages.py \
   --report reports/media_file_page_resolution.json
 ```
 
-The latest resolver batch attempted 1,000 Fandom file-page rows, resolved 992 direct URLs, and left 8 missing. Cumulatively, the manifest now exposes 3,026 direct media URLs, including 1,241 Fandom page-reference image URLs across 84 entities. These include build, burnt, phase, frozen, animation, map-icon, official Discord emoji, and character head/idle variants. Full derived-table rebuilds capture existing media-asset URL metadata before `page_images` is regenerated, so resolved page-reference URLs survive the cascade/rebuild cycle.
+The latest resolver batch attempted 3,000 Fandom file-page rows, resolved 2,990 direct URLs, and left 10 missing. Cumulatively, the manifest now exposes 6,016 direct media URLs, including 4,231 Fandom page-reference image URLs across 106 entities. These include build, burnt, phase, frozen, animation, map-icon, official Discord emoji, and character head/idle variants. Full derived-table rebuilds capture existing media-asset URL metadata before `page_images` is regenerated, so resolved page-reference URLs survive the cascade/rebuild cycle.
 
 The manifest is executable with `scripts/download_media_assets.py`. A safe downloader smoke run is:
 

@@ -15,7 +15,7 @@
     "entity_media_downloads": 21254,
     "entity_media_profiles": 1457,
     "entity_media_coverage": 2593,
-    "entity_media_gap_queue": 3945,
+    "entity_media_gap_queue": 3883,
     "entity_relations": 62839,
     "entity_link_profiles": 2520,
     "entity_prefab_profiles": 1903,
@@ -63,7 +63,7 @@
     "entity_coverage": 2593,
     "entity_taxonomy": 25916,
     "entity_completeness_audit": 2593,
-    "entity_completeness_gap_queue": 9214,
+    "entity_completeness_gap_queue": 9213,
     "entity_official_verification_queue": 2412,
     "entity_profile_json": 2593
   },
