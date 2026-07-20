@@ -31,6 +31,9 @@ from dst_wiki_db.official_mentions import rebuild_official_record_mentions
 from dst_wiki_db.official_products import rebuild_official_products
 from dst_wiki_db.official_updates import rebuild_official_update_events
 from dst_wiki_db.official_update_sections import rebuild_official_update_sections
+from dst_wiki_db.official_verification_queue import (
+    rebuild_entity_official_verification_queue,
+)
 from dst_wiki_db.entity_profiles import rebuild_entity_profile_json
 from dst_wiki_db.page_images import rebuild_page_images
 from dst_wiki_db.prefab_profiles import rebuild_entity_prefab_profiles
@@ -105,6 +108,7 @@ def main(argv=None):
     taxonomy_count = rebuild_entity_taxonomy(conn)
     completeness_audit_count = rebuild_entity_completeness_audit(conn)
     completeness_gap_queue_count = rebuild_entity_completeness_gap_queue(conn)
+    official_verification_queue_count = rebuild_entity_official_verification_queue(conn)
     profile_count = rebuild_entity_profile_json(conn)
     payload = {
         "recipe_ingredients": recipe_count,
@@ -163,6 +167,7 @@ def main(argv=None):
         "entity_taxonomy": taxonomy_count,
         "entity_completeness_audit": completeness_audit_count,
         "entity_completeness_gap_queue": completeness_gap_queue_count,
+        "entity_official_verification_queue": official_verification_queue_count,
         "entity_profile_json": profile_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

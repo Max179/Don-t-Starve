@@ -354,6 +354,26 @@ Top entities mentioned across official records include:
 
 The matcher skips generic single-word non-creature entries such as `Time`, `Things`, and `Farm`; those three currently have 0 official mentions after filtering.
 
+The database now includes `entity_official_verification_queue`, a lightweight
+queue for the 2,418 entities that still lack official mentions. It is derived
+from the completeness gap queue and keeps each candidate's readiness score,
+entity kind, source/media status, best matched wiki page, and compact Klei/Steam
+search queries. Candidate distribution by kind:
+
+- `item`: 794
+- `page`: 736
+- `mob`: 256
+- `structure`: 195
+- `boss`: 145
+- `character`: 109
+- `food`: 63
+- `biome`: 63
+- `plant`: 57
+
+Highest-priority candidates currently favor boss and character entries that are
+otherwise strong profiles, so future official fetch/probe passes can verify the
+most valuable entities first without scanning the full completeness queue.
+
 Klei page probe statuses:
 
 - `https://www.klei.com/games/dont-starve`: `ok`
@@ -758,7 +778,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, entity completeness audit rows, compact action-only entity completeness gap queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 93,085,696 bytes, about 89 MiB. This remains below GitHub's 100 MiB hard limit, but future database growth should continue prioritizing compression or splitting bulky derived queues into separately generated artifacts before adding large new embedded payloads.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, entity completeness audit rows, compact action-only entity completeness gap queue rows, official verification queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 94,257,152 bytes, about 90 MiB. This remains below GitHub's 100 MiB hard limit, but future database growth should continue prioritizing compression or splitting bulky derived queues into separately generated artifacts before adding large new embedded payloads.
 
 Each profile aggregates:
 

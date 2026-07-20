@@ -69,6 +69,7 @@ COUNT_TABLES = [
     "entity_taxonomy",
     "entity_completeness_audit",
     "entity_completeness_gap_queue",
+    "entity_official_verification_queue",
     "entity_profile_json",
 ]
 

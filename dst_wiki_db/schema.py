@@ -1069,6 +1069,35 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_completeness_gap_queue_requirement
             on entity_completeness_gap_queue(missing_requirement, readiness_status);
 
+        create table if not exists entity_official_verification_queue (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            priority integer not null default 50,
+            readiness_score integer not null default 0,
+            readiness_status text not null default '',
+            source_coverage_status text not null default '',
+            media_status text not null default '',
+            source_profile_count integer not null default 0,
+            matched_source_page_count integer not null default 0,
+            best_source_key text not null default '',
+            best_page_title text not null default '',
+            best_page_url text not null default '',
+            suggested_sources_text text not null default 'klei|steam',
+            official_search_query text not null default '',
+            steam_news_query text not null default '',
+            klei_query text not null default '',
+            candidate_reason text not null default 'missing_official_mentions',
+            detected_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_official_verification_queue_priority
+            on entity_official_verification_queue(priority, kind);
+        create index if not exists idx_entity_official_verification_queue_kind
+            on entity_official_verification_queue(kind, readiness_score);
+
         create table if not exists recipe_ingredients (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,
