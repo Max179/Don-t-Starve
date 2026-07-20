@@ -23,7 +23,7 @@
     "entity_alias_profiles": 2593,
     "verification_checks": 2593,
     "official_records": 163,
-    "official_record_mentions": 726,
+    "official_record_mentions": 735,
     "official_products": 56,
     "official_product_media": 226,
     "official_update_events": 50,
@@ -63,8 +63,8 @@
     "entity_coverage": 2593,
     "entity_taxonomy": 25916,
     "entity_completeness_audit": 2593,
-    "entity_completeness_gap_queue": 9223,
-    "entity_official_verification_queue": 2418,
+    "entity_completeness_gap_queue": 9217,
+    "entity_official_verification_queue": 2412,
     "entity_profile_json": 2593
   },
   "sample_entities": [

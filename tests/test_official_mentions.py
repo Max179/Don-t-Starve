@@ -189,3 +189,148 @@ def test_rebuild_official_record_mentions_skips_generic_single_word_entries(tmp_
     ).fetchall()
     assert count == 1
     assert [tuple(row) for row in rows] == [("Don't Starve Together", "title")]
+
+
+def test_rebuild_official_record_mentions_uses_character_prefab_aliases(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    source_id = upsert_source(
+        conn,
+        key="fandom",
+        name="Don't Starve Wiki on Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+    wigfrid_id = upsert_entity(
+        conn,
+        canonical_title="Wigfrid",
+        kind="character",
+        primary_source_id=source_id,
+        primary_page_id=30,
+        canonical_url="https://dontstarve.fandom.com/wiki/Wigfrid",
+        summary="A character.",
+    )
+    wigfrid_variant_id = upsert_entity(
+        conn,
+        canonical_title="Wigfrid/Don't Starve Together",
+        kind="character",
+        primary_source_id=source_id,
+        primary_page_id=31,
+        canonical_url="https://dontstarve.fandom.com/wiki/Wigfrid/Don%27t_Starve_Together",
+        summary="A variant page.",
+    )
+    conn.executemany(
+        """
+        insert into entity_aliases (
+            entity_id, alias_type, alias_value, alias_key, source_key,
+            source_field, confidence
+        )
+        values (?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                wigfrid_id,
+                "prefab_code",
+                "wathgrithr",
+                "wathgrithr",
+                "fandom",
+                "infobox.spawn_code",
+                0.98,
+            ),
+            (
+                wigfrid_variant_id,
+                "prefab_code",
+                "wathgrithr",
+                "wathgrithr",
+                "fandom",
+                "infobox.spawn_code",
+                0.98,
+            ),
+        ],
+    )
+    conn.execute(
+        """
+        insert into official_records (
+            provider, record_type, external_id, title, url, status, summary, payload_json
+        )
+        values (
+            'steam',
+            'news',
+            '1002',
+            'Roseate Skin Set',
+            'https://store.steampowered.com/news/app/322330/view/1002',
+            'ok',
+            'Wathgrithr receives a new set.',
+            '{}'
+        )
+        """
+    )
+
+    count = rebuild_official_record_mentions(conn)
+
+    rows = conn.execute(
+        """
+        select entity_id, entity_title, mention_text, match_method, confidence
+        from official_record_mentions
+        """
+    ).fetchall()
+    assert count == 1
+    assert [tuple(row) for row in rows] == [
+        (wigfrid_id, "Wigfrid", "Wathgrithr", "alias_prefab_code_phrase", 0.86)
+    ]
+
+
+def test_rebuild_official_record_mentions_rejects_generic_single_word_prefabs(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    source_id = upsert_source(
+        conn,
+        key="fandom",
+        name="Don't Starve Wiki on Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+    upsert_entity(
+        conn,
+        canonical_title="Bucket-o-poop",
+        kind="item",
+        primary_source_id=source_id,
+        primary_page_id=40,
+        canonical_url="https://dontstarve.fandom.com/wiki/Bucket-o-poop",
+        summary="An item.",
+    )
+    conn.execute(
+        """
+        insert into entity_aliases (
+            entity_id, alias_type, alias_value, alias_key, source_key,
+            source_field, confidence
+        )
+        select id, 'prefab_code', 'fertilizer', 'fertilizer', 'fandom',
+               'infobox.spawn_code', 0.98
+        from entities
+        where canonical_title = 'Bucket-o-poop'
+        """
+    )
+    conn.execute(
+        """
+        insert into official_records (
+            provider, record_type, external_id, title, url, status, summary, payload_json
+        )
+        values (
+            'steam',
+            'news',
+            '1003',
+            'Wormwood tuning',
+            'https://store.steampowered.com/news/app/322330/view/1003',
+            'ok',
+            'It can be used as a very potent fertilizer.',
+            '{}'
+        )
+        """
+    )
+
+    count = rebuild_official_record_mentions(conn)
+
+    assert count == 0

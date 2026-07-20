@@ -1,6 +1,6 @@
 # Current Database Progress
 
-Last updated: 2026-07-19 Asia/Shanghai.
+Last updated: 2026-07-20 Asia/Shanghai.
 
 ## Committed Database
 
@@ -52,7 +52,7 @@ Coverage:
 - Normalized official update sections: 80
 - Official update section items: 397
 - Official update media URLs: 5
-- Official-record entity mentions: 726
+- Official-record entity mentions: 735
 - Ranked source catalog rows: 8
 - Source catalog evidence rows: 30
 - Representative source topic probes: 12
@@ -179,7 +179,7 @@ Current high-priority missing dimensions:
 - Entities missing image coverage: 1,136
 - Entities missing stat rows: 820
 - Entities missing variant rows: 2,067
-- Entities missing official mentions: 2,418
+- Entities missing official mentions: 2,412
 - Entities missing source mappings: 0
 
 Examples with 90/100 coverage include `Abigail's Flower`, `Battle Call Canister`, `Bundling Wrap`, `Deconstruction Staff`, `Ghost`, `Grave`, `Hound`, `Meat`, `Midsummer Cawnival`, and `Royal Tapestry`.
@@ -197,15 +197,15 @@ than being hidden by other coverage.
 
 Current readiness distribution:
 
-- `complete_profile`: 17 entities, score 100
-- `strong_profile`: 890 entities, scores 80-90
-- `usable_profile`: 972 entities, scores 60-70
-- `partial_profile`: 608 entities, scores 40-50
+- `complete_profile`: 19 entities, score 100
+- `strong_profile`: 888 entities, scores 80-90
+- `usable_profile`: 973 entities, scores 60-70
+- `partial_profile`: 607 entities, scores 40-50
 - `sparse_profile`: 106 entities, scores 10-30
 
 Most common missing requirements:
 
-- `official_mentions`: 2,418 entities
+- `official_mentions`: 2,412 entities
 - `variants`: 2,067 entities
 - `primary_direct_media`: 1,685 entities
 - `media`: 1,136 entities
@@ -220,10 +220,10 @@ next pass can sort directly by concrete gaps such as official verification,
 variant extraction, image collection, stat parsing, or source alignment. Each
 compressed entity profile embeds this as `completeness_audit`.
 
-`entity_completeness_gap_queue` expands those missing requirements into 9,223
+`entity_completeness_gap_queue` expands those missing requirements into 9,217
 queryable rows. Current queue distribution:
 
-- `official_mentions`: 2,418 gaps
+- `official_mentions`: 2,412 gaps
 - `variants`: 2,067 gaps
 - `primary_direct_media`: 1,685 gaps
 - `media`: 1,136 gaps
@@ -329,13 +329,15 @@ Examples verified in the current database:
 
 The Steam clan image extractor only stores URLs ending in known image extensions, avoiding truncated or text-contaminated URLs such as placeholders ending in `...` or `pngThe`.
 
-The database also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase matching. With DLC titles, descriptions, Klei pages, Steam news, and Don't Starve Elsewhere official records included, this pass generated 726 official-record entity mentions:
+The database also includes an `official_record_mentions` table that links official Steam/Klei records back to matching wiki entities by conservative title-phrase and high-confidence alias/prefab phrase matching. With DLC titles, descriptions, Klei pages, Steam news, and Don't Starve Elsewhere official records included, this pass generated 735 official-record entity mentions:
 
-- `steam:dlc_appdetails`: 388
-- `steam:news`: 216
+- `steam:dlc_appdetails`: 390
+- `steam:news`: 223
 - `steam:steam_dlc_id`: 102
 - `steam:appdetails`: 12
 - `klei:http_probe`: 8
+
+Alias/prefab matching contributed 9 of those links, including official text mentions such as `Ancient Hulk` -> `Iron Hulk`, `Wathgrithr` -> `Wigfrid`, `Waxwell` -> `Maxwell`, and `Deck Of Cards` -> `Playing Card`. Single-word prefab aliases for non-character entries remain filtered to avoid generic false positives such as `fertilizer`.
 
 Top entities mentioned across official records include:
 
@@ -345,30 +347,33 @@ Top entities mentioned across official records include:
 - `Wilson`: 23
 - `WX-78`: 20
 - `Klei Entertainment`: 16
-- `Willow`: 15
 - `Webber`: 15
-- `Wormwood`: 13
+- `Willow`: 15
 - `Wendy`: 13
+- `Wormwood`: 13
 - `Winona`: 12
-- `Wortox`: 11
+- `Characters`: 11
+- `Maxwell`: 11
+- `Wigfrid`: 11
+- `Wolfgang`: 11
 
 The matcher skips generic single-word non-creature entries such as `Time`, `Things`, and `Farm`; those three currently have 0 official mentions after filtering.
 
 The database now includes `entity_official_verification_queue`, a lightweight
-queue for the 2,418 entities that still lack official mentions. It is derived
+queue for the 2,412 entities that still lack official mentions. It is derived
 from the completeness gap queue and keeps each candidate's readiness score,
 entity kind, source/media status, best matched wiki page, and compact Klei/Steam
 search queries. Candidate distribution by kind:
 
-- `item`: 794
-- `page`: 736
-- `mob`: 256
+- `item`: 793
+- `page`: 735
+- `mob`: 254
 - `structure`: 195
-- `boss`: 145
+- `boss`: 144
 - `character`: 109
-- `food`: 63
 - `biome`: 63
-- `plant`: 57
+- `food`: 63
+- `plant`: 56
 
 Highest-priority candidates currently favor boss and character entries that are
 otherwise strong profiles, so future official fetch/probe passes can verify the
@@ -492,9 +497,9 @@ Examples verified in the current database:
 
 The database now includes an `entity_variants` table derived from explicit variant keys, image roles, growth stage fields, DS/DST fields, and repeated infobox instances.
 
-This pass generated 1,452 rows:
+This pass generated 1,479 rows:
 
-- `infobox_instance`: 726
+- `infobox_instance`: 753
 - `game_scope`: 323
 - `numbered_variant`: 307
 - `growth_stage`: 96
@@ -508,10 +513,10 @@ Examples verified in the current database:
 
 Recipe slots such as `ingredient1` and `ingredient2` are deliberately excluded from variants and live in `recipe_ingredients`.
 
-The database now also includes `entity_variant_summary`, which merges variant keys from `entity_attributes`, `entity_stats`, `entity_facts`, `recipe_ingredients`, `entity_variants`, and `entity_media_assets`. This pass generated 3,391 merged variant summary rows:
+The database now also includes `entity_variant_summary`, which merges variant keys from `entity_attributes`, `entity_stats`, `entity_facts`, `recipe_ingredients`, `entity_variants`, and `entity_media_assets`. This pass generated 3,430 merged variant summary rows:
 
-- `numbered_variant`: 1,858
-- `infobox_instance`: 726
+- `numbered_variant`: 1,869
+- `infobox_instance`: 753
 - `visual_variant`: 379
 - `game_scope`: 234
 - `growth_stage`: 108
@@ -778,7 +783,7 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, entity completeness audit rows, compact action-only entity completeness gap queue rows, official verification queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 94,257,152 bytes, about 90 MiB. This remains below GitHub's 100 MiB hard limit, but future database growth should continue prioritizing compression or splitting bulky derived queues into separately generated artifacts before adding large new embedded payloads.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, entity completeness audit rows, compact action-only entity completeness gap queue rows, official verification queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, conservative official alias matching, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 94,253,056 bytes, about 90 MiB. This remains below GitHub's 100 MiB hard limit, but future database growth should continue prioritizing compression or splitting bulky derived queues into separately generated artifacts before adding large new embedded payloads.
 
 Each profile aggregates:
 
