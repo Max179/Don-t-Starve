@@ -1038,6 +1038,37 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_completeness_audit_score
             on entity_completeness_audit(readiness_score, kind);
 
+        create table if not exists entity_completeness_gap_queue (
+            id integer primary key,
+            entity_id integer not null references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            missing_requirement text not null,
+            readiness_score integer not null default 0,
+            readiness_status text not null default '',
+            priority integer not null default 50,
+            next_action text not null default '',
+            source_coverage_status text not null default '',
+            media_status text not null default '',
+            source_gap_count integer not null default 0,
+            media_gap_count integer not null default 0,
+            attribute_count integer not null default 0,
+            stat_count integer not null default 0,
+            media_count integer not null default 0,
+            variant_count integer not null default 0,
+            relationship_count integer not null default 0,
+            official_mention_count integer not null default 0,
+            detail_json text not null default '{}',
+            detected_at text not null default current_timestamp,
+            unique (entity_id, missing_requirement)
+        );
+
+        create index if not exists idx_entity_completeness_gap_queue_priority
+            on entity_completeness_gap_queue(priority, readiness_score, kind);
+        create index if not exists idx_entity_completeness_gap_queue_requirement
+            on entity_completeness_gap_queue(missing_requirement, readiness_status);
+
         create table if not exists recipe_ingredients (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,
