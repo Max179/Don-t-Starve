@@ -136,6 +136,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
     taxonomy = _taxonomy(conn, entity_id)
     media_profile = _media_profile(conn, entity_id)
     media_coverage = _media_coverage(conn, entity_id)
+    completeness_audit = _completeness_audit(conn, entity_id)
     combat_profile = _combat_profile(conn, entity_id)
     food_profile = _food_profile(conn, entity_id)
     item_profile = _item_profile(conn, entity_id)
@@ -187,6 +188,7 @@ def _profile_for_entity(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str,
         "taxonomy": taxonomy,
         "media_profile": media_profile,
         "media_coverage": media_coverage,
+        "completeness_audit": completeness_audit,
         "combat_profile": combat_profile,
         "food_profile": food_profile,
         "item_profile": item_profile,
@@ -521,6 +523,94 @@ def _media_coverage(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any]:
             "image_name": str(row["primary_image_name"] or ""),
             "download_url": row["primary_download_url"],
             "file_page_url": row["primary_file_page_url"],
+        },
+    }
+
+
+def _completeness_audit(conn: sqlite3.Connection, entity_id: int) -> dict[str, Any]:
+    row = conn.execute(
+        """
+        select
+            readiness_score,
+            readiness_status,
+            source_coverage_status,
+            media_status,
+            evidence_coverage_score,
+            source_gap_count,
+            media_gap_count,
+            source_profile_count,
+            matched_source_page_count,
+            media_count,
+            variant_media_count,
+            attribute_count,
+            stat_count,
+            stat_value_count,
+            variant_count,
+            category_count,
+            relationship_count,
+            official_mention_count,
+            has_source_mapping,
+            has_core_source_pair,
+            has_attributes,
+            has_stats,
+            has_media,
+            has_primary_direct_media,
+            has_variants,
+            has_categories,
+            has_relationships,
+            has_official_mentions,
+            missing_requirements_json,
+            next_actions_json
+        from entity_completeness_audit
+        where entity_id = ?
+        """,
+        (entity_id,),
+    ).fetchone()
+    if row is None:
+        return {
+            "readiness_score": 0,
+            "readiness_status": "missing_completeness_audit",
+            "missing_requirements": [],
+            "next_actions": [],
+            "counts": {},
+            "flags": {},
+        }
+    return {
+        "readiness_score": int(row["readiness_score"]),
+        "readiness_status": str(row["readiness_status"]),
+        "source_coverage_status": str(row["source_coverage_status"] or ""),
+        "media_status": str(row["media_status"] or ""),
+        "evidence_coverage_score": int(row["evidence_coverage_score"]),
+        "missing_requirements": json.loads(
+            str(row["missing_requirements_json"] or "[]")
+        ),
+        "next_actions": json.loads(str(row["next_actions_json"] or "[]")),
+        "counts": {
+            "source_gaps": int(row["source_gap_count"]),
+            "media_gaps": int(row["media_gap_count"]),
+            "source_profiles": int(row["source_profile_count"]),
+            "matched_source_pages": int(row["matched_source_page_count"]),
+            "media": int(row["media_count"]),
+            "variant_media": int(row["variant_media_count"]),
+            "attributes": int(row["attribute_count"]),
+            "stats": int(row["stat_count"]),
+            "stat_values": int(row["stat_value_count"]),
+            "variants": int(row["variant_count"]),
+            "categories": int(row["category_count"]),
+            "relationships": int(row["relationship_count"]),
+            "official_mentions": int(row["official_mention_count"]),
+        },
+        "flags": {
+            "has_source_mapping": bool(row["has_source_mapping"]),
+            "has_core_source_pair": bool(row["has_core_source_pair"]),
+            "has_attributes": bool(row["has_attributes"]),
+            "has_stats": bool(row["has_stats"]),
+            "has_media": bool(row["has_media"]),
+            "has_primary_direct_media": bool(row["has_primary_direct_media"]),
+            "has_variants": bool(row["has_variants"]),
+            "has_categories": bool(row["has_categories"]),
+            "has_relationships": bool(row["has_relationships"]),
+            "has_official_mentions": bool(row["has_official_mentions"]),
         },
     }
 

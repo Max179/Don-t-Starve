@@ -116,6 +116,7 @@ def test_schema_has_auditable_raw_tables(tmp_path):
         "community_guide_topic_index",
         "entity_coverage",
         "entity_variant_summary",
+        "entity_completeness_audit",
         "entity_profile_json",
         "entity_gameplay_edges",
         "entity_combat_profiles",

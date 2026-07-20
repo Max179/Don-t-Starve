@@ -13,6 +13,7 @@ from dst_wiki_db.alias_profiles import rebuild_entity_alias_profiles
 from dst_wiki_db.categories import rebuild_entity_categories
 from dst_wiki_db.character_profiles import rebuild_entity_character_profiles
 from dst_wiki_db.combat_profiles import rebuild_entity_combat_profiles
+from dst_wiki_db.completeness_audit import rebuild_entity_completeness_audit
 from dst_wiki_db.creature_profiles import rebuild_entity_creature_profiles
 from dst_wiki_db.entity_coverage import rebuild_entity_coverage
 from dst_wiki_db.food_profiles import rebuild_entity_food_profiles
@@ -101,6 +102,7 @@ def main(argv=None):
     variant_summary_count = rebuild_entity_variant_summary(conn)
     coverage_count = rebuild_entity_coverage(conn)
     taxonomy_count = rebuild_entity_taxonomy(conn)
+    completeness_audit_count = rebuild_entity_completeness_audit(conn)
     profile_count = rebuild_entity_profile_json(conn)
     payload = {
         "recipe_ingredients": recipe_count,
@@ -157,6 +159,7 @@ def main(argv=None):
         "entity_variant_summary": variant_summary_count,
         "entity_coverage": coverage_count,
         "entity_taxonomy": taxonomy_count,
+        "entity_completeness_audit": completeness_audit_count,
         "entity_profile_json": profile_count,
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

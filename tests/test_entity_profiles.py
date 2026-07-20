@@ -350,6 +350,30 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     )
     conn.execute(
         """
+        insert into entity_completeness_audit (
+            entity_id, slug, canonical_title, kind, readiness_score,
+            readiness_status, source_coverage_status, media_status,
+            evidence_coverage_score, source_gap_count, media_gap_count,
+            source_profile_count, matched_source_page_count, media_count,
+            variant_media_count, attribute_count, stat_count,
+            stat_value_count, variant_count, category_count,
+            relationship_count, official_mention_count, has_source_mapping,
+            has_core_source_pair, has_attributes, has_stats, has_media,
+            has_primary_direct_media, has_variants, has_categories,
+            has_relationships, has_official_mentions,
+            missing_requirements_json, next_actions_json
+        )
+        values (?, 'berry-bush', 'Berry Bush', 'plant', 80,
+                'strong_profile', 'wiki.gg_only', 'download_pending',
+                80, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+                '["core_source_pair"]',
+                '[{"action":"fill_source_alignment","gap_count":1,"status":"wiki.gg_only"}]')
+        """,
+        (entity_id,),
+    )
+    conn.execute(
+        """
         insert into entity_taxonomy (
             entity_id, slug, canonical_title, kind, taxonomy_type,
             taxonomy_key, label, confidence, evidence_source, evidence_count
@@ -590,6 +614,14 @@ def test_rebuild_entity_profile_json_aggregates_entity_evidence(tmp_path):
     assert profile["source_coverage"]["coverage_status"] == "wiki.gg_only"
     assert profile["source_coverage"]["missing_sources"] == ["fandom"]
     assert profile["source_coverage"]["best_page"]["source_key"] == "wiki.gg"
+    assert profile["completeness_audit"]["readiness_score"] == 80
+    assert profile["completeness_audit"]["readiness_status"] == "strong_profile"
+    assert profile["completeness_audit"]["missing_requirements"] == [
+        "core_source_pair"
+    ]
+    assert profile["completeness_audit"]["next_actions"][0]["action"] == (
+        "fill_source_alignment"
+    )
     assert profile["taxonomy"][0]["taxonomy_key"] == "plant"
     assert profile["combat_profile"]["health"]["max"] == 100.0
     assert profile["combat_profile"]["damage"]["text"] == "10 / 20"

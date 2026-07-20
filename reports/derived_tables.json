@@ -47,5 +47,6 @@
   "entity_variant_summary": 3430,
   "entity_coverage": 2593,
   "entity_taxonomy": 25916,
+  "entity_completeness_audit": 2593,
   "entity_profile_json": 2593
 }

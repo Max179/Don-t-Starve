@@ -176,13 +176,49 @@ Average coverage score by entity kind:
 
 Current high-priority missing dimensions:
 
-- Entities missing image coverage: 1,133
-- Entities missing stat rows: 810
-- Entities missing variant rows: 2,052
+- Entities missing image coverage: 1,136
+- Entities missing stat rows: 820
+- Entities missing variant rows: 2,067
 - Entities missing official mentions: 2,418
 - Entities missing source mappings: 0
 
 Examples with 90/100 coverage include `Abigail's Flower`, `Battle Call Canister`, `Bundling Wrap`, `Deconstruction Staff`, `Ghost`, `Grave`, `Hound`, `Meat`, `Midsummer Cawnival`, and `Royal Tapestry`.
+
+## Entity Completeness Audit
+
+The database now includes `entity_completeness_audit`, a stricter one-row
+readiness audit for every entity. It combines the broad `entity_coverage`
+evidence flags with wiki.gg/Fandom source coverage, media coverage, source-gap
+queues, media-gap queues, official mentions, variants, categories, and
+relationship evidence. The score is intentionally strict: ten requirements are
+worth 10 points each, and a missing official mention, missing variant evidence,
+missing primary direct media, or missing core source pair remains visible rather
+than being hidden by other coverage.
+
+Current readiness distribution:
+
+- `complete_profile`: 17 entities, score 100
+- `strong_profile`: 890 entities, scores 80-90
+- `usable_profile`: 972 entities, scores 60-70
+- `partial_profile`: 608 entities, scores 40-50
+- `sparse_profile`: 106 entities, scores 10-30
+
+Most common missing requirements:
+
+- `official_mentions`: 2,418 entities
+- `variants`: 2,067 entities
+- `primary_direct_media`: 1,685 entities
+- `media`: 1,136 entities
+- `stats`: 820 entities
+- `attributes`: 555 entities
+- `core_source_pair`: 393 entities
+- `relationships`: 82 entities
+- `categories`: 67 entities
+
+The table stores `missing_requirements_json` and `next_actions_json`, so the
+next pass can sort directly by concrete gaps such as official verification,
+variant extraction, image collection, stat parsing, or source alignment. Each
+compressed entity profile embeds this as `completeness_audit`.
 
 Some wiki pages contain repeated infoboxes for variants or alternate forms. For example, Abigail has multiple `Mob Infobox` blocks. The schema now records `template_index` on `entity_attributes`, so repeated fields such as `health` and `damage` are preserved instead of overwritten or rejected.
 
@@ -702,12 +738,13 @@ Latest wiki.gg discovery probe:
 
 The database now includes an `entity_profile_json` table with one consumable JSON profile per entity. This pass generated 2,593 rows, matching the `entities` table.
 
-Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 88,166,400 bytes, about 84 MiB.
+Profile payloads are stored as `gzip+json` bytes in `profile_json` to keep the committed SQLite database below GitHub's 100 MiB file limit while preserving full profile detail. Use `dst_wiki_db.entity_profiles.load_profile_json` to decode rows; the loader also supports older `gzip+base64+json` rows. After binary profile compression, compact media download state, wiki.gg and Fandom title-index profiles, entity source profiles, entity source coverage rows, entity source gap queue rows, entity media coverage rows, entity media gap queue rows, entity completeness audit rows, 341 wiki.gg gap pages, URL-only media download compaction, capped embedded media-profile arrays, capped link-profile target arrays, capped generic page-reference images, source topic probes, and `VACUUM`, `data/dont_starve_wiki.sqlite` is 90,087,424 bytes, about 86 MiB.
 
 Each profile aggregates:
 
 - identity: id, slug, title, kind, canonical URL, and summary
 - coverage: coverage score, detailed evidence counts, boolean coverage flags, and missing-data labels
+- completeness_audit: readiness score, readiness status, missing requirements, next actions, and source/media/evidence counts
 - attributes: raw and normalized infobox fields with source id/key, raw page id, template name/index, raw name, canonical name, value text, parsed number, unit, and variant key
 - media: unified infobox/page media assets with primary flags, URLs, dimensions, local paths, and variant metadata
 - media_profile: query-ready primary image, variant image, URL-readiness, and download-state summary

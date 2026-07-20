@@ -994,6 +994,50 @@ def init_db(conn: sqlite3.Connection) -> None:
         create index if not exists idx_entity_coverage_score
             on entity_coverage(coverage_score);
 
+        create table if not exists entity_completeness_audit (
+            id integer primary key,
+            entity_id integer not null unique references entities(id) on delete cascade,
+            slug text not null,
+            canonical_title text not null,
+            kind text not null,
+            readiness_score integer not null default 0,
+            readiness_status text not null default 'sparse_profile',
+            source_coverage_status text not null default '',
+            media_status text not null default '',
+            evidence_coverage_score integer not null default 0,
+            source_gap_count integer not null default 0,
+            media_gap_count integer not null default 0,
+            source_profile_count integer not null default 0,
+            matched_source_page_count integer not null default 0,
+            media_count integer not null default 0,
+            variant_media_count integer not null default 0,
+            attribute_count integer not null default 0,
+            stat_count integer not null default 0,
+            stat_value_count integer not null default 0,
+            variant_count integer not null default 0,
+            category_count integer not null default 0,
+            relationship_count integer not null default 0,
+            official_mention_count integer not null default 0,
+            has_source_mapping integer not null default 0,
+            has_core_source_pair integer not null default 0,
+            has_attributes integer not null default 0,
+            has_stats integer not null default 0,
+            has_media integer not null default 0,
+            has_primary_direct_media integer not null default 0,
+            has_variants integer not null default 0,
+            has_categories integer not null default 0,
+            has_relationships integer not null default 0,
+            has_official_mentions integer not null default 0,
+            missing_requirements_json text not null default '[]',
+            next_actions_json text not null default '[]',
+            updated_at text not null default current_timestamp
+        );
+
+        create index if not exists idx_entity_completeness_audit_status
+            on entity_completeness_audit(readiness_status, kind);
+        create index if not exists idx_entity_completeness_audit_score
+            on entity_completeness_audit(readiness_score, kind);
+
         create table if not exists recipe_ingredients (
             id integer primary key,
             entity_id integer not null references entities(id) on delete cascade,
