@@ -1,4 +1,7 @@
-from dst_wiki_db.media_assets import rebuild_entity_media_assets
+from dst_wiki_db.media_assets import (
+    capture_entity_media_asset_metadata,
+    rebuild_entity_media_assets,
+)
 from dst_wiki_db.schema import connect, init_db, upsert_entity, upsert_source
 
 
@@ -235,6 +238,95 @@ def test_rebuild_entity_media_assets_preserves_resolved_page_reference_metadata(
     assert dict(row) == {
         "original_url": "https://img.test/Bee_Frozen.png",
         "description_url": "https://example.test/File:Bee_Frozen.png?stable=1",
+        "width": 128,
+        "height": 96,
+        "mime": "image/png",
+        "sha1": "def",
+    }
+
+
+def test_rebuild_entity_media_assets_can_restore_after_page_image_cascade(tmp_path):
+    conn = connect(tmp_path / "wiki.sqlite")
+    init_db(conn)
+    source_id = upsert_source(
+        conn,
+        key="fandom",
+        name="Fandom",
+        base_url="https://dontstarve.fandom.com",
+        api_url="https://dontstarve.fandom.com/api.php",
+        role="comparison",
+    )
+    entity_id = upsert_entity(
+        conn,
+        canonical_title="Bee",
+        kind="mob",
+        primary_source_id=source_id,
+        primary_page_id=1,
+        canonical_url="https://example.test/Bee",
+        summary="",
+    )
+    conn.execute(
+        """
+        insert into raw_pages (
+            source_id, pageid, ns, title, canonical_url, wikitext,
+            categories_json, templates_json, images_json, externallinks_json,
+            fetched_at
+        )
+        values (?, 1, 0, 'Bee', 'https://example.test/Bee', '',
+                '[]', '[]', '[]', '[]', 'now')
+        """,
+        (source_id,),
+    )
+    raw_page_id = conn.execute("select id from raw_pages").fetchone()[0]
+    conn.execute(
+        """
+        insert into page_images (
+            entity_id, source_id, raw_page_id, image_title, image_name,
+            image_slug, role, description_url
+        )
+        values (?, ?, ?, 'File:Bee Frozen.png', 'Bee Frozen.png',
+                'bee-frozen-png', 'page_reference',
+                'https://example.test/File:Bee_Frozen.png')
+        """,
+        (entity_id, source_id, raw_page_id),
+    )
+    rebuild_entity_media_assets(conn)
+    conn.execute(
+        """
+        update entity_media_assets
+        set original_url = 'https://img.test/Bee_Frozen.png',
+            width = 128,
+            height = 96,
+            mime = 'image/png',
+            sha1 = 'def'
+        """
+    )
+
+    metadata = capture_entity_media_asset_metadata(conn)
+    conn.execute("delete from page_images")
+    conn.execute(
+        """
+        insert into page_images (
+            entity_id, source_id, raw_page_id, image_title, image_name,
+            image_slug, role, description_url
+        )
+        values (?, ?, ?, 'File:Bee Frozen.png', 'Bee Frozen.png',
+                'bee-frozen-png', 'page_reference',
+                'https://example.test/File:Bee_Frozen.png')
+        """,
+        (entity_id, source_id, raw_page_id),
+    )
+
+    rebuild_entity_media_assets(conn, preserved_metadata=metadata)
+
+    row = conn.execute(
+        """
+        select original_url, width, height, mime, sha1
+        from entity_media_assets
+        """
+    ).fetchone()
+    assert dict(row) == {
+        "original_url": "https://img.test/Bee_Frozen.png",
         "width": 128,
         "height": 96,
         "mime": "image/png",

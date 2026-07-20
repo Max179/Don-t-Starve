@@ -5,10 +5,24 @@ import sqlite3
 
 
 PRIMARY_INFOBOX_ROLES = {"image", "inventoryimage", "inventoryImage"}
+MediaAssetMetadata = tuple[
+    dict[tuple[object, ...], dict[str, object]],
+    dict[tuple[object, ...], dict[str, object]],
+]
 
 
-def rebuild_entity_media_assets(conn: sqlite3.Connection) -> int:
-    existing_metadata, loose_metadata = _existing_asset_metadata(conn)
+def capture_entity_media_asset_metadata(conn: sqlite3.Connection) -> MediaAssetMetadata:
+    return _existing_asset_metadata(conn)
+
+
+def rebuild_entity_media_assets(
+    conn: sqlite3.Connection,
+    preserved_metadata: MediaAssetMetadata | None = None,
+) -> int:
+    if preserved_metadata is None:
+        existing_metadata, loose_metadata = _existing_asset_metadata(conn)
+    else:
+        existing_metadata, loose_metadata = preserved_metadata
     conn.execute("delete from entity_media_assets")
     count = 0
     count += _insert_infobox_assets(conn, existing_metadata, loose_metadata)

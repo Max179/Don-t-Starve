@@ -23,7 +23,10 @@ from dst_wiki_db.image_variants import rebuild_image_variants
 from dst_wiki_db.identity import rebuild_identity_keys
 from dst_wiki_db.item_profiles import rebuild_entity_item_profiles
 from dst_wiki_db.link_profiles import rebuild_entity_link_profiles
-from dst_wiki_db.media_assets import rebuild_entity_media_assets
+from dst_wiki_db.media_assets import (
+    capture_entity_media_asset_metadata,
+    rebuild_entity_media_assets,
+)
 from dst_wiki_db.media_coverage import rebuild_entity_media_coverage
 from dst_wiki_db.media_downloads import rebuild_entity_media_downloads
 from dst_wiki_db.media_profiles import rebuild_entity_media_profiles
@@ -73,9 +76,13 @@ def main(argv=None):
     fact_count = rebuild_entity_facts(conn)
     variant_count = rebuild_entity_variants(conn)
     category_count = rebuild_entity_categories(conn)
+    media_asset_metadata = capture_entity_media_asset_metadata(conn)
     page_image_count = rebuild_page_images(conn)
     image_variant_count = rebuild_image_variants(conn)
-    media_asset_count = rebuild_entity_media_assets(conn)
+    media_asset_count = rebuild_entity_media_assets(
+        conn,
+        preserved_metadata=media_asset_metadata,
+    )
     media_download_count = rebuild_entity_media_downloads(conn)
     media_profile_count = rebuild_entity_media_profiles(conn)
     media_coverage_counts = rebuild_entity_media_coverage(conn)
