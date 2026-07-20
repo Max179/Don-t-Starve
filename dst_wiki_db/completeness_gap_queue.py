@@ -76,7 +76,9 @@ def rebuild_entity_completeness_gap_queue(conn: sqlite3.Connection) -> int:
         missing = json.loads(str(row["missing_requirements_json"] or "[]"))
         actions = json.loads(str(row["next_actions_json"] or "[]"))
         for requirement in missing:
-            detail = _detail(row, str(requirement), actions)
+            requirement_text = str(requirement)
+            next_action = REQUIREMENT_ACTION.get(requirement_text, "review_entity")
+            detail = _detail(next_action, actions)
             conn.execute(
                 """
                 insert into entity_completeness_gap_queue (
@@ -98,8 +100,8 @@ def rebuild_entity_completeness_gap_queue(conn: sqlite3.Connection) -> int:
                     str(requirement),
                     int(row["readiness_score"]),
                     str(row["readiness_status"]),
-                    _priority(row, str(requirement)),
-                    detail["next_action"],
+                    _priority(row, requirement_text),
+                    next_action,
                     str(row["source_coverage_status"] or ""),
                     str(row["media_status"] or ""),
                     int(row["source_gap_count"]),
@@ -125,29 +127,9 @@ def _priority(row: sqlite3.Row, requirement: str) -> int:
     return kind + requirement_score + score_bonus
 
 
-def _detail(
-    row: sqlite3.Row, requirement: str, actions: list[dict[str, Any]]
-) -> dict[str, Any]:
-    next_action = REQUIREMENT_ACTION.get(requirement, "review_entity")
+def _detail(next_action: str, actions: list[dict[str, Any]]) -> dict[str, Any]:
     action_detail = next(
         (action for action in actions if action.get("action") == next_action),
         {},
     )
-    return {
-        "missing_requirement": requirement,
-        "next_action": next_action,
-        "action_detail": action_detail,
-        "readiness": {
-            "score": int(row["readiness_score"]),
-            "status": str(row["readiness_status"]),
-        },
-        "source": {
-            "status": str(row["source_coverage_status"] or ""),
-            "gap_count": int(row["source_gap_count"]),
-        },
-        "media": {
-            "status": str(row["media_status"] or ""),
-            "gap_count": int(row["media_gap_count"]),
-            "media_count": int(row["media_count"]),
-        },
-    }
+    return dict(action_detail)

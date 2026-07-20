@@ -78,7 +78,8 @@ def test_rebuild_entity_completeness_gap_queue_expands_missing_requirements(tmp_
         for row in conn.execute(
             """
             select canonical_title, missing_requirement, next_action,
-                   readiness_score, priority, detail_json
+                   readiness_score, priority, source_coverage_status,
+                   source_gap_count, detail_json
             from entity_completeness_gap_queue
             order by priority, canonical_title, missing_requirement
             """
@@ -94,8 +95,13 @@ def test_rebuild_entity_completeness_gap_queue_expands_missing_requirements(tmp_
     assert rows[2]["missing_requirement"] == "official_mentions"
     assert rows[2]["priority"] == 37
     detail = json.loads(rows[1]["detail_json"])
-    assert detail["source"] == {"gap_count": 1, "status": "wiki.gg_only"}
-    assert detail["action_detail"]["action"] == "fill_source_alignment"
+    assert rows[1]["source_coverage_status"] == "wiki.gg_only"
+    assert rows[1]["source_gap_count"] == 1
+    assert detail == {
+        "action": "fill_source_alignment",
+        "gap_count": 1,
+        "status": "wiki.gg_only",
+    }
 
 
 def test_rebuild_entity_completeness_gap_queue_is_idempotent(tmp_path):
