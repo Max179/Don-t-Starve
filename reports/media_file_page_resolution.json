@@ -1,9 +1,34 @@
 {
-  "attempted": 3000,
-  "resolved": 2990,
-  "missing": 10,
+  "attempted": 9086,
+  "resolved": 8954,
+  "missing": 132,
   "skipped": 0,
   "dry_run": false,
+  "unique_rows_attempted": 9032,
+  "unresolved_after_retry": 54,
+  "batches": [
+    {
+      "attempted": 3000,
+      "resolved": 2989,
+      "missing": 11
+    },
+    {
+      "attempted": 3000,
+      "resolved": 2987,
+      "missing": 13
+    },
+    {
+      "attempted": 3032,
+      "resolved": 2978,
+      "missing": 54
+    },
+    {
+      "attempted": 54,
+      "resolved": 0,
+      "missing": 54,
+      "retry": true
+    }
+  ],
   "derived_refresh": {
     "entity_media_profiles": 1457,
     "entity_profile_json": 2593
